@@ -14,6 +14,7 @@
 
   <string name="inventory_menu_repository_add">Add Repository…</string>
   <string name="inventory_menu_repository_delete">Delete Repository…</string>
+  <string name="inventory_menu_version">Application Version…</string>
 
   <string name="install_started">Install started</string>
   <string name="install_already_running">Already installing/updating</string>
@@ -67,4 +68,7 @@ Exception: %1$s (%2$s)</string>
   <string name="install_apk_started">Started installing APK</string>
   <string name="install_apk_failed_exception">APK install failed: %1$s (%2$s)</string>
   <string name="install_apk_failed_code">APK install failed: Status code: %1$d</string>
+  <string name="versions_revision">Revision</string>
+  <string name="versions_version">Version</string>
+  <string name="inventory_menu_repository_reload">Reload Repository</string>
 </resources>

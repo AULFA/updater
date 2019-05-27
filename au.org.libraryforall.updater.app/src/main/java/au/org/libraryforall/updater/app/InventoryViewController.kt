@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -61,6 +63,20 @@ class InventoryViewController(arguments: Bundle) : Controller(arguments) {
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     super.onCreateOptionsMenu(menu, inflater)
     inflater.inflate(R.menu.inventory, menu)
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      R.id.inventoryVersion -> {
+        this.router.pushController(
+          RouterTransaction.with(ApplicationVersionController())
+            .pushChangeHandler(HorizontalChangeHandler())
+            .popChangeHandler(HorizontalChangeHandler()))
+        true
+      }
+
+      else -> super.onOptionsItemSelected(item)
+    }
   }
 
   override fun onAttach(view: View) {
