@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <color name="mainColorLighter">#7075ab</color>
+  <color name="mainColorLight">#424a7c</color>
+  <color name="mainColor">#14234F</color>
+  <color name="mainColorDark">#000027</color>
+
+  <style name="LauncherTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <item name="colorPrimary">@color/mainColor</item>
+    <item name="colorPrimaryDark">@color/mainColorDark</item>
+    <item name="colorAccent">@color/mainColorLight</item>
+  </style>
+</resources>

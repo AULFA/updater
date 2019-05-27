@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/installFailed"
+  android:layout_width="match_parent"
+  android:layout_height="@dimen/inventory_item_height">
+
+  <ImageView
+    android:id="@+id/installFailedIcon"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/error_small" />
+
+  <TextView
+    android:id="@+id/installFailedPackageName"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:text="Placeholder"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/installFailedIcon"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/installedFailedMessage"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="8dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:text="Downloading failed"
+    android:textSize="12sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/installFailedIcon"
+    app:layout_constraintTop_toBottomOf="@id/installFailedPackageName" />
+
+  <Button
+    android:id="@+id/installFailedPackageDetailsButton"
+    android:layout_width="0dp"
+    android:layout_height="40dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginBottom="16dp"
+    android:text="@string/package_details"
+    android:textSize="12sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+
+  <Button
+    android:id="@+id/installFailedPackageButton"
+    android:layout_width="0dp"
+    android:layout_height="40dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:text="@string/package_retry"
+    android:textSize="12sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+  <View
+    android:id="@+id/divider2"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="?android:attr/listDivider"
+    app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

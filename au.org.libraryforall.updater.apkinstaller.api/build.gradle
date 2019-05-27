@@ -1,0 +1,8 @@
+dependencies {
+  api libraries.googleGuava
+
+  implementation libraries.kotlinStdlib
+
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}

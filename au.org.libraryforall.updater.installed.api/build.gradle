@@ -1,0 +1,8 @@
+dependencies {
+  implementation libraries.kotlinStdlib
+  implementation libraries.jodaTime
+  implementation libraries.rxjava
+
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="urn:au.org.libraryforall.updater.repository.xml:1.0"
+  xmlns:u="urn:au.org.libraryforall.updater.repository.xml:1.0">
+
+  <simpleType name="uuid">
+    <restriction base="string">
+      <pattern
+        value="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}">
+      </pattern>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="sha256">
+    <restriction base="string">
+      <pattern value="[a-f0-9]{64}"/>
+    </restriction>
+  </simpleType>
+
+  <element name="repository">
+    <complexType>
+      <sequence minOccurs="0" maxOccurs="unbounded">
+        <element ref="u:package" />
+      </sequence>
+
+      <attribute name="updated" type="dateTime" use="required" />
+      <attribute name="id" type="u:uuid" use="required" />
+      <attribute name="title" type="string" use="required" />
+    </complexType>
+  </element>
+
+  <element name="package">
+    <complexType>
+      <attribute name="versionCode" type="nonNegativeInteger" use="required"/>
+      <attribute name="versionName" type="string" use="required"/>
+      <attribute name="id" type="string" use="required" />
+      <attribute name="name" type="string" use="required" />
+      <attribute name="source" type="anyURI" use="required" />
+      <attribute name="sha256" type="u:sha256" use="required" />
+    </complexType>
+  </element>
+
+</schema>

@@ -1,0 +1,24 @@
+dependencies {
+  implementation project(":au.org.libraryforall.updater.apkinstaller.api")
+  implementation project(":au.org.libraryforall.updater.apkinstaller.device")
+  implementation project(":au.org.libraryforall.updater.installed.api")
+  implementation project(":au.org.libraryforall.updater.installed.vanilla")
+  implementation project(":au.org.libraryforall.updater.inventory.api")
+  implementation project(":au.org.libraryforall.updater.inventory.vanilla")
+  implementation project(":au.org.libraryforall.updater.repository.api")
+
+  implementation libraries.androidMaterial
+  implementation libraries.androidXActivity
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXConstraintLayout
+  implementation libraries.androidXCore
+  implementation libraries.conductor
+  implementation libraries.kotlinStdlib
+  implementation libraries.rxjava
+  implementation (libraries.slf4j) {
+    force = true
+  }
+  implementation libraries.logbackAndroid
+  implementation libraries.irradiaHTTPAPI
+  implementation libraries.irradiaHTTPVanilla
+}
