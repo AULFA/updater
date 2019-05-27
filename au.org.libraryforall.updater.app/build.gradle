@@ -57,5 +57,6 @@ android {
     buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
     versionName = VERSION_NAME
     versionCode = version
+    setProperty("archivesBaseName", "lfa-updater-${versionName}-${versionCode}")
   }
 }

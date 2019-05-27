@@ -10,9 +10,14 @@ import au.org.libraryforall.updater.tests.InventoryContract
 import com.google.common.util.concurrent.ListeningExecutorService
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URI
 
 class InventoryTest : InventoryContract() {
+
+  override fun logger(): Logger =
+    LoggerFactory.getLogger(InventoryTest::class.java)
 
   override fun inventory(
     resources: InventoryStringResourcesType,

@@ -19,5 +19,4 @@ interface InventoryRepositoryPackageType {
   val state: InventoryPackageState
 
   fun install(activity: Any): ListenableFuture<InventoryInstallResult>
-
 }

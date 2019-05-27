@@ -26,35 +26,36 @@ class InventoryTaskInstallAPK(
 
   fun execute(): InventoryTaskMonad<Unit> {
     val step = InventoryTaskStep(description = this.resources.installAPKStarted)
+    return InventoryTaskMonad.startWithStep(step).flatMap { runAPK(step) }
+  }
 
-    return InventoryTaskMonad.startWithStep(step).flatMap {
-      try {
-        val task =
-          this.apkInstaller.createInstallTask(
-            activity = this.activity,
-            packageName = this.packageName,
-            packageVersionCode = this.packageVersionCode,
-            file = this.file)
+  private fun runAPK(step: InventoryTaskStep): InventoryTaskMonad<Unit> {
+    return try {
+      val task =
+        this.apkInstaller.createInstallTask(
+          activity = this.activity,
+          packageName = this.packageName,
+          packageVersionCode = this.packageVersionCode,
+          file = this.file)
 
-        this.logger.debug("waiting for install task")
-        val status = task.future.get()
-        this.logger.debug("install task returned")
+      this.logger.debug("waiting for install task")
+      val status = task.future.get()
+      this.logger.debug("install task returned")
 
-        if (status == ACTIVITY_RESULT_OK) {
-          step.resolution = this.resources.installAPKSucceeded(status)
-          step.failed = false
-          InventoryTaskMonad.InventoryTaskSuccess(Unit)
-        } else {
-          step.resolution = this.resources.installAPKFailedWithCode(status)
-          step.failed = true
-          InventoryTaskMonad.InventoryTaskFailed<Unit>()
-        }
-      } catch (e: Exception) {
-        this.logger.error("APK install failed: ", e)
-        step.resolution = this.resources.installAPKFailedWithException(e)
+      if (status == ACTIVITY_RESULT_OK) {
+        step.resolution = this.resources.installAPKSucceeded(status)
+        step.failed = false
+        InventoryTaskMonad.InventoryTaskSuccess(Unit)
+      } else {
+        step.resolution = this.resources.installAPKFailedWithCode(status)
         step.failed = true
         InventoryTaskMonad.InventoryTaskFailed<Unit>()
       }
+    } catch (e: Exception) {
+      this.logger.error("APK install failed: ", e)
+      step.resolution = this.resources.installAPKFailedWithException(e)
+      step.failed = true
+      InventoryTaskMonad.InventoryTaskFailed<Unit>()
     }
   }
 

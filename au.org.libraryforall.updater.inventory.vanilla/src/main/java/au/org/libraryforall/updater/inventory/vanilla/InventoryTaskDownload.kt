@@ -52,38 +52,44 @@ class InventoryTaskDownload(
         approximateCalls = 5,
         progress = onVerificationProgress::invoke)
 
-    return InventoryTaskMonad.startWithStep(step).flatMap {
-      try {
-        if (reservation.file.isFile) {
-          when (val verification = this.reservation.verify(receiver)) {
-            is VerificationFailure -> {
-              step.failed = false
-              step.resolution = this.resources.installDownloadNeededHashFailed(
-                expected = this.reservation.hash,
-                received = verification.hash)
-              InventoryTaskMonad.InventoryTaskSuccess(true)
-            }
-            is VerificationSuccess -> {
-              step.failed = false
-              step.resolution = this.resources.installDownloadNeededNot
-              InventoryTaskMonad.InventoryTaskSuccess(false)
-            }
-            VerificationCancelled -> {
-              TODO()
-            }
+    return InventoryTaskMonad.startWithStep(step)
+      .flatMap { this.runDownloadVerificationCheck(receiver, step) }
+  }
+
+  private fun runDownloadVerificationCheck(
+    receiver: (VerificationProgressType) -> Unit,
+    step: InventoryTaskStep
+  ): InventoryTaskMonad.InventoryTaskSuccess<Boolean> {
+    return try {
+      if (this.reservation.file.isFile) {
+        when (val verification = this.reservation.verify(receiver)) {
+          is VerificationFailure -> {
+            step.failed = false
+            step.resolution = this.resources.installDownloadNeededHashFailed(
+              expected = this.reservation.hash,
+              received = verification.hash)
+            InventoryTaskMonad.InventoryTaskSuccess(true)
           }
-        } else {
-          step.failed = false
-          step.resolution = this.resources.installDownloadNeeded
-          InventoryTaskMonad.InventoryTaskSuccess(true)
+          is VerificationSuccess -> {
+            step.failed = false
+            step.resolution = this.resources.installDownloadNeededNot
+            InventoryTaskMonad.InventoryTaskSuccess(false)
+          }
+          VerificationCancelled -> {
+            TODO()
+          }
         }
-      } catch (e: Exception) {
-        this.logger.error("failed verification: ", e)
-        step.failed = true
-        step.exception = e
-        step.resolution = this.resources.installDownloadNeededExceptional(e)
+      } else {
+        step.failed = false
+        step.resolution = this.resources.installDownloadNeeded
         InventoryTaskMonad.InventoryTaskSuccess(true)
       }
+    } catch (e: Exception) {
+      this.logger.error("failed verification: ", e)
+      step.failed = true
+      step.exception = e
+      step.resolution = this.resources.installDownloadNeededExceptional(e)
+      InventoryTaskMonad.InventoryTaskSuccess(true)
     }
   }
 
@@ -96,31 +102,37 @@ class InventoryTaskDownload(
       exception = null,
       failed = false)
 
-    return InventoryTaskMonad.startWithStep(step).flatMap {
-      try {
-        inputStream.use {
-          FileOutputStream(this.reservation.file, false).use { outputStream ->
-            val buffer = ByteArray(4096)
-            while (true) {
-              val r = inputStream.read(buffer)
-              if (r == -1) {
-                break
-              }
-              outputStream.write(buffer, 0, r)
+    return InventoryTaskMonad.startWithStep(step)
+      .flatMap { this.runDownload(inputStream, step) }
+  }
+
+  private fun runDownload(
+    inputStream: InputStream,
+    step: InventoryTaskStep
+  ): InventoryTaskMonad<File> {
+    return try {
+      inputStream.use {
+        FileOutputStream(this.reservation.file, false).use { outputStream ->
+          val buffer = ByteArray(4096)
+          while (true) {
+            val r = inputStream.read(buffer)
+            if (r == -1) {
+              break
             }
+            outputStream.write(buffer, 0, r)
           }
         }
-
-        step.resolution = this.resources.installDownloadingSucceeded
-        step.failed = false
-        InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
-      } catch (e: Exception) {
-        this.logger.error("download failed: ", e)
-        step.resolution = this.resources.installDownloadingFailed(e)
-        step.exception = e
-        step.failed = true
-        InventoryTaskMonad.InventoryTaskFailed<File>()
       }
+
+      step.resolution = this.resources.installDownloadingSucceeded
+      step.failed = false
+      InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
+    } catch (e: Exception) {
+      this.logger.error("download failed: ", e)
+      step.resolution = this.resources.installDownloadingFailed(e)
+      step.exception = e
+      step.failed = true
+      InventoryTaskMonad.InventoryTaskFailed<File>()
     }
   }
 
@@ -142,7 +154,6 @@ class InventoryTaskDownload(
               contentType = result.contentTypeOrDefault,
               contentLength = result.contentLength
             ),
-            exception = null,
             failed = false))
           .andThen(InventoryTaskMonad.InventoryTaskSuccess(result.result))
       is HTTPResult.HTTPFailed.HTTPError ->
@@ -155,7 +166,6 @@ class InventoryTaskDownload(
               contentType = result.contentTypeOrDefault,
               contentLength = result.contentLength
             ),
-            exception = null,
             failed = true))
           .andThen(InventoryTaskMonad.InventoryTaskFailed())
       is HTTPResult.HTTPFailed.HTTPFailure ->
