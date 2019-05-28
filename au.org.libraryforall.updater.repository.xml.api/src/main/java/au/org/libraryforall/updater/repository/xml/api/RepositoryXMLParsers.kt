@@ -103,14 +103,14 @@ class RepositoryXMLParsers private constructor(
   companion object {
 
     /**
-     * Create a new parser using the given list of formats.
+     * Create a new parser provider using the given list of formats.
      */
 
     fun create(formats: List<SPIFormatVersionedHandlerProviderType>): RepositoryXMLParserProviderType =
       RepositoryXMLParsers(formats)
 
     /**
-     * Create a new parser using [java.util.ServiceLoader] to find formats.
+     * Create a new parser provider using [java.util.ServiceLoader] to find formats.
      */
 
     fun createFromServiceLoader(): RepositoryXMLParserProviderType =

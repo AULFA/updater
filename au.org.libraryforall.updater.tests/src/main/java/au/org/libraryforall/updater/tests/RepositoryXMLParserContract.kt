@@ -2,6 +2,7 @@ package au.org.libraryforall.updater.tests
 
 import au.org.libraryforall.updater.repository.xml.api.RepositoryParserFailureException
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import au.org.libraryforall.updater.repository.xml.spi.ParseError
 import org.junit.Assert
 import org.junit.Before
@@ -9,6 +10,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.slf4j.Logger
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
 
@@ -17,6 +21,8 @@ abstract class RepositoryXMLParserContract {
   abstract fun logger(): Logger
 
   abstract fun repositoryXMLParsers(): RepositoryXMLParserProviderType
+
+  abstract fun repositoryXMLSerializers(): RepositoryXMLSerializerProviderType
 
   @JvmField
   @Rule
@@ -197,6 +203,38 @@ abstract class RepositoryXMLParserContract {
     parser.errors.subscribe(loggingConsumer())
     this.expectedException.expect(RepositoryParserFailureException::class.java)
     parser.parse()
+  }
+
+  @Test
+  fun testRoundTrip() {
+    val parsers = this.repositoryXMLParsers()
+    val serializers = this.repositoryXMLSerializers()
+
+    val parser =
+      parsers.createParser(
+        uri = URI.create("urn:example"),
+        inputStream = this.stream("simple.xml"))
+
+    parser.errors.subscribe(loggingConsumer())
+    val repositoryOriginal = parser.parse()
+
+    val temporary =
+      File.createTempFile("repository-xml", ".xml")
+
+    this.logger.debug("temporary: ${temporary}")
+
+    FileOutputStream(temporary).use { stream ->
+      val serializer = serializers.createSerializer(stream)
+      serializer.serialize(repositoryOriginal)
+    }
+
+    FileInputStream(temporary).use { stream ->
+      val parser =
+        parsers.createParser(uri = URI.create("urn:example"), inputStream = stream)
+      parser.errors.subscribe(loggingConsumer())
+      val repositorySerialized = parser.parse()
+      Assert.assertEquals(repositoryOriginal, repositorySerialized)
+    }
   }
 
   private fun loggingConsumer(): (ParseError) -> Unit {
