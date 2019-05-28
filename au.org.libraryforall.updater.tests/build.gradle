@@ -3,7 +3,9 @@ dependencies {
   implementation project(":au.org.libraryforall.updater.inventory.api")
   implementation project(":au.org.libraryforall.updater.inventory.vanilla")
   implementation project(":au.org.libraryforall.updater.repository.api")
-  implementation project(":au.org.libraryforall.updater.repository.xml")
+  implementation project(":au.org.libraryforall.updater.repository.xml.v1_0")
+  implementation project(":au.org.libraryforall.updater.repository.xml.api")
+  implementation project(":au.org.libraryforall.updater.repository.xml.spi")
 
   implementation libraries.mockito
   implementation libraries.slf4j
