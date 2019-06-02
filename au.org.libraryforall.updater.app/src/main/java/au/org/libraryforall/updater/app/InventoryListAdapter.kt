@@ -1,7 +1,6 @@
 package au.org.libraryforall.updater.app
 
 import android.app.Activity
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import au.org.libraryforall.updater.inventory.api.InventoryInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusDefinite
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusIndefinite
@@ -19,7 +18,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
 class InventoryListAdapter(
   private val context: Activity,
   private val packages: List<InventoryRepositoryPackageType>,
-  private val onShowFailureDetails: (InventoryRepositoryPackageType, InventoryInstallResult) -> Unit)
+  private val onShowFailureDetails: (InventoryRepositoryPackageType, InventoryPackageInstallResult) -> Unit)
   : RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

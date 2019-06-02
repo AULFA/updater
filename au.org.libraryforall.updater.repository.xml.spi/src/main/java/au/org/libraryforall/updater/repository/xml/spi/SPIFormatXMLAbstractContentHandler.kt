@@ -158,8 +158,10 @@ abstract class SPIFormatXMLAbstractContentHandler<A, B> protected constructor(
     length: Int) {
 
     val current = this.handler
-    current?.onCharacters(ch, start, length)
-    throw java.lang.IllegalStateException("Unreachable code")
+    if (current != null) {
+      current.onCharacters(ch, start, length)
+      return
+    }
   }
 
   override fun get(): B {

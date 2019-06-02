@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.inventory.api
 
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationProgressType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 
-object InventoryHashIndexedDirectoryReceivers {
+object InventoryAPKDirectoryReceivers {
 
   fun throttledReceiver(
     approximateCalls: Int = 100,

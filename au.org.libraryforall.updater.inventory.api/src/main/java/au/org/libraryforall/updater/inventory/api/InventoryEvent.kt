@@ -27,5 +27,9 @@ sealed class InventoryEvent {
         override val packageId: String) :
         InventoryRepositoryPackageEvent()
     }
+
+    data class RepositoryChanged(
+      override val repositoryId: UUID)
+      : InventoryRepositoryEvent()
   }
 }

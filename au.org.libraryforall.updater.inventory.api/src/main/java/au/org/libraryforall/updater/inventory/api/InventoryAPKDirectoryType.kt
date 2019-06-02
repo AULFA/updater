@@ -13,7 +13,7 @@ import java.io.IOException
  */
 
 @ThreadSafe
-interface InventoryHashIndexedDirectoryType {
+interface InventoryAPKDirectoryType {
 
   /**
    * The result of executing verification of a file.

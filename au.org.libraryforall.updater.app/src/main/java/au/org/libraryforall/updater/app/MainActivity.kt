@@ -1,6 +1,5 @@
 package au.org.libraryforall.updater.app
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -45,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     this.router = Conductor.attachRouter(this, container, savedInstanceState)
     if (!this.router.hasRootController()) {
       this.router.setRoot(RouterTransaction.with(
-        InventoryViewController(this.inventory.inventoryRepositories()[0])))
+        InventoryRepositoryViewController(this.inventory.inventoryRepositories()[0])))
     }
   }
 

@@ -9,16 +9,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 
-class InventoryInstallFailureListAdapter(
+class InventoryFailureListAdapter(
   private val context: Context,
   private val steps: List<InventoryTaskStep>)
-  : RecyclerView.Adapter<InventoryInstallFailureListAdapter.ViewHolder>() {
+  : RecyclerView.Adapter<InventoryFailureListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val inflater =
       LayoutInflater.from(parent.context)
     val item =
-      inflater.inflate(R.layout.install_failure_item, parent, false)
+      inflater.inflate(R.layout.failure_item, parent, false)
 
     return this.ViewHolder(item)
   }
@@ -42,12 +42,12 @@ class InventoryInstallFailureListAdapter(
 
   inner class ViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
     val icon =
-      parent.findViewById<ImageView>(R.id.installFailureIcon)
+      parent.findViewById<ImageView>(R.id.failureItemIcon)
     val description =
-      parent.findViewById<TextView>(R.id.installFailureDescription)
+      parent.findViewById<TextView>(R.id.failureItemDescription)
     val resolution =
-      parent.findViewById<TextView>(R.id.installFailureResolution)
+      parent.findViewById<TextView>(R.id.failureItemResolution)
     val stepNumber =
-      parent.findViewById<TextView>(R.id.installFailureStepNumber)
+      parent.findViewById<TextView>(R.id.failureItemStepNumber)
   }
 }

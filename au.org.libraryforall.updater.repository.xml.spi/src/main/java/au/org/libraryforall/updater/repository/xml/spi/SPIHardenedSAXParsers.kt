@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.repository.xml.spi
 
+import org.apache.xerces.jaxp.SAXParserFactoryImpl
 import org.xml.sax.SAXException
 import org.xml.sax.XMLReader
 import java.io.File
@@ -13,7 +14,7 @@ import javax.xml.parsers.SAXParserFactory
 
 class SPIHardenedSAXParsers {
 
-  private val parsers: SAXParserFactory = SAXParserFactory.newInstance()
+  private val parsers: SAXParserFactory = SAXParserFactoryImpl()
 
   /**
    * Create a non-validating XML reader.
@@ -43,17 +44,6 @@ class SPIHardenedSAXParsers {
     reader.setFeature(
       XMLConstants.FEATURE_SECURE_PROCESSING,
       true)
-
-    /*
-     * Don't allow access to schemas or DTD files.
-     */
-
-    reader.setProperty(
-      XMLConstants.ACCESS_EXTERNAL_SCHEMA,
-      "")
-    reader.setProperty(
-      XMLConstants.ACCESS_EXTERNAL_DTD,
-      "")
 
     /*
      * Don't load DTDs at all.
@@ -135,23 +125,6 @@ class SPIHardenedSAXParsers {
     reader.setFeature(
       XMLConstants.FEATURE_SECURE_PROCESSING,
       true)
-
-    /*
-     * Only allow access to schema files using a "file" URL scheme. This is
-     * restricted even further via a custom entity resolver.
-     */
-
-    reader.setProperty(
-      XMLConstants.ACCESS_EXTERNAL_SCHEMA,
-      "file")
-
-    /*
-     * Deny access to external DTD files.
-     */
-
-    reader.setProperty(
-      XMLConstants.ACCESS_EXTERNAL_DTD,
-      "")
 
     /*
      * Don't load DTDs at all.

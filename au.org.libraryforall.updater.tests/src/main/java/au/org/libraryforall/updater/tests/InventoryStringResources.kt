@@ -2,10 +2,60 @@ package au.org.libraryforall.updater.tests
 
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.repository.api.Hash
+import org.joda.time.Duration
 import java.io.File
 import java.net.URI
+import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
+
+  override val inventoryRepositoryAddParseFailed: String =
+    "inventoryRepositoryAddParseFailed"
+
+  override val inventoryRepositoryAddAlreadyExists: String =
+    "inventoryRepositoryAddAlreadyExists"
+
+  override fun inventoryRepositoryAddFetching(uri: URI): String {
+    return "inventoryRepositoryAddFetching"
+  }
+
+  override fun inventoryRepositoryAddFetched(duration: Duration): String {
+    return "inventoryRepositoryAddFetched"
+  }
+
+  override fun inventoryRepositoryAddServerError(
+    statusCode: Int,
+    message: String,
+    contentType: String,
+    contentLength: Long
+  ): String {
+    return "inventoryRepositoryAddServerError"
+  }
+
+  override fun inventoryRepositoryAddConnectionFailed(exception: Exception): String {
+    return "inventoryRepositoryAddConnectionFailed"
+  }
+
+  override fun inventoryRepositoryAddParsed(duration: Duration): String {
+    return "inventoryRepositoryAddParsed"
+  }
+
+  override fun inventoryRepositorySaving(id: UUID): String {
+    return "inventoryRepositorySaving"
+  }
+
+  override fun inventoryRepositorySavingSucceeded(id: UUID): String {
+    return "inventoryRepositorySavingSucceeded"
+  }
+
+  override fun inventoryRepositorySavingFailed(id: UUID): String {
+    return "inventoryRepositorySavingFailed"
+  }
+
+  override val inventoryRepositoryAddParsing: String =
+    "inventoryRepositoryAddParsing"
+
+
   override fun installVerifying(currentBytes: Long, maximumBytes: Long): String {
     return "installVerifying"
   }

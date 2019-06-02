@@ -6,6 +6,7 @@ import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLSerializerTyp
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.OutputStream
+import java.util.Properties
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -34,22 +35,21 @@ class XML1Serializer(private val outputStream: OutputStream) : SPIFormatXMLSeria
     val root = ofRepository(document, repository)
     document.appendChild(root)
 
-    val transformers = TransformerFactory.newInstance();
-    transformers.setAttribute("indent-number", Integer.valueOf(4));
+    val factory = TransformerFactory.newInstance()
+    val transformer = factory.newTransformer()
+    val outFormat = Properties()
+    outFormat.setProperty(OutputKeys.INDENT, "yes")
+    outFormat.setProperty(OutputKeys.METHOD, "xml")
+    outFormat.setProperty(OutputKeys.OMIT_XML_DECLARATION, "no")
+    outFormat.setProperty(OutputKeys.VERSION, "1.0")
+    outFormat.setProperty(OutputKeys.ENCODING, "UTF-8")
+    transformer.outputProperties = outFormat
 
-    val transformer = transformers.newTransformer();
-    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+    val domSource = DOMSource(document)
+    val result = StreamResult(this.outputStream)
+    transformer.transform(domSource, result)
 
-    this.outputStream.write(XML_DECLARATION);
-    this.outputStream.write("\r\n".toByteArray());
-
-    val source = DOMSource(document);
-    val result = StreamResult(this.outputStream);
-    transformer.transform(source, result);
+    this.outputStream.flush()
   }
 
   private fun ofRepository(document: Document, repository: Repository): Element {

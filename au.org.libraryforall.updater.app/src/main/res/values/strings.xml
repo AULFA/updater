@@ -16,13 +16,14 @@
   <string name="inventory_menu_repository_delete">Delete Repository…</string>
   <string name="inventory_menu_version">Application Version…</string>
 
+  <string name="failure_steps_title">Task Steps</string>
+
   <string name="install_started">Install started</string>
   <string name="install_already_running">Already installing/updating</string>
   <string name="install_failure_title">Install Failed</string>
   <string name="install_failure_repository">Repository</string>
   <string name="install_failure_package">Package</string>
   <string name="install_failure_save_report">Save Report</string>
-  <string name="install_failure_steps_title">Installation Steps</string>
   <string name="install_failure_package_version">Package Version</string>
   <string name="install_failure_package_uri">Package URI</string>
   <string name="install_opening_connection_to">Attempted connection to %1$s</string>
@@ -71,4 +72,24 @@ Exception: %1$s (%2$s)</string>
   <string name="versions_revision">Revision</string>
   <string name="versions_version">Version</string>
   <string name="inventory_menu_repository_reload">Reload Repository</string>
+  <string name="inventory_repository_add_already_exists">Repository already exists</string>
+  <string name="inventory_repository_add_fetching">Attempted to fetch repository.\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_add_fetched">Fetched repository data (%1$d milliseconds)</string>
+  <string name="inventory_repository_add_parsed">Parsed repository data (%1$d milliseconds)</string>
+  <string name="inventory_repository_saving">Attempted to save repository data\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_save_success">Saved repository data\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_save_failure">
+    Failed to save repository data\n
+\n
+Repository: %1$s
+  </string>
+  <string name="inventory_repository_add_parsing">Attempted to parse repository data.</string>
+  <string name="inventory_repository_update_failed_title">Repository Update Failed</string>
+  <string name="inventory_repository_add_parse_failed">Parsing repository data failed</string>
 </resources>

@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryReceivers
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.*
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryReceivers
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.*
 import au.org.libraryforall.updater.repository.api.Hash
 import org.junit.After
 import org.junit.Assert
@@ -18,14 +18,14 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-abstract class InventoryHashIndexedDirectoryContract {
+abstract class InventoryAPKDirectoryContract {
 
   private var executor: ExecutorService? = null
   private lateinit var directory: File
   private lateinit var logger: Logger
 
   protected abstract fun hashIndexedDirectory(
-    directory: File): InventoryHashIndexedDirectoryType
+    directory: File): InventoryAPKDirectoryType
 
   protected abstract fun logger(): Logger
 
@@ -168,7 +168,7 @@ abstract class InventoryHashIndexedDirectoryContract {
   private fun runThrottledReceiver(approximateCalls: Int) {
     var calls = 0
     val receiver =
-      InventoryHashIndexedDirectoryReceivers.throttledReceiver(approximateCalls) { progress ->
+      InventoryAPKDirectoryReceivers.throttledReceiver(approximateCalls) { progress ->
         this.logger.debug("({}) {}/{}", approximateCalls, progress.currentBytes, progress.maximumBytes)
         ++calls
       }

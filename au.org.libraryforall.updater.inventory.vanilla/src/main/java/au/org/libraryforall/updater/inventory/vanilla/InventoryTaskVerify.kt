@@ -1,11 +1,11 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryReceivers
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.KeyReservationType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationProgressType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationResult.VerificationCancelled
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationResult.VerificationFailure
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationResult.VerificationSuccess
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryReceivers
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.KeyReservationType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult.VerificationCancelled
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult.VerificationFailure
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult.VerificationSuccess
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ class InventoryTaskVerify(
       failed = false)
 
     val receiver =
-      InventoryHashIndexedDirectoryReceivers.throttledReceiver(
+      InventoryAPKDirectoryReceivers.throttledReceiver(
         approximateCalls = 5,
         progress = onVerificationProgress::invoke)
 

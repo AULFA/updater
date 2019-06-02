@@ -23,24 +23,15 @@ class SPIHardenedDispatchingResolver private constructor(
   private val baseDirectory: File?,
   private val schemas: SPISchemaResolutionMappings) : EntityResolver2 {
 
+  private val logger = LoggerFactory.getLogger(SPIHardenedDispatchingResolver::class.java)
+
   @Throws(SAXException::class)
   override fun getExternalSubset(
     name: String?,
-    baseURI: String?): InputSource {
+    baseURI: String?): InputSource? {
 
-    /*
-     * This will be encountered upon inline entity definitions.
-     */
-
-    val lineSeparator = System.lineSeparator()
-    throw SAXException(
-      StringBuilder(128)
-        .append("External subsets are explicitly forbidden by this parser configuration.")
-        .append(lineSeparator)
-        .append("  Name: ")
-        .append(name)
-        .append(lineSeparator)
-        .toString())
+    this.logger.debug("getExternalSubset: {} {}", name, baseURI)
+    return null
   }
 
   @Throws(SAXException::class, IOException::class)
@@ -49,14 +40,15 @@ class SPIHardenedDispatchingResolver private constructor(
     publicID: String?,
     baseURI: String?,
     systemID: String?): InputSource {
-    LOG.debug("resolveEntity: {} {} {} {}", name, publicID, baseURI, systemID)
+
+    this.logger.debug("resolveEntity: {} {} {} {}", name, publicID, baseURI, systemID)
 
     val schema =
       this.schemas.mappings.values.find { def -> def.fileIdentifier == systemID }
 
     if (schema != null) {
       val location = schema.location
-      LOG.debug("resolving {} from internal resources -> {}", systemID, location)
+      this.logger.debug("resolving {} from internal resources -> {}", systemID, location)
       return createSource(location.openStream(), location.toString())
     }
 
@@ -91,7 +83,7 @@ class SPIHardenedDispatchingResolver private constructor(
             .toString())
       }
 
-      LOG.debug("resolving {} from filesystem", systemID)
+      this.logger.debug("resolving {} from filesystem", systemID)
 
       val resolved = File(base, systemID).absoluteFile
       if (!resolved.startsWith(base)) {
@@ -136,7 +128,6 @@ class SPIHardenedDispatchingResolver private constructor(
     throw UnsupportedOperationException("Simple entity resolution not supported")
 
   companion object {
-    private val LOG = LoggerFactory.getLogger(SPIHardenedDispatchingResolver::class.java)
 
     /**
      * Create a new resolver. The resolver will resolve schemas from the given

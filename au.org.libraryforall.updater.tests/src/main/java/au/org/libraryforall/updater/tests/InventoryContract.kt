@@ -6,15 +6,20 @@ import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryType
-import au.org.libraryforall.updater.inventory.vanilla.InventoryHashIndexedDirectory
+import au.org.libraryforall.updater.inventory.vanilla.InventoryAPKDirectory
+import au.org.libraryforall.updater.inventory.vanilla.InventoryRepositoryDatabase
 import au.org.libraryforall.updater.repository.api.Hash
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
@@ -40,9 +45,16 @@ import java.util.concurrent.Executors
 
 abstract class InventoryContract {
 
-  private lateinit var directory: File
+  private lateinit var database: InventoryRepositoryDatabaseType
+  private lateinit var databaseDirectory: File
+  private lateinit var apkDirectory: File
   private lateinit var logger: Logger
   private var executor: ListeningExecutorService? = null
+
+  private val repositoryXMLParsers =
+    RepositoryXMLParsers.createFromServiceLoader()
+  private val repositoryXMLSerializers =
+    RepositoryXMLSerializers.createFromServiceLoader()
 
   protected abstract fun logger(): Logger
 
@@ -51,8 +63,10 @@ abstract class InventoryContract {
     executorService: ListeningExecutorService,
     http: HTTPClientType,
     httpAuthentication: (URI) -> HTTPAuthentication?,
-    directory: InventoryHashIndexedDirectoryType,
+    database: InventoryRepositoryDatabaseType,
+    apkDirectory: InventoryAPKDirectoryType,
     apkInstaller: APKInstallerType,
+    repositoryParsers: RepositoryXMLParserProviderType,
     packages: InstalledPackagesType): InventoryType
 
   class EmptyInstalledPackages : InstalledPackagesType {
@@ -71,12 +85,25 @@ abstract class InventoryContract {
       get() = this.eventSubject
   }
 
+
+
   @Before
   fun setup() {
     this.logger = this.logger()
-    this.directory = File.createTempFile("inventory-hash-indexed", "dir")
-    this.directory.delete()
-    this.directory.mkdirs()
+    this.apkDirectory = File.createTempFile("inventory-hash-indexed", "dir")
+    this.apkDirectory.delete()
+    this.apkDirectory.mkdirs()
+
+    this.databaseDirectory = File.createTempFile("inventory-database", "dir")
+    this.databaseDirectory.delete()
+    this.databaseDirectory.mkdirs()
+
+    this.database =
+      InventoryRepositoryDatabase.create(
+        this.repositoryXMLParsers,
+        this.repositoryXMLSerializers,
+        this.databaseDirectory)
+
     this.executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(4))
   }
 
@@ -96,8 +123,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = MockHTTP(),
         httpAuthentication = { null },
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     Assert.assertEquals(
@@ -110,7 +139,7 @@ abstract class InventoryContract {
       inventory.inventoryRepositorySelect(UUID.randomUUID()))
   }
 
-  @Test
+  @Test(timeout = 100_10_000L)
   fun testRepositoryAdded() {
     val apkInstaller =
       Mockito.mock(APKInstallerType::class.java)
@@ -121,8 +150,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = MockHTTP(),
         httpAuthentication = { null },
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -142,13 +173,14 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
 
     Assert.assertEquals(
       "One package",
       1,
-      inventoryRepository.packages.size)
+      putResult.repository!!.packages.size)
   }
 
   @Test(timeout = 10_000L)
@@ -168,8 +200,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = http,
         httpAuthentication = httpAuthentication,
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        repositoryParsers = this.repositoryXMLParsers,
+        database = this.database,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -189,10 +223,12 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
+
     val inventoryPackage =
-      inventoryRepository.packages[0]
+      putResult.repository!!.packages[0]
 
     Mockito
       .`when`(http.get(
@@ -221,7 +257,7 @@ abstract class InventoryContract {
         activity = activity,
         packageName = package0.id,
         packageVersionCode = package0.versionCode,
-        file = File(directory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
+        file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
     val result =
@@ -257,8 +293,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = http,
         httpAuthentication = httpAuthentication,
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -278,10 +316,12 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
+
     val inventoryPackage =
-      inventoryRepository.packages[0]
+      putResult.repository!!.packages[0]
 
     Mockito
       .`when`(http.get(
@@ -329,8 +369,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = http,
         httpAuthentication = httpAuthentication,
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -350,10 +392,12 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
+
     val inventoryPackage =
-      inventoryRepository.packages[0]
+      putResult.repository!!.packages[0]
 
     Mockito
       .`when`(http.get(
@@ -397,8 +441,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = http,
         httpAuthentication = httpAuthentication,
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -418,10 +464,12 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
+
     val inventoryPackage =
-      inventoryRepository.packages[0]
+      putResult.repository!!.packages[0]
 
     Mockito
       .`when`(http.get(
@@ -450,7 +498,7 @@ abstract class InventoryContract {
         activity = activity,
         packageName = package0.id,
         packageVersionCode = package0.versionCode,
-        file = File(directory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
+        file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
     val result =
@@ -486,8 +534,10 @@ abstract class InventoryContract {
         executorService = this.executor!!,
         http = http,
         httpAuthentication = httpAuthentication,
-        directory = InventoryHashIndexedDirectory.create(this.directory),
+        apkDirectory = InventoryAPKDirectory.create(this.apkDirectory),
         apkInstaller = apkInstaller,
+        database = this.database,
+        repositoryParsers = this.repositoryXMLParsers,
         packages = EmptyInstalledPackages())
 
     val package0 =
@@ -507,10 +557,12 @@ abstract class InventoryContract {
         packages = listOf(package0),
         source = URI.create("http://example.com"))
 
-    val inventoryRepository =
+    val putResult =
       inventory.inventoryRepositoryPut(repository)
+        .get()
+
     val inventoryPackage =
-      inventoryRepository.packages[0]
+      putResult.repository!!.packages[0]
 
     Mockito
       .`when`(http.get(
@@ -539,7 +591,7 @@ abstract class InventoryContract {
         activity = activity,
         packageName = package0.id,
         packageVersionCode = package0.versionCode,
-        file = File(directory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
+        file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
     val result =

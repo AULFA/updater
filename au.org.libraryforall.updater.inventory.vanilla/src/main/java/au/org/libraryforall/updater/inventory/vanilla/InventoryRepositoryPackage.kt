@@ -1,11 +1,11 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationProgressType
-import au.org.libraryforall.updater.inventory.api.InventoryInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallFailed
 import au.org.libraryforall.updater.inventory.api.InventoryPackageState.Installed
@@ -34,7 +34,7 @@ internal class InventoryRepositoryPackage(
   private val repositoryPackage: RepositoryPackage,
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
-  private val directory: InventoryHashIndexedDirectoryType,
+  private val directory: InventoryAPKDirectoryType,
   private val apkInstaller: APKInstallerType,
   private val resources: InventoryStringResourcesType,
   private val events: PublishSubject<InventoryEvent>,
@@ -55,7 +55,7 @@ internal class InventoryRepositoryPackage(
   private val logger =
     LoggerFactory.getLogger(InventoryRepositoryPackage::class.java)
 
-  override fun install(activity: Any): ListenableFuture<InventoryInstallResult> {
+  override fun install(activity: Any): ListenableFuture<InventoryPackageInstallResult> {
     this.logger.debug("[${this.id}]: install")
 
     return synchronized(this.stateLock) {
@@ -68,7 +68,7 @@ internal class InventoryRepositoryPackage(
         }
 
         is Installing -> {
-          Futures.immediateFuture(InventoryInstallResult(
+          Futures.immediateFuture(InventoryPackageInstallResult(
             repositoryId = this.repositoryId,
             packageVersionCode = this.versionCode,
             packageVersionName = this.versionName,
@@ -85,10 +85,10 @@ internal class InventoryRepositoryPackage(
   override val isUpdateAvailable: Boolean
     get() = false
 
-  private fun runInstall(activity: Any): ListenableFuture<InventoryInstallResult> {
+  private fun runInstall(activity: Any): ListenableFuture<InventoryPackageInstallResult> {
     val step0 = InventoryTaskStep(description = this.resources.installStarted)
 
-    return this.executor.submit(Callable<InventoryInstallResult> {
+    return this.executor.submit(Callable<InventoryPackageInstallResult> {
       runInstallActual(step0, activity)
     })
   }
@@ -96,7 +96,7 @@ internal class InventoryRepositoryPackage(
   private fun runInstallActual(
     initialStep: InventoryTaskStep,
     activity: Any
-  ): InventoryInstallResult {
+  ): InventoryPackageInstallResult {
     val result =
       try {
         this.directory.withKey(this.repositoryPackage.sha256) { reservation ->
@@ -135,7 +135,7 @@ internal class InventoryRepositoryPackage(
       }
 
     val installResult =
-      InventoryInstallResult(
+      InventoryPackageInstallResult(
         this.repositoryId,
         this.id,
         this.versionCode,

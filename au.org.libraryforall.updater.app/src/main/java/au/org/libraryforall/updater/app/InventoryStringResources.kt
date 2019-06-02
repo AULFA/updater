@@ -3,10 +3,56 @@ package au.org.libraryforall.updater.app
 import android.content.Context
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.repository.api.Hash
+import org.joda.time.Duration
 import java.io.File
 import java.net.URI
+import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
+
+  override val inventoryRepositoryAddParseFailed: String =
+    this.context.getString(R.string.inventory_repository_add_parse_failed)
+
+  override val inventoryRepositoryAddAlreadyExists: String =
+    this.context.getString(R.string.inventory_repository_add_already_exists)
+
+  override fun inventoryRepositoryAddFetching(uri: URI): String =
+    this.context.resources.getString(R.string.inventory_repository_add_fetching, uri.toString())
+
+  override fun inventoryRepositoryAddFetched(duration: Duration): String =
+    this.context.resources.getString(R.string.inventory_repository_add_fetched, duration.millis)
+
+  override fun inventoryRepositoryAddServerError(
+    statusCode: Int,
+    message: String,
+    contentType: String,
+    contentLength: Long
+  ): String =
+    this.context.getString(
+      R.string.install_connected_server_error,
+      statusCode,
+      message)
+
+  override fun inventoryRepositoryAddConnectionFailed(exception: Exception): String =
+    this.context.getString(
+      R.string.install_connection_failed,
+      exception.localizedMessage,
+      exception.javaClass.simpleName)
+
+  override fun inventoryRepositoryAddParsed(duration: Duration): String =
+    this.context.resources.getString(R.string.inventory_repository_add_parsed, duration.millis)
+
+  override fun inventoryRepositorySaving(id: UUID): String =
+    this.context.getString(R.string.inventory_repository_saving, id.toString())
+
+  override fun inventoryRepositorySavingSucceeded(id: UUID): String =
+    this.context.getString(R.string.inventory_repository_save_success, id.toString())
+
+  override fun inventoryRepositorySavingFailed(id: UUID): String =
+    this.context.getString(R.string.inventory_repository_save_failure, id.toString())
+
+  override val inventoryRepositoryAddParsing: String =
+    this.context.getString(R.string.inventory_repository_add_parsing)
 
   override fun installAPKFailedWithCode(status: Int): String =
     this.context.getString(R.string.install_apk_failed_code, status)

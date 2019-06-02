@@ -1,8 +1,10 @@
 package au.org.libraryforall.updater.inventory.api
 
 import au.org.libraryforall.updater.repository.api.Hash
+import org.joda.time.Duration
 import java.io.File
 import java.net.URI
+import java.util.UUID
 
 interface InventoryStringResourcesType {
 
@@ -80,4 +82,30 @@ interface InventoryStringResourcesType {
 
   val installStarted: String
 
+  val inventoryRepositoryAddAlreadyExists: String
+
+  fun inventoryRepositoryAddFetching(uri: URI): String
+
+  fun inventoryRepositoryAddFetched(duration: Duration): String
+
+  fun inventoryRepositoryAddServerError(
+    statusCode: Int,
+    message: String,
+    contentType: String,
+    contentLength: Long
+  ): String
+
+  fun inventoryRepositoryAddConnectionFailed(exception: Exception): String
+
+  fun inventoryRepositoryAddParsed(duration: Duration): String
+
+  fun inventoryRepositorySaving(id: UUID): String
+
+  fun inventoryRepositorySavingSucceeded(id: UUID): String
+
+  fun inventoryRepositorySavingFailed(id: UUID): String
+
+  val inventoryRepositoryAddParseFailed: String
+
+  val inventoryRepositoryAddParsing: String
 }

@@ -1,6 +1,8 @@
 dependencies {
   api project(":au.org.libraryforall.updater.repository.api")
 
+  api libraries.xerces
+
   implementation libraries.kotlinStdlib
   implementation libraries.jodaTime
   implementation libraries.rxjava

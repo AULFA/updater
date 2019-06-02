@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.net.URI
 import java.util.UUID
 
-data class InventoryInstallResult(
+data class InventoryPackageInstallResult(
   val repositoryId: UUID,
   val packageName: String,
   val packageVersionCode: Int,

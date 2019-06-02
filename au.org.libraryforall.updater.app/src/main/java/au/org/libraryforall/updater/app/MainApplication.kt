@@ -65,7 +65,7 @@ class MainApplication : Application() {
           title = "LFA",
           updated = LocalDateTime.now(),
           packages = listOf(package0, package1, package2, package3),
-          source = URI.create("http://www.example.com")))
-
+          source = URI.create("https://ataxia.io7m.com/2019/06/01/repository.xml")))
+      .get()
   }
 }

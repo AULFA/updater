@@ -14,7 +14,7 @@ sealed class InventoryPackageState {
 
   data class InstallFailed(
     override val inventoryPackage: InventoryRepositoryPackageType,
-    val result: InventoryInstallResult)
+    val result: InventoryPackageInstallResult)
     : InventoryPackageState()
 
   sealed class InstallingStatus {

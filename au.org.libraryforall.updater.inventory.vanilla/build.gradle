@@ -1,6 +1,7 @@
 dependencies {
   api project(":au.org.libraryforall.updater.apkinstaller.api")
   api project(":au.org.libraryforall.updater.repository.api")
+  api project(":au.org.libraryforall.updater.repository.xml.api")
   api project(":au.org.libraryforall.updater.installed.api")
   api project(":au.org.libraryforall.updater.inventory.api")
 

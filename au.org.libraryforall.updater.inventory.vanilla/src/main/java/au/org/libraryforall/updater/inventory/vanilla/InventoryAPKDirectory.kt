@@ -1,10 +1,10 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.KeyReservationType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.ReservationUnavailableException
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationProgressType
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType.VerificationResult
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.KeyReservationType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.ReservationUnavailableException
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult
 import au.org.libraryforall.updater.repository.api.Hash
 import net.jcip.annotations.ThreadSafe
 import org.apache.commons.codec.binary.Hex
@@ -20,10 +20,10 @@ import java.security.MessageDigest
  */
 
 @ThreadSafe
-class InventoryHashIndexedDirectory private constructor(private val base: File)
-  : InventoryHashIndexedDirectoryType {
+class InventoryAPKDirectory private constructor(private val base: File)
+  : InventoryAPKDirectoryType {
 
-  private val logger = LoggerFactory.getLogger(InventoryHashIndexedDirectory::class.java)
+  private val logger = LoggerFactory.getLogger(InventoryAPKDirectory::class.java)
   private val reservationLock = Object()
   private val reservations = mutableMapOf<Hash, Reservation>()
 
@@ -132,7 +132,7 @@ class InventoryHashIndexedDirectory private constructor(private val base: File)
      * Create a new directory.
      */
 
-    fun create(base: File): InventoryHashIndexedDirectoryType =
-      InventoryHashIndexedDirectory(base)
+    fun create(base: File): InventoryAPKDirectoryType =
+      InventoryAPKDirectory(base)
   }
 }

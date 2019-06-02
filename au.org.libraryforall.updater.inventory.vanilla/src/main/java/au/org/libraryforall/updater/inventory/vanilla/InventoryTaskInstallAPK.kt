@@ -49,13 +49,13 @@ class InventoryTaskInstallAPK(
       } else {
         step.resolution = this.resources.installAPKFailedWithCode(status)
         step.failed = true
-        InventoryTaskMonad.InventoryTaskFailed<Unit>()
+        InventoryTaskMonad.InventoryTaskFailed()
       }
     } catch (e: Exception) {
       this.logger.error("APK install failed: ", e)
       step.resolution = this.resources.installAPKFailedWithException(e)
       step.failed = true
-      InventoryTaskMonad.InventoryTaskFailed<Unit>()
+      InventoryTaskMonad.InventoryTaskFailed()
     }
   }
 

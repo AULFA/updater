@@ -6,12 +6,17 @@ import au.org.libraryforall.updater.apkinstaller.api.APKInstallerDevice
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.installed.vanilla.InstalledPackages
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryType
 import au.org.libraryforall.updater.inventory.vanilla.Inventory
-import au.org.libraryforall.updater.inventory.vanilla.InventoryHashIndexedDirectory
-import com.google.common.util.concurrent.ListeningExecutorService
+import au.org.libraryforall.updater.inventory.vanilla.InventoryAPKDirectory
+import au.org.libraryforall.updater.inventory.vanilla.InventoryRepositoryDatabase
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
+import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
 import com.google.common.util.concurrent.MoreExecutors
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.vanilla.HTTPClientsOkHTTP
@@ -70,21 +75,47 @@ object MainServices {
       HTTPClientsOkHTTP().createClient("LFA Updater 0.0.1")
     }
 
+  private var repositoryParsers : AtomicService<RepositoryXMLParserProviderType> =
+    AtomicService {
+      RepositoryXMLParsers.createFromServiceLoader()
+    }
+
+  private var repositorySerializers : AtomicService<RepositoryXMLSerializerProviderType> =
+    AtomicService {
+      RepositoryXMLSerializers.createFromServiceLoader()
+    }
+
+  private var inventoryDatabase : AtomicService<InventoryRepositoryDatabaseType> =
+    AtomicService {
+      InventoryRepositoryDatabase.create(
+        parsers = this.repositoryParsers.get(),
+        serializers = this.repositorySerializers.get(),
+        directory = this.inventoryDatabaseDirectory())
+    }
+
+  private fun inventoryDatabaseDirectory(): File {
+    val dir = File(this.context.filesDir, "Repositories").absoluteFile
+    this.logger.debug("using inventory directory: {}", dir)
+    return dir
+  }
+
   private var inventory: AtomicService<InventoryType> =
     AtomicService {
-      Inventory.create(
+      Inventory.open(
         resources = this.inventoryStringResources(),
         executor = this.inventoryExecutor,
         httpAuthentication = { uri -> null },
         http = this.http(),
-        directory = this.inventoryDirectory(),
+        apkDirectory = this.inventoryDirectory(),
         apkInstaller = this.apkInstaller(),
+        repositoryParsers = this.repositoryParsers.get(),
+        inventoryDatabase = this.inventoryDatabase.get(),
         installedPackages = this.installedPackages())
     }
 
-  private val inventoryDirectoryReference: AtomicService<InventoryHashIndexedDirectoryType> =
+  private val inventoryDirectoryReference: AtomicService<InventoryAPKDirectoryType> =
     AtomicService {
-      InventoryHashIndexedDirectory.create(apkDirectory())
+      InventoryAPKDirectory.create(apkDirectory())
     }
 
   private fun apkDirectory(): File {
@@ -108,7 +139,7 @@ object MainServices {
   fun http(): HTTPClientType =
     this.httpClient.get()
 
-  fun inventoryDirectory(): InventoryHashIndexedDirectoryType =
+  fun inventoryDirectory(): InventoryAPKDirectoryType =
     this.inventoryDirectoryReference.get()
 
   fun installedPackages(): InstalledPackagesType =
