@@ -95,19 +95,24 @@ class Inventory private constructor(
     this.databaseSubscription =
       this.inventoryDatabase.events.subscribe(this::onDatabaseEvent)
 
-    this.logger.debug("initialized")
+    for (entry in this.inventoryDatabase.entries) {
+      this.putRepositoryForEntry(entry)
+    }
+
+    val size = synchronized(this.repositoryLock, this.repositories::size)
+    this.logger.debug("initialized {} repositories", size)
   }
 
   private fun onDatabaseEvent(event: InventoryRepositoryDatabaseEvent) {
     return when (event) {
       is DatabaseRepositoryAdded -> {
-
+        this.logger.debug("database repository added")
       }
       is DatabaseRepositoryRemoved -> {
-
+        this.logger.debug("database repository removed")
       }
       is DatabaseRepositoryUpdated -> {
-
+        this.logger.debug("database repository updated")
       }
     }
   }
@@ -139,7 +144,7 @@ class Inventory private constructor(
           .flatMap { entry -> InventoryTaskSuccess(this.putRepositoryForEntry(entry)) }
 
       InventoryRepositoryAddResult(
-        uri = repository.source,
+        uri = repository.self,
         steps = result.steps,
         repository = when (result) {
           is InventoryTaskSuccess -> result.value
@@ -162,7 +167,7 @@ class Inventory private constructor(
       }
 
       val existing =
-        this.repositories.values.find { repos -> repos.source == uri }
+        this.repositories.values.find { repos -> repos.updateURI == uri }
 
       if (existing != null) {
         return Futures.immediateFailedFuture(

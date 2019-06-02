@@ -15,10 +15,6 @@ import javax.xml.transform.stream.StreamResult
 
 class XML1Serializer(private val outputStream: OutputStream) : SPIFormatXMLSerializerType {
 
-  companion object {
-    private val XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".toByteArray()
-  }
-
   private val documentBuilders: DocumentBuilderFactory =
     DocumentBuilderFactory.newInstance()
 
@@ -59,6 +55,7 @@ class XML1Serializer(private val outputStream: OutputStream) : SPIFormatXMLSeria
     root.setAttribute("id", repository.id.toString())
     root.setAttribute("updated", repository.updated.toString())
     root.setAttribute("title", repository.title)
+    root.setAttribute("self", repository.self.toString())
 
     for (pack in repository.packages) {
       root.appendChild(ofPackage(document, pack))

@@ -23,7 +23,7 @@ class RepositoryXML1Format : SPIFormatVersionedHandlerProviderType {
     uri: URI,
     locator: Locator2
   ): SPIFormatXMLContentHandlerType<Repository> =
-    XML1RepositoryHandler(uri, locator)
+    XML1RepositoryHandler(locator)
 
   override val schemaDefinition: SPISchemaDefinition =
     SPISchemaDefinition(

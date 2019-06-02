@@ -171,7 +171,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)
@@ -221,7 +221,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)
@@ -314,7 +314,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)
@@ -390,7 +390,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)
@@ -462,7 +462,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)
@@ -555,7 +555,7 @@ abstract class InventoryContract {
         title = "LFA",
         updated = LocalDateTime(),
         packages = listOf(package0),
-        source = URI.create("http://example.com"))
+        self = URI.create("http://example.com"))
 
     val putResult =
       inventory.inventoryRepositoryPut(repository)

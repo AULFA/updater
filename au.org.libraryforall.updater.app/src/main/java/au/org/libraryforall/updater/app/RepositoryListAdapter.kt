@@ -32,7 +32,7 @@ class RepositoryListAdapter(
 
     holder.parent.setOnClickListener { this.onItemClicked.invoke(repository) }
     holder.titleView.text = repository.title
-    holder.uriView.text = repository.source.toString()
+    holder.uriView.text = repository.updateURI.toString()
   }
 
   inner class ViewHolder(val parent: View) : RecyclerView.ViewHolder(parent) {

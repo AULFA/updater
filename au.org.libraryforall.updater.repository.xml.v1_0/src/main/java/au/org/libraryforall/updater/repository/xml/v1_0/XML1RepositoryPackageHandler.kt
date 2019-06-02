@@ -4,20 +4,26 @@ import au.org.libraryforall.updater.repository.api.Hash
 import au.org.libraryforall.updater.repository.api.RepositoryPackage
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
+import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.SAXParseException
 import org.xml.sax.ext.Locator2
 import java.net.URI
 
-class XML1RepositoryPackageHandler(locator2: Locator2)
+class XML1RepositoryPackageHandler(
+  locator2: Locator2,
+  private val baseURI: URI)
   : SPIFormatXMLAbstractContentHandler<Unit, RepositoryPackage>(locator2, "package") {
+
+  private val logger =
+    LoggerFactory.getLogger(XML1RepositoryPackageHandler::class.java)
 
   private lateinit var source: URI
   private lateinit var sha256: Hash
   private lateinit var name: String
-  private var versionCode: Int = 0
   private lateinit var versionName: String
   private lateinit var id: String
+  private var versionCode: Int = 0
 
   override fun onWantHandlerName(): String =
     XML1RepositoryPackageHandler::class.java.simpleName
@@ -49,7 +55,19 @@ class XML1RepositoryPackageHandler(locator2: Locator2)
       this.versionName = attributes.getValue("versionName")
       this.name = attributes.getValue("name")
       this.sha256 = Hash(attributes.getValue("sha256"))
-      this.source = URI.create(attributes.getValue("source"))
+
+      val relativeSource =
+        URI.create(attributes.getValue("source"))
+
+      val resolvedSource =
+        if (!relativeSource.isAbsolute) {
+          this.baseURI.resolve(relativeSource)
+        } else {
+          relativeSource
+        }
+
+      this.logger.debug("resolved package source: {}", resolvedSource)
+      this.source = resolvedSource
     } catch (e: Exception) {
       throw SAXParseException(e.message, this.locator(), e)
     }

@@ -80,12 +80,13 @@ class InventoryRepository(
 
     return when (event) {
       is DatabaseRepositoryAdded -> {
-
+        this.logger.debug("database repository added")
       }
       is DatabaseRepositoryRemoved -> {
-
+        this.logger.debug("database repository added")
       }
       is DatabaseRepositoryUpdated -> {
+        this.logger.debug("database repository updated")
         this.updateFrom(this.databaseEntry.repository)
         Unit
       }
@@ -185,8 +186,8 @@ class InventoryRepository(
   override val updated: LocalDateTime
     get() = this.databaseEntry.repository.updated
 
-  override val source: URI
-    get() = this.databaseEntry.repository.source
+  override val updateURI: URI
+    get() = this.databaseEntry.repository.self
 
   override fun update(): ListenableFuture<Unit> {
     synchronized(this.stateLock) {
@@ -230,7 +231,7 @@ class InventoryRepository(
       httpAuthentication = this.httpAuthentication,
       repositoryParsers = this.repositoryParsers,
       database = this.databaseEntry.database,
-      uri = this.databaseEntry.repository.source)
+      uri = this.databaseEntry.repository.self)
       .execute()
       .flatMap { InventoryTaskSuccess(Unit) }
   }

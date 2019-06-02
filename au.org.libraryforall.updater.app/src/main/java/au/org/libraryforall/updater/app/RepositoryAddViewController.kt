@@ -13,6 +13,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
+import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -93,6 +94,21 @@ class RepositoryAddViewController : Controller() {
       this.idleConfirm.isEnabled = false
       this.errorConfirm.isEnabled = false
       this.inventory.inventoryRepositoryAdd(uri)
+        .addListener(Runnable { this.inventoryTaskFinished() }, MoreExecutors.directExecutor())
+    }
+  }
+
+  private fun inventoryTaskFinished() {
+    UIThread.execute {
+      when (val state = this.inventory.state) {
+        InventoryState.InventoryIdle -> {
+          this.logger.debug("inventory task succeeded, popping view controller")
+          this.router.popCurrentController()
+        }
+        is InventoryState.InventoryAddingRepository,
+        is InventoryState.InventoryAddingRepositoryFailed ->
+          Unit
+      }
     }
   }
 

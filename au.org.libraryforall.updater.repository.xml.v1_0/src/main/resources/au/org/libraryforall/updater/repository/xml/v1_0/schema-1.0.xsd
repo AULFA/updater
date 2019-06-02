@@ -27,6 +27,7 @@
       <attribute name="updated" type="dateTime" use="required" />
       <attribute name="id" type="u:uuid" use="required" />
       <attribute name="title" type="string" use="required" />
+      <attribute name="self" type="anyURI" use="required" />
     </complexType>
   </element>
 

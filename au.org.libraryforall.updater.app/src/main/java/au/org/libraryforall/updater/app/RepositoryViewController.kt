@@ -56,6 +56,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     this.setHasOptionsMenu(true)
   }
 
+  private lateinit var listPackages: MutableList<InventoryRepositoryPackageType>
   private lateinit var title: TextView
   private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: InventoryListAdapter
@@ -124,10 +125,13 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     this.repository = currentRepository
 
     this.title.text = this.repository.title
+
+    this.listPackages = mutableListOf()
+    this.listPackages.addAll(this.repository.packages)
     this.listAdapter =
       InventoryListAdapter(
         context = this.activity!!,
-        packages = this.repository.packages,
+        packages = this.listPackages,
         onShowFailureDetails = this@RepositoryViewController::showRepositoryPackageFailure)
 
     this.recyclerView.setHasFixedSize(true)
@@ -179,6 +183,8 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
             is PackageChanged,
             is PackageBecameInvisible -> {
               UIThread.execute {
+                this.listPackages.clear()
+                this.listPackages.addAll(this.repository.packages)
                 this.listAdapter.notifyDataSetChanged()
               }
             }

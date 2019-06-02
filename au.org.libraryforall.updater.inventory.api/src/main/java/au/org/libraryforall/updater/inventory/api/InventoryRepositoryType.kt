@@ -18,7 +18,7 @@ interface InventoryRepositoryType {
 
   val updated: LocalDateTime
 
-  val source: URI
+  val updateURI: URI
 
   val packages: List<InventoryRepositoryPackageType>
 

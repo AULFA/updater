@@ -52,6 +52,9 @@ class InventoryRepositoryDatabase private constructor(
         }
       }
     }
+
+    val size = synchronized(this.entriesLock, this.entriesCurrent::size)
+    this.logger.debug("opened {} entries", size)
   }
 
   private fun delete(file: File) {
@@ -59,28 +62,17 @@ class InventoryRepositoryDatabase private constructor(
     file.deleteRecursively()
   }
 
-  private fun openEntry(baseDirectory: File): Entry? {
-    this.logger.debug("openEntry: {}", baseDirectory)
-
-    val name = baseDirectory.name
-    if (!nameIsUUID(name)) {
-      this.logger.error("directory name {} is not a UUID", name)
-      delete(baseDirectory)
-      return null
-    }
-
-    return try {
-      baseDirectory.mkdirs()
-
-      val fileXML = File(baseDirectory, "repository.xml")
-      FileInputStream(fileXML).use { stream ->
-        this.parsers.createParser(fileXML.toURI(), stream).use { parser ->
+  private fun openRepository(
+    baseDirectory: File
+  ): Repository {
+    val file = File(baseDirectory, "repository.xml")
+    return FileInputStream(file).use { stream ->
+      this.parsers.createParser(file.toURI(), stream)
+        .use { parser ->
           val errors = mutableListOf<ParseError>()
           parser.errors.subscribe { error -> errors.add(error) }
           try {
-            this.Entry(
-              baseDirectory = baseDirectory,
-              repositoryInitial = parser.parse())
+            parser.parse()
           } catch (e: Exception) {
             for (error in errors) {
               this.logger.error("{}:{}:{}: {}", error.file, error.line, error.column, error.message)
@@ -88,14 +80,28 @@ class InventoryRepositoryDatabase private constructor(
                 this.logger.error("exception: ", error.exception)
               }
             }
-            delete(baseDirectory)
-            null
+            throw e
           }
         }
-      }
+    }
+  }
+
+  private fun openEntry(baseDirectory: File): Entry? {
+    this.logger.debug("openEntry: {}", baseDirectory)
+
+    val name = baseDirectory.name
+    if (!this.nameIsUUID(name)) {
+      this.logger.error("directory name {} is not a UUID", name)
+      this.delete(baseDirectory)
+      return null
+    }
+
+    return try {
+      baseDirectory.mkdirs()
+      return this.Entry(baseDirectory, openRepository(baseDirectory))
     } catch (e: Exception) {
       this.logger.error("openEntry: ", e)
-      delete(baseDirectory)
+      this.delete(baseDirectory)
       null
     }
   }
@@ -164,7 +170,8 @@ class InventoryRepositoryDatabase private constructor(
     } else {
       this.logger.debug("createOrUpdate: {} does not exist", repository.id)
       val baseDirectory = File(this.directory, repository.id.toString())
-      val entry = Entry(baseDirectory, repository)
+      val entry =
+        this.Entry(baseDirectory, repository)
       entry.update(repository)
       this.eventSubject.onNext(DatabaseRepositoryAdded(repository.id))
       entry
@@ -173,6 +180,12 @@ class InventoryRepositoryDatabase private constructor(
 
   override val events: Observable<InventoryRepositoryDatabaseEvent>
     get() = this.eventSubject
+
+  override val entries: List<InventoryRepositoryDatabaseEntryType>
+    get() = synchronized(this.entriesLock) {
+      this.entriesCurrent.values.toList()
+        .sortedBy { e -> e.repository.title }
+    }
 
   companion object {
 

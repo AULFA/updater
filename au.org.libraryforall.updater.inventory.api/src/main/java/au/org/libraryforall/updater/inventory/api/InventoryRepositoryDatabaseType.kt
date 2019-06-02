@@ -11,4 +11,6 @@ interface InventoryRepositoryDatabaseType {
     repository: Repository)
     : InventoryRepositoryDatabaseEntryType
 
+  val entries: List<InventoryRepositoryDatabaseEntryType>
+
 }

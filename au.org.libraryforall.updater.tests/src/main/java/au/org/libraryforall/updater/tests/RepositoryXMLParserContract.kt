@@ -48,7 +48,7 @@ abstract class RepositoryXMLParserContract {
 
     Assert.assertEquals("79b82d4a-02d1-4dd4-81e3-37dc37b8a5d0", repository.id.toString())
     Assert.assertEquals("Example Repository", repository.title)
-    Assert.assertEquals(URI.create("urn:example"), repository.source)
+    Assert.assertEquals(URI.create("http://www.example.com/self"), repository.self)
     Assert.assertEquals("2019-01-01T00:00:00.000", repository.updated.toString())
 
     Assert.assertEquals(3, repository.packages.size)
