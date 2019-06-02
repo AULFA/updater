@@ -83,7 +83,7 @@ class InventoryRepository(
         this.logger.debug("database repository added")
       }
       is DatabaseRepositoryRemoved -> {
-        this.logger.debug("database repository added")
+        this.logger.debug("database repository removed")
       }
       is DatabaseRepositoryUpdated -> {
         this.logger.debug("database repository updated")

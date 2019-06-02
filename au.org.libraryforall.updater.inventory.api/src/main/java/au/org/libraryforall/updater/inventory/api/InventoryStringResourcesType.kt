@@ -68,6 +68,14 @@ interface InventoryStringResourcesType {
 
   fun installAPKFailedWithCode(status: Int): String
 
+  val inventoryRepositoryRemovingFailed: String
+
+  val inventoryRepositoryRemovingSucceeded: String
+
+  val inventoryRepositoryRemoveNonexistent: String
+
+  val inventoryRepositoryRemoving: String
+
   val installAPKStarted: String
 
   val installVerificationSucceeded: String

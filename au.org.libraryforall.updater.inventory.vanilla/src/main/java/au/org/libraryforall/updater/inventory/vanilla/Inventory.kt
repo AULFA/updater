@@ -7,6 +7,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAddException
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.*
+import au.org.libraryforall.updater.inventory.api.InventoryRemoveException
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryAddResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
@@ -14,9 +15,11 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEve
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryRemoved
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryRemoveResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import au.org.libraryforall.updater.inventory.api.InventoryState
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
+import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.inventory.api.InventoryType
 import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskFailed
 import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskSuccess
@@ -150,6 +153,40 @@ class Inventory private constructor(
           is InventoryTaskSuccess -> result.value
           is InventoryTaskFailed -> null
         })
+    })
+  }
+
+  override fun inventoryRepositoryRemove(id: UUID): ListenableFuture<InventoryRepositoryRemoveResult> {
+    synchronized(this.repositoryLock) {
+      val existing = this.repositories[id]
+      if (existing == null) {
+        return Futures.immediateFailedFuture(
+          InventoryRemoveException(
+            id = id,
+            message = this.resources.inventoryRepositoryRemoveNonexistent))
+      }
+    }
+
+    return this.executor.submit(Callable {
+      try {
+        this.inventoryDatabase.delete(id)
+        synchronized(this.repositoryLock) { this.repositories.remove(id) }
+        this.eventSubject.onNext(InventoryStateChanged)
+        InventoryRepositoryRemoveResult(
+          id, listOf(InventoryTaskStep(
+          description = this.resources.inventoryRepositoryRemoving,
+          resolution = this.resources.inventoryRepositoryRemovingSucceeded,
+          exception = null,
+          failed = false)))
+      } catch (e: Exception) {
+        this.logger.error("inventoryRepositoryRemove: ", e)
+        InventoryRepositoryRemoveResult(
+          id, listOf(InventoryTaskStep(
+          description = this.resources.inventoryRepositoryRemoving,
+          resolution = this.resources.inventoryRepositoryRemovingFailed,
+          exception = e,
+          failed = true)))
+      }
     })
   }
 

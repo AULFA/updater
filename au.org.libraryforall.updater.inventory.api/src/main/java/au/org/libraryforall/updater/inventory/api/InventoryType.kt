@@ -28,4 +28,8 @@ interface InventoryType {
 
   fun inventoryRepositories(): List<InventoryRepositoryType>
 
+  fun inventoryRepositoryRemove(
+    id: UUID)
+    : ListenableFuture<InventoryRepositoryRemoveResult>
+
 }

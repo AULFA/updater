@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.inventory.api
 
-import java.net.URI
+import java.util.UUID
 
-open class InventoryAddException(
-  val uri: URI,
+open class InventoryRemoveException(
+  val id: UUID,
   message: String,
   cause: java.lang.Exception? = null) : Exception(message, cause)

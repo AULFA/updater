@@ -2,8 +2,7 @@ package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.*
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
@@ -150,6 +149,10 @@ class InventoryRepositoryDatabase private constructor(
         }
       }
     }
+
+    fun delete() {
+      this.baseDirectory.deleteRecursively()
+    }
   }
 
   override fun createOrUpdate(repository: Repository): InventoryRepositoryDatabaseEntryType {
@@ -175,6 +178,27 @@ class InventoryRepositoryDatabase private constructor(
       entry.update(repository)
       this.eventSubject.onNext(DatabaseRepositoryAdded(repository.id))
       entry
+    }
+  }
+
+  override fun delete(id: UUID) {
+    val existing =
+      synchronized(this.entriesLock) {
+        this.entriesCurrent[id]
+      }
+
+    return if (existing != null) {
+      this.logger.debug("delete: {} exists", id)
+      Preconditions.checkArgument(
+        existing.repository.id == id,
+        "Repository IDs must match")
+
+      existing.delete()
+      this.eventSubject.onNext(DatabaseRepositoryRemoved(id))
+      synchronized(this.entriesLock) { this.entriesCurrent.remove(id) }
+      Unit
+    } else {
+      this.logger.debug("delete: {} does not exist", id)
     }
   }
 

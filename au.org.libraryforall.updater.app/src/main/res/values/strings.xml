@@ -101,4 +101,11 @@ Repository: %1$s
   <string name="repository_add_failed">Repository addition failed</string>
   <string name="repository_add_title">Add Repository</string>
   <string name="error_report">Error Report</string>
+  <string name="repository_delete_confirm_title">Confirm Delete</string>
+  <string name="repository_delete_confirm">Are you sure you want to delete this repository?</string>
+  <string name="repository_delete">Delete</string>
+  <string name="repository_removing_failed">Removing the repository failed.</string>
+  <string name="repository_removing_succeeded">Removing the repository succeeded.</string>
+  <string name="repository_removing_nonexistent">The given repository does not exist!</string>
+  <string name="repository_removing">Attempted to remove a repository.</string>
 </resources>

@@ -10,13 +10,6 @@
     app:showAsAction="ifRoom" />
 
   <item
-    android:id="@+id/menuItemRepositoryDelete"
-    android:icon="@drawable/delete"
-    android:title="@string/inventory_menu_repository_delete"
-    android:visible="true"
-    app:showAsAction="ifRoom" />
-
-  <item
     android:id="@+id/menuItemVersion"
     android:title="@string/inventory_menu_version"
     android:visible="true" />

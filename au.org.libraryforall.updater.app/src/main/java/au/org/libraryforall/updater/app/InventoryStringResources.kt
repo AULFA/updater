@@ -10,6 +10,18 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val inventoryRepositoryRemovingFailed: String =
+    this.context.resources.getString(R.string.repository_removing_failed)
+
+  override val inventoryRepositoryRemovingSucceeded: String =
+    this.context.resources.getString(R.string.repository_removing_succeeded)
+
+  override val inventoryRepositoryRemoveNonexistent: String =
+    this.context.resources.getString(R.string.repository_removing_nonexistent)
+
+  override val inventoryRepositoryRemoving: String =
+    this.context.resources.getString(R.string.repository_removing)
+
   override val inventoryRepositoryAddInProgress: String =
     this.context.resources.getString(R.string.repository_add_in_progress)
 

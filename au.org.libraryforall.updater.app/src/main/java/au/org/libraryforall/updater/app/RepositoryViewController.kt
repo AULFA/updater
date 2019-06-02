@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.app
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -87,13 +89,29 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
-      R.id.inventoryRepositoryReload -> {
+      R.id.menuItemRepositoryReload -> {
         this.onSelectedReload()
+        return true
+      }
+
+      R.id.menuItemRepositoryDelete -> {
+        this.onSelectedDelete()
         return true
       }
 
       else -> super.onOptionsItemSelected(item)
     }
+  }
+
+  private fun onSelectedDelete() {
+    AlertDialog.Builder(this.activity!!)
+      .setTitle(R.string.repository_delete_confirm_title)
+      .setMessage(R.string.repository_delete_confirm)
+      .setPositiveButton(R.string.repository_delete, { dialog, which ->
+        this.inventory.inventoryRepositoryRemove(this.repositoryUUID)
+        this.router.popCurrentController()
+      })
+      .show()
   }
 
   private fun onSelectedReload() {
