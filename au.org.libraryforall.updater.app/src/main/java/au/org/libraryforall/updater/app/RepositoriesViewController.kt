@@ -77,6 +77,7 @@ class RepositoriesViewController : Controller() {
   override fun onAttach(view: View) {
     super.onAttach(view)
 
+    this.setOptionsMenuHidden(false)
     (this.activity as AppCompatActivity).supportActionBar?.title =
       view.context.resources.getString(R.string.main_title)
 
@@ -93,6 +94,8 @@ class RepositoriesViewController : Controller() {
   }
 
   private fun onSelectedRepository(repository: InventoryRepositoryType) {
+    this.setOptionsMenuHidden(true)
+
     this.router.pushController(
       RouterTransaction.with(RepositoryViewController(repository.id))
         .pushChangeHandler(HorizontalChangeHandler())

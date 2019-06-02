@@ -99,4 +99,6 @@ Repository: %1$s
   <string name="repository_uri_invalid">Not a valid URI</string>
   <string name="repository_add_in_progress">Repository addition in progress…</string>
   <string name="repository_add_failed">Repository addition failed</string>
+  <string name="repository_add_title">Add Repository</string>
+  <string name="error_report">Error Report</string>
 </resources>

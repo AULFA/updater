@@ -16,13 +16,15 @@ class ApplicationVersionController : Controller() {
     container: ViewGroup
   ): View {
     val view = inflater.inflate(R.layout.version, container, false)
-    this.revision = view.findViewById<TextView>(R.id.version_build)
-    this.version = view.findViewById<TextView>(R.id.version_version)
+    this.revision = view.findViewById(R.id.version_build)
+    this.version = view.findViewById(R.id.version_version)
     return view
   }
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    this.setOptionsMenuHidden(true)
 
     this.version.text =
       String.format(

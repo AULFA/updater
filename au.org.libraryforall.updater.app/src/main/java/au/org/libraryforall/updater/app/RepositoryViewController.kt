@@ -112,6 +112,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
     (this.activity as AppCompatActivity).supportActionBar?.title =
       view.context.resources.getString(R.string.repository)
+    this.setOptionsMenuHidden(false)
 
     val currentRepository =
       this.inventory.inventoryRepositorySelect(this.repositoryUUID)
@@ -143,7 +144,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     result: InventoryPackageInstallResult
   ) {
     this.router.pushController(
-      RouterTransaction.with(InventoryFailureController(
+      RouterTransaction.with(InventoryFailureViewController(
         this.bundleRepositoryPackageFailure(repositoryPackage, result)))
         .pushChangeHandler(HorizontalChangeHandler())
         .popChangeHandler(HorizontalChangeHandler()))
@@ -230,8 +231,10 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun showRepositoryUpdateFailure(steps: List<InventoryTaskStep>) {
+    this.setOptionsMenuHidden(true)
+
     this.router.pushController(
-      RouterTransaction.with(InventoryFailureController(
+      RouterTransaction.with(InventoryFailureViewController(
         this.bundleRepositoryUpdateFailure(steps)))
         .pushChangeHandler(HorizontalChangeHandler())
         .popChangeHandler(HorizontalChangeHandler()))

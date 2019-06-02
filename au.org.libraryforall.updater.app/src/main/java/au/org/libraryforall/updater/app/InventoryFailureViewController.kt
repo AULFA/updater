@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.bluelinelabs.conductor.Controller
 import org.slf4j.LoggerFactory
 
-class InventoryFailureController(arguments: Bundle) : Controller(arguments) {
+class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) {
 
   constructor(failure: InventoryFailure) : this(bundleArguments(failure))
 
@@ -26,7 +26,7 @@ class InventoryFailureController(arguments: Bundle) : Controller(arguments) {
     }
   }
 
-  private val logger = LoggerFactory.getLogger(InventoryFailureController::class.java)
+  private val logger = LoggerFactory.getLogger(InventoryFailureViewController::class.java)
 
   private lateinit var titleView: TextView
   private lateinit var tableView: TableLayout
@@ -56,8 +56,9 @@ class InventoryFailureController(arguments: Bundle) : Controller(arguments) {
   override fun onAttach(view: View) {
     super.onAttach(view)
 
+    this.setOptionsMenuHidden(true)
     (this.activity as AppCompatActivity).supportActionBar?.title =
-      this.failure.title
+      view.context.resources.getString(R.string.error_report)
 
     this.adapter =
       InventoryFailureListAdapter(view.context, this.failure.taskSteps)

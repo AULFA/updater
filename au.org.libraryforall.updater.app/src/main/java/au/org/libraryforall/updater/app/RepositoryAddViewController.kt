@@ -1,12 +1,12 @@
 package au.org.libraryforall.updater.app
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryState
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
@@ -63,6 +63,11 @@ class RepositoryAddViewController : Controller() {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    this.setOptionsMenuHidden(true)
+
+    (this.activity as AppCompatActivity).supportActionBar?.title =
+      view.context.resources.getString(R.string.repository_add_title)
 
     this.eventSubscription =
       this.inventory.events.ofType(InventoryEvent.InventoryStateChanged::class.java)
@@ -133,7 +138,7 @@ class RepositoryAddViewController : Controller() {
 
   private fun showErrorDetails(uri: URI, steps: List<InventoryTaskStep>) {
     this.router.pushController(
-      RouterTransaction.with(InventoryFailureController(this.bundleErrorDetails(uri, steps)))
+      RouterTransaction.with(InventoryFailureViewController(this.bundleErrorDetails(uri, steps)))
         .pushChangeHandler(HorizontalChangeHandler())
         .popChangeHandler(HorizontalChangeHandler()))
   }
