@@ -6,6 +6,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +27,11 @@ class RepositoriesViewController : Controller() {
 
   private val logger = LoggerFactory.getLogger(RepositoriesViewController::class.java)
   private val inventory = MainServices.inventory()
+  private val listRepositories: MutableList<InventoryRepositoryType> = mutableListOf()
 
   private var repositoryEventSubscription: Disposable? = null
 
-  private lateinit var listRepositories: MutableList<InventoryRepositoryType>
+  private lateinit var isEmpty: TextView
   private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: RepositoryListAdapter
 
@@ -39,6 +41,8 @@ class RepositoriesViewController : Controller() {
 
     this.recyclerView =
       layout.findViewById(R.id.repositoryList)
+    this.isEmpty =
+      layout.findViewById(R.id.repositoryListIsEmpty)
 
     return layout
   }
@@ -84,8 +88,9 @@ class RepositoriesViewController : Controller() {
     (this.activity as AppCompatActivity).supportActionBar?.title =
       view.context.resources.getString(R.string.main_title)
 
-    this.listRepositories = mutableListOf()
-    this.listRepositories.addAll(this.inventory.inventoryRepositories())
+    this.recyclerView.visibility = View.VISIBLE
+    this.isEmpty.visibility = View.INVISIBLE
+
     this.listAdapter =
       RepositoryListAdapter(
         context = this.activity!!,
@@ -100,13 +105,24 @@ class RepositoriesViewController : Controller() {
     this.repositoryEventSubscription =
       this.inventory.events.ofType(InventoryEvent.InventoryStateChanged::class.java)
         .subscribe { this.onInventoryStateChanged() }
+
+    this.onInventoryStateChanged()
   }
 
   private fun onInventoryStateChanged() {
     UIThread.execute {
       this.listRepositories.clear()
-      this.listRepositories.addAll(this.inventory.inventoryRepositories())
-      this.listAdapter.notifyDataSetChanged()
+
+      val currentRepositories = this.inventory.inventoryRepositories()
+      if (currentRepositories.isEmpty()) {
+        this.recyclerView.visibility = View.INVISIBLE
+        this.isEmpty.visibility = View.VISIBLE
+      } else {
+        this.recyclerView.visibility = View.VISIBLE
+        this.isEmpty.visibility = View.INVISIBLE
+        this.listRepositories.addAll(currentRepositories)
+        this.listAdapter.notifyDataSetChanged()
+      }
     }
   }
 

@@ -108,4 +108,7 @@ Repository: %1$s
   <string name="repository_removing_succeeded">Removing the repository succeeded.</string>
   <string name="repository_removing_nonexistent">The given repository does not exist!</string>
   <string name="repository_removing">Attempted to remove a repository.</string>
+  <string name="repositories_empty">No repositories available.\n
+\n
+Add repositories using the action bar menu!</string>
 </resources>
