@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="@dimen/inventory_item_height">
+
+  <include layout="@layout/inventory_package_install_failed" />
+
+  <include layout="@layout/inventory_package_installed" />
+
+  <include layout="@layout/inventory_package_installing" />
+
+  <include layout="@layout/inventory_package_not_installed" />
+
+</FrameLayout>

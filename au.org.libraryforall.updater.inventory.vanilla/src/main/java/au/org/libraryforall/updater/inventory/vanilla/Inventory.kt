@@ -5,6 +5,8 @@ import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAddException
+import au.org.libraryforall.updater.inventory.api.InventoryEvent
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.*
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryAddResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
@@ -13,6 +15,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEve
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
+import au.org.libraryforall.updater.inventory.api.InventoryState
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryType
 import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskFailed
@@ -22,7 +25,9 @@ import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProvid
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.PublishSubject
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import org.slf4j.LoggerFactory
@@ -71,10 +76,18 @@ class Inventory private constructor(
         repositoryParsers = repositoryParsers)
   }
 
+  private val eventSubject = PublishSubject.create<InventoryEvent>()
   private val installedSubscription: Disposable
   private val databaseSubscription: Disposable
   private val repositoryLock = Object()
   private val repositories = mutableMapOf<UUID, InventoryRepository>()
+  private var stateActual : InventoryState = InventoryState.InventoryIdle
+
+  override val events: Observable<InventoryEvent>
+    get() = this.eventSubject
+
+  override val state: InventoryState
+    get() = synchronized(this.repositoryLock, this::stateActual)
 
   init {
     this.installedSubscription =
@@ -112,9 +125,10 @@ class Inventory private constructor(
       this.repositories[id]
     }
 
-  override fun inventoryRepositories(): List<UUID> =
+  override fun inventoryRepositories(): List<InventoryRepositoryType> =
     synchronized(this.repositoryLock) {
-      this.repositories.keys.toList()
+      this.repositories.values.toList()
+        .sortedBy { r -> r.title }
     }
 
   override fun inventoryRepositoryPut(repository: Repository): ListenableFuture<InventoryRepositoryAddResult> {
@@ -136,6 +150,17 @@ class Inventory private constructor(
 
   override fun inventoryRepositoryAdd(uri: URI): ListenableFuture<InventoryRepositoryAddResult> {
     synchronized(this.repositoryLock) {
+      when (this.stateActual) {
+        InventoryState.InventoryIdle,
+        is InventoryState.InventoryAddingRepositoryFailed -> Unit
+        is InventoryState.InventoryAddingRepository -> {
+          return Futures.immediateFailedFuture(
+            InventoryAddException(
+              uri = uri,
+              message = this.resources.inventoryRepositoryAddInProgress))
+        }
+      }
+
       val existing =
         this.repositories.values.find { repos -> repos.source == uri }
 
@@ -145,6 +170,9 @@ class Inventory private constructor(
             uri = uri,
             message = this.resources.inventoryRepositoryAddAlreadyExists))
       }
+
+      this.stateActual = InventoryState.InventoryAddingRepository(uri)
+      this.eventSubject.onNext(InventoryStateChanged)
     }
 
     return this.executor.submit(Callable<InventoryRepositoryAddResult> {
@@ -159,13 +187,25 @@ class Inventory private constructor(
         ).execute()
           .flatMap { entry -> InventoryTaskSuccess(this.putRepositoryForEntry(entry)) }
 
-      InventoryRepositoryAddResult(
-        uri = uri,
-        steps = result.steps,
-        repository = when (result) {
-          is InventoryTaskSuccess -> result.value
-          is InventoryTaskFailed -> null
-        })
+      when (result) {
+        is InventoryTaskSuccess -> {
+          this.stateActual = InventoryState.InventoryIdle
+          this.eventSubject.onNext(InventoryStateChanged)
+          InventoryRepositoryAddResult(
+            uri = uri,
+            steps = result.steps,
+            repository = result.value )
+        }
+
+        is InventoryTaskFailed -> {
+          this.stateActual = InventoryState.InventoryAddingRepositoryFailed(uri, result.steps)
+          this.eventSubject.onNext(InventoryStateChanged)
+          InventoryRepositoryAddResult(
+            uri = uri,
+            steps = result.steps,
+            repository = null )
+        }
+      }
     })
   }
 
@@ -182,6 +222,7 @@ class Inventory private constructor(
         http = this.http,
         httpAuthentication = this.httpAuthentication,
         repositoryParsers = this.repositoryParsers,
+        eventSubject = this.eventSubject,
         databaseEntry = entry)
 
     synchronized(this.repositoryLock) {

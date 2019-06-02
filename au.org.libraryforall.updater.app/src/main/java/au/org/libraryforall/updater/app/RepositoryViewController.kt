@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory
 import java.util.TreeMap
 import java.util.UUID
 
-class InventoryRepositoryViewController(arguments: Bundle) : Controller(arguments) {
+class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   constructor(repository: UUID) : this(bundleArguments(repository))
 
@@ -46,7 +47,7 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
     }
   }
 
-  private val logger = LoggerFactory.getLogger(InventoryRepositoryViewController::class.java)
+  private val logger = LoggerFactory.getLogger(RepositoryViewController::class.java)
   private var repositoryEventSubscription: Disposable? = null
   private val inventory = MainServices.inventory()
   private val repositoryUUID: UUID = arguments.getSerializable("repositoryUUID") as UUID
@@ -64,7 +65,7 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
     val layout =
-      inflater.inflate(R.layout.inventory, container, false)
+      inflater.inflate(R.layout.inventory_repository, container, false)
 
     this.progess =
       layout.findViewById(R.id.inventoryProgress)
@@ -80,16 +81,11 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     super.onCreateOptionsMenu(menu, inflater)
-    inflater.inflate(R.menu.inventory, menu)
+    inflater.inflate(R.menu.repository, menu)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
-      R.id.inventoryVersion -> {
-        this.onSelectedVersion()
-        true
-      }
-
       R.id.inventoryRepositoryReload -> {
         this.onSelectedReload()
         return true
@@ -97,13 +93,6 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
 
       else -> super.onOptionsItemSelected(item)
     }
-  }
-
-  private fun onSelectedVersion() {
-    this.router.pushController(
-      RouterTransaction.with(ApplicationVersionController())
-        .pushChangeHandler(HorizontalChangeHandler())
-        .popChangeHandler(HorizontalChangeHandler()))
   }
 
   private fun onSelectedReload() {
@@ -121,6 +110,9 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
   override fun onAttach(view: View) {
     super.onAttach(view)
 
+    (this.activity as AppCompatActivity).supportActionBar?.title =
+      view.context.resources.getString(R.string.repository)
+
     val currentRepository =
       this.inventory.inventoryRepositorySelect(this.repositoryUUID)
 
@@ -135,7 +127,7 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
       InventoryListAdapter(
         context = this.activity!!,
         packages = this.repository.packages,
-        onShowFailureDetails = this@InventoryRepositoryViewController::showRepositoryPackageFailure)
+        onShowFailureDetails = this@RepositoryViewController::showRepositoryPackageFailure)
 
     this.recyclerView.setHasFixedSize(true)
     this.recyclerView.layoutManager = LinearLayoutManager(view.context);
@@ -198,6 +190,7 @@ class InventoryRepositoryViewController(arguments: Bundle) : Controller(argument
         } else {
 
         }
+      InventoryEvent.InventoryStateChanged -> Unit
     }
   }
 

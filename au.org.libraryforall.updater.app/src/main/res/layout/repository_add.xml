@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_height="match_parent"
+  android:layout_width="match_parent">
+
+  <TextView
+    android:id="@+id/repositoryAddTitle"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:text="@string/repository_uri"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <EditText
+    android:id="@+id/repositoryAddURI"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:inputType="text"
+    android:text="https://"
+    android:textSize="12sp"
+    android:fontFamily="monospace"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/repositoryAddTitle" />
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/repositoryIdle"
+    android:layout_width="0dp"
+    android:layout_height="96dp"
+    android:layout_margin="16dp"
+    android:visibility="visible"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/repositoryAddURI">
+
+    <Button
+      android:id="@+id/repositoryIdleAddConfirm"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/repository_add"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/repositoryAdding"
+    android:layout_width="0dp"
+    android:layout_height="96dp"
+    android:layout_margin="16dp"
+    android:visibility="visible"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/repositoryAddURI">
+
+    <ProgressBar
+      android:id="@+id/repositoryAddingProgress"
+      style="?android:attr/progressBarStyle"
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+      android:id="@+id/repositoryAddingText"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="@string/repository_add_in_progress"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/repositoryAddingProgress"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/repositoryError"
+    android:layout_width="0dp"
+    android:layout_height="96dp"
+    android:layout_margin="16dp"
+    android:visibility="visible"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/repositoryAddURI">
+
+    <ImageView
+      android:id="@+id/repositoryErrorIcon"
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      android:src="@drawable/error_small"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+      android:id="@+id/repositoryErrorText"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="@string/repository_add_failed"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/repositoryErrorIcon"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+      android:id="@+id/repositoryErrorAddDetails"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/package_details"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+      android:id="@+id/repositoryErrorAddConfirm"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/repository_add"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

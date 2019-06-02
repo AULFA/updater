@@ -95,6 +95,8 @@ interface InventoryStringResourcesType {
     contentLength: Long
   ): String
 
+  val inventoryRepositoryAddInProgress: String
+
   fun inventoryRepositoryAddConnectionFailed(exception: Exception): String
 
   fun inventoryRepositoryAddParsed(duration: Duration): String

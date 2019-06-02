@@ -4,6 +4,8 @@ import java.util.UUID
 
 sealed class InventoryEvent {
 
+  object InventoryStateChanged : InventoryEvent()
+
   sealed class InventoryRepositoryEvent : InventoryEvent() {
 
     abstract val repositoryId: UUID

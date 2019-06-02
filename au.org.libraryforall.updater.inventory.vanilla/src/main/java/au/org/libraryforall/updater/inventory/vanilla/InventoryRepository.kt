@@ -48,11 +48,11 @@ class InventoryRepository(
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val repositoryParsers: RepositoryXMLParserProviderType,
-  private val databaseEntry: InventoryRepositoryDatabaseEntryType) : InventoryRepositoryType {
+  private val databaseEntry: InventoryRepositoryDatabaseEntryType,
+  private val eventSubject: PublishSubject<InventoryEvent>) : InventoryRepositoryType {
 
   private val subscription: Disposable
   private val logger = LoggerFactory.getLogger(InventoryRepository::class.java)
-  private val eventSubject: PublishSubject<InventoryEvent> = PublishSubject.create()
 
   private val stateLock = Object()
   private var stateActual: InventoryRepositoryState =

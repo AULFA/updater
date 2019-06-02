@@ -92,4 +92,11 @@ Repository: %1$s
   <string name="inventory_repository_add_parsing">Attempted to parse repository data.</string>
   <string name="inventory_repository_update_failed_title">Repository Update Failed</string>
   <string name="inventory_repository_add_parse_failed">Parsing repository data failed</string>
+  <string name="repositories">Repositories</string>
+  <string name="repository">Repository</string>
+  <string name="repository_uri">Repository URI</string>
+  <string name="repository_add">Add</string>
+  <string name="repository_uri_invalid">Not a valid URI</string>
+  <string name="repository_add_in_progress">Repository addition in progress…</string>
+  <string name="repository_add_failed">Repository addition failed</string>
 </resources>

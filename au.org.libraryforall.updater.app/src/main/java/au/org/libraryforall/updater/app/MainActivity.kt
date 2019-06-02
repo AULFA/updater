@@ -43,8 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     this.router = Conductor.attachRouter(this, container, savedInstanceState)
     if (!this.router.hasRootController()) {
-      this.router.setRoot(RouterTransaction.with(
-        InventoryRepositoryViewController(this.inventory.inventoryRepositories()[0])))
+      this.router.setRoot(RouterTransaction.with(RepositoriesViewController()))
     }
   }
 

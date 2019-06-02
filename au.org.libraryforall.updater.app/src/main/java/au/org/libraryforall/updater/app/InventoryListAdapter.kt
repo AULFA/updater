@@ -26,7 +26,7 @@ class InventoryListAdapter(
     val inflater =
       LayoutInflater.from(parent.context)
     val item =
-      inflater.inflate(R.layout.inventory_item, parent, false)
+      inflater.inflate(R.layout.inventory_package, parent, false)
 
     return this.ViewHolder(
       parent = item,

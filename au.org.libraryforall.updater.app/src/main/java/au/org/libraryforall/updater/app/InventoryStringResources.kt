@@ -10,6 +10,9 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val inventoryRepositoryAddInProgress: String =
+    this.context.resources.getString(R.string.repository_add_in_progress)
+
   override val inventoryRepositoryAddParseFailed: String =
     this.context.getString(R.string.inventory_repository_add_parse_failed)
 

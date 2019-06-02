@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -54,6 +55,9 @@ class InventoryFailureController(arguments: Bundle) : Controller(arguments) {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    (this.activity as AppCompatActivity).supportActionBar?.title =
+      this.failure.title
 
     this.adapter =
       InventoryFailureListAdapter(view.context, this.failure.taskSteps)

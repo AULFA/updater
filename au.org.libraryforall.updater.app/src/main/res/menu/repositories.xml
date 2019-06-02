@@ -3,28 +3,21 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
-    android:id="@+id/inventoryRepositoryReload"
-    android:icon="@drawable/reload"
-    android:title="@string/inventory_menu_repository_reload"
-    android:visible="true"
-    app:showAsAction="ifRoom" />
-
-  <item
-    android:id="@+id/inventoryRepositoryAdd"
+    android:id="@+id/menuItemRepositoryAdd"
     android:icon="@drawable/add"
     android:title="@string/inventory_menu_repository_add"
     android:visible="true"
     app:showAsAction="ifRoom" />
 
   <item
-    android:id="@+id/inventoryRepositoryDelete"
+    android:id="@+id/menuItemRepositoryDelete"
     android:icon="@drawable/delete"
     android:title="@string/inventory_menu_repository_delete"
     android:visible="true"
     app:showAsAction="ifRoom" />
 
   <item
-    android:id="@+id/inventoryVersion"
+    android:id="@+id/menuItemVersion"
     android:title="@string/inventory_menu_version"
     android:visible="true" />
 
