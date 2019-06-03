@@ -121,15 +121,28 @@ class InventoryListAdapter(
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
+        holder.viewHolderInstalled.packageName.text = repositoryPackage.name
+        holder.viewHolderInstalled.packageAvailable.text =
+          this.context.resources.getString(
+            R.string.package_state_available,
+            repositoryPackage.versionName,
+            repositoryPackage.versionCode)
+
+        holder.viewHolderInstalled.packageInstalled.text =
+          this.context.resources.getString(
+            R.string.package_state_installed,
+            repositoryPackage.versionName,
+            repositoryPackage.versionCode)
+
         if (repositoryPackage.isUpdateAvailable) {
-          setVisibility(holder.viewHolderNotInstalled.packageButton, View.VISIBLE)
-          holder.viewHolderNotInstalled.packageButton.isEnabled = true
-          holder.viewHolderNotInstalled.packageButton.setOnClickListener {
-            holder.viewHolderNotInstalled.packageButton.isEnabled = false
+          setVisibility(holder.viewHolderInstalled.packageButton, View.VISIBLE)
+          holder.viewHolderInstalled.packageButton.isEnabled = true
+          holder.viewHolderInstalled.packageButton.setOnClickListener {
+            holder.viewHolderInstalled.packageButton.isEnabled = false
             repositoryPackage.install(this.context)
           }
         } else {
-          setVisibility(holder.viewHolderNotInstalled.packageButton, View.INVISIBLE)
+          setVisibility(holder.viewHolderInstalled.packageButton, View.INVISIBLE)
         }
       }
 

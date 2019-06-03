@@ -193,7 +193,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun onRepositoryEvent(event: InventoryEvent) {
-    this.logger.debug("event: {}", event)
+    this.logger.trace("event: {}", event)
 
     return when (event) {
       is InventoryRepositoryEvent ->
