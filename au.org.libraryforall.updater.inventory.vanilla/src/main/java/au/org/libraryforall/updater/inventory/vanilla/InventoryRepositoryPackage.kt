@@ -16,6 +16,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryPackageState.NotInsta
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
+import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskDownload.*
 import au.org.libraryforall.updater.repository.api.RepositoryPackage
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -111,7 +112,8 @@ internal class InventoryRepositoryPackage(
                 httpAuthentication = this.httpAuthentication,
                 reservation = reservation,
                 onVerificationProgress = this::onInstallVerificationProgress,
-                uri = this.repositoryPackage.source
+                uri = this.repositoryPackage.source,
+                onDownloadProgress = this::onInstallDownloadProgress
               ).execute()
             }.flatMap {
               InventoryTaskVerify(
@@ -125,6 +127,7 @@ internal class InventoryRepositoryPackage(
                   this,
                   InstallingStatusIndefinite(
                     status = this.resources.installWaitingForInstaller))
+
               InventoryTaskInstallAPK(
                 activity,
                 resources = this.resources,
@@ -160,6 +163,32 @@ internal class InventoryRepositoryPackage(
         this.stateActual = InstallFailed(this, installResult)
         installResult
       }
+    }
+  }
+
+  private fun onInstallDownloadProgress(progress: DownloadProgressType) {
+    val total = progress.expectedBytesTotal
+    if (total != null) {
+      this.stateActual =
+        Installing(
+          this,
+          InstallingStatusDefinite(
+            currentBytes = progress.receivedBytesTotal,
+            maximumBytes = total,
+            status = this.resources.installDownloading(
+              receivedBytesTotal = progress.receivedBytesTotal,
+              expectedBytesTotal = total,
+              bytesPerSecond = progress.receivedBytesPerSecond
+            )))
+    } else {
+      this.stateActual =
+        Installing(
+          this,
+          InstallingStatusIndefinite(
+            status = this.resources.installDownloadingIndefinite(
+              receivedBytesTotal = progress.receivedBytesTotal,
+              bytesPerSecond = progress.receivedBytesPerSecond
+            )))
     }
   }
 

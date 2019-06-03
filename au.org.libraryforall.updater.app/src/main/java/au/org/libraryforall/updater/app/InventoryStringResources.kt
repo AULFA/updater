@@ -105,6 +105,26 @@ class InventoryStringResources(private val context: Context) : InventoryStringRe
       currentBytes.toDouble() / 1_000_000.0,
       maximumBytes.toDouble() / 1_000_000.0)
 
+  override fun installDownloading(
+    receivedBytesTotal: Long,
+    expectedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String =
+    this.context.getString(
+      R.string.install_downloading,
+      receivedBytesTotal.toDouble() / 1_000_000.0,
+      expectedBytesTotal.toDouble() / 1_000_000.0,
+      bytesPerSecond.toDouble() / 1_000_000.0)
+
+  override fun installDownloadingIndefinite(
+    receivedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String =
+    this.context.getString(
+      R.string.install_downloading_indefinite,
+      receivedBytesTotal.toDouble() / 1_000_000.0,
+      bytesPerSecond.toDouble() / 1_000_000.0)
+
   override fun installDownloadingCheckRequired(file: File): String =
     this.context.getString(R.string.install_download_check_required, file)
 

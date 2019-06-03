@@ -16,7 +16,7 @@ class MainPackageReceiver : BroadcastReceiver() {
 
   override fun onReceive(context: Context?, intent: Intent?) {
     this.logger.debug("onReceive: {} {}", context, intent)
-    
+
     if (intent != null) {
       val packageNameURI = intent.data
       if (packageNameURI != null) {

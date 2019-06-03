@@ -246,8 +246,8 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Int>()
-    installFuture.set(-1)
+    val installFuture = SettableFuture.create<Boolean>()
+    installFuture.set(true)
 
     Mockito.`when`(installTask.future)
       .thenReturn(installFuture)
@@ -487,8 +487,8 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Int>()
-    installFuture.set(999)
+    val installFuture = SettableFuture.create<Boolean>()
+    installFuture.set(false)
 
     Mockito.`when`(installTask.future)
       .thenReturn(installFuture)
@@ -580,7 +580,7 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Int>()
+    val installFuture = SettableFuture.create<Boolean>()
     installFuture.setException(Exception())
 
     Mockito.`when`(installTask.future)

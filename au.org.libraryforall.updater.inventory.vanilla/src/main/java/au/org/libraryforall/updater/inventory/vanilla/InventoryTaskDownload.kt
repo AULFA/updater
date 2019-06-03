@@ -16,14 +16,26 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
+import org.joda.time.Instant
+import org.joda.time.Seconds
 
 class InventoryTaskDownload(
   private val resources: InventoryStringResourcesType,
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val reservation: KeyReservationType,
+  private val onDownloadProgress: (DownloadProgressType) -> Unit,
   private val onVerificationProgress: (VerificationProgressType) -> Unit,
   private val uri: URI) {
+
+  interface DownloadProgressType {
+
+    val expectedBytesTotal : Long?
+
+    val receivedBytesTotal : Long
+
+    val receivedBytesPerSecond : Long
+  }
 
   private val logger = LoggerFactory.getLogger(InventoryTaskDownload::class.java)
 
@@ -31,7 +43,9 @@ class InventoryTaskDownload(
     return this.fileNeedsDownloadingTask()
       .flatMap { downloadRequired ->
         if (downloadRequired) {
-          this.openConnectionTask().flatMap(this::fileDownloadTask)
+          this.openConnectionTask().flatMap { pair ->
+            this.fileDownloadTask(pair.first, pair.second)
+          }
         } else {
           InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
         }
@@ -47,13 +61,13 @@ class InventoryTaskDownload(
       exception = null,
       failed = false)
 
-    val receiver =
+    val verificationReceiver =
       InventoryAPKDirectoryReceivers.throttledReceiver(
         approximateCalls = 5,
         progress = onVerificationProgress::invoke)
 
     return InventoryTaskMonad.startWithStep(step)
-      .flatMap { this.runDownloadVerificationCheck(receiver, step) }
+      .flatMap { this.runDownloadVerificationCheck(verificationReceiver, step) }
   }
 
   private fun runDownloadVerificationCheck(
@@ -93,7 +107,10 @@ class InventoryTaskDownload(
     }
   }
 
-  private fun fileDownloadTask(inputStream: InputStream): InventoryTaskMonad<File> {
+  private fun fileDownloadTask(
+    expectedBytes: Long?,
+    inputStream: InputStream
+  ): InventoryTaskMonad<File> {
     this.logger.debug("download: {}", this.reservation.file)
 
     val step = InventoryTaskStep(
@@ -103,22 +120,65 @@ class InventoryTaskDownload(
       failed = false)
 
     return InventoryTaskMonad.startWithStep(step)
-      .flatMap { this.runDownload(inputStream, step) }
+      .flatMap { this.runDownload(expectedBytes, inputStream, step) }
+  }
+
+  private class ThrottledDownloadReceiver(
+    override val expectedBytesTotal: Long?,
+    val progress: (DownloadProgressType) -> Unit) : DownloadProgressType {
+
+    override val receivedBytesTotal: Long
+      get() = this.receivedLast
+
+    override val receivedBytesPerSecond: Long
+      get() = this.receivedBPS
+
+    @Volatile
+    private var receivedBPS = 0L
+
+    @Volatile
+    private var receivedLast = 0L
+
+    @Volatile
+    private var timeLast = Instant.now()
+
+    @Volatile
+    private var timeCurrent = Instant.now()
+
+    fun receivedNow(receivedNow: Long) {
+      this.timeCurrent = Instant.now()
+      if (Seconds.secondsBetween(this.timeLast, this.timeCurrent).seconds >= 1) {
+        this.receivedBPS = Math.max(0L, receivedNow - this.receivedLast)
+        this.receivedLast = receivedNow
+        this.timeLast = this.timeCurrent
+        this.progress.invoke(this)
+      }
+    }
   }
 
   private fun runDownload(
+    expectedBytes: Long?,
     inputStream: InputStream,
     step: InventoryTaskStep
   ): InventoryTaskMonad<File> {
+
+    val receiver =
+      ThrottledDownloadReceiver(expectedBytes, this.onDownloadProgress)
+
     return try {
       inputStream.use {
         FileOutputStream(this.reservation.file, false).use { outputStream ->
           val buffer = ByteArray(4096)
+          var received = 0L
           while (true) {
+            receiver.receivedNow(received)
+
             val r = inputStream.read(buffer)
             if (r == -1) {
               break
             }
+
+            received += r
             outputStream.write(buffer, 0, r)
           }
         }
@@ -136,7 +196,7 @@ class InventoryTaskDownload(
     }
   }
 
-  private fun openConnectionTask(): InventoryTaskMonad<InputStream> {
+  private fun openConnectionTask(): InventoryTaskMonad<Pair<Long?, InputStream>> {
     this.logger.debug("open connection: {}", this.uri)
 
     return when (val result =
@@ -155,7 +215,8 @@ class InventoryTaskDownload(
               contentLength = result.contentLength
             ),
             failed = false))
-          .andThen(InventoryTaskMonad.InventoryTaskSuccess(result.result))
+          .andThen(InventoryTaskMonad.InventoryTaskSuccess(
+            Pair(knownContentLengthOrNull(result.contentLength), result.result)))
       is HTTPResult.HTTPFailed.HTTPError ->
         InventoryTaskMonad.startWithStep(
           InventoryTaskStep(
@@ -176,6 +237,14 @@ class InventoryTaskDownload(
             exception = result.exception,
             failed = true))
           .andThen(InventoryTaskMonad.InventoryTaskFailed())
+    }
+  }
+
+  private fun knownContentLengthOrNull(contentLength: Long): Long? {
+    return if (contentLength == -1L) {
+      null
+    } else {
+      contentLength
     }
   }
 }

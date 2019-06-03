@@ -9,6 +9,24 @@ import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
 
+  override fun installDownloading(
+    receivedBytesTotal: Long,
+    expectedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String {
+    return "installDownloading"
+  }
+
+  override fun installDownloadingIndefinite(
+    receivedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String {
+    return "installDownloadingIndefinite"
+  }
+
+  override val installAPKSucceeded: String =
+    "installAPKSucceeded"
+
   override val installWaitingForInstaller: String =
     "installWaitingForInstaller"
 
@@ -94,16 +112,8 @@ class InventoryStringResources : InventoryStringResourcesType {
     return "installVerificationFailedException"
   }
 
-  override fun installAPKSucceeded(status: Int): String {
-    return "installAPKSucceeded"
-  }
-
   override fun installAPKFailedWithException(e: Exception): String {
     return "installAPKFailedWithException"
-  }
-
-  override fun installAPKFailedWithCode(status: Int): String {
-    return "installAPKFailedWithCode"
   }
 
   override val installAPKStarted: String =

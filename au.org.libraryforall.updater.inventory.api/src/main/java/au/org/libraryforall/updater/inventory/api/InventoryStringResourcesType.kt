@@ -35,6 +35,17 @@ interface InventoryStringResourcesType {
     fileOutput: File
   ): String
 
+  fun installDownloading(
+    receivedBytesTotal: Long,
+    expectedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String
+
+  fun installDownloadingIndefinite(
+    receivedBytesTotal: Long,
+    bytesPerSecond: Long
+  ): String
+
   fun installDownloadingCheckRequired(file: File): String
 
   fun installDownloadNeededHashFailed(
