@@ -1,6 +1,8 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
+import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
+import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
@@ -16,11 +18,12 @@ import au.org.libraryforall.updater.inventory.api.InventoryPackageState.NotInsta
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
-import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskDownload.*
+import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskDownload.DownloadProgressType
 import au.org.libraryforall.updater.repository.api.RepositoryPackage
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
@@ -39,7 +42,37 @@ internal class InventoryRepositoryPackage(
   private val apkInstaller: APKInstallerType,
   private val resources: InventoryStringResourcesType,
   private val events: PublishSubject<InventoryEvent>,
+  private val installedPackages: InstalledPackagesType,
   private val executor: ListeningExecutorService) : InventoryRepositoryPackageType {
+
+  private val installedSubscription: Disposable
+
+  init {
+    this.installedSubscription =
+      this.installedPackages.events.subscribe(this::onInstalledPackageEvent)
+  }
+
+  private fun onInstalledPackageEvent(event: InstalledPackageEvent) {
+    return when (event) {
+      InstalledPackageEvent.InstalledPackagesChanged -> {
+        val installed =
+          this.installedPackages.packages()
+        val isNowInstalled =
+          installed.containsKey(this.repositoryPackage.id)
+
+        val stateCurrent = this.stateActual
+        if (stateCurrent is NotInstalled && isNowInstalled) {
+          this.logger.debug("package {} became installed", this.repositoryPackage.id)
+          this.stateActual = Installed(this)
+        } else if (stateCurrent is Installed && !isNowInstalled) {
+          this.logger.debug("package {} became uninstalled", this.repositoryPackage.id)
+          this.stateActual = NotInstalled(this)
+        } else {
+
+        }
+      }
+    }
+  }
 
   override val sourceURI: URI
     get() = this.repositoryPackage.source

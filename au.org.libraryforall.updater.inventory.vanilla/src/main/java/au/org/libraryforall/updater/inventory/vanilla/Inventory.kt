@@ -6,14 +6,10 @@ import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAddException
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.*
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryStateChanged
 import au.org.libraryforall.updater.inventory.api.InventoryRemoveException
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryAddResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryRemoved
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryRemoveResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
@@ -81,7 +77,6 @@ class Inventory private constructor(
 
   private val eventSubject = PublishSubject.create<InventoryEvent>()
   private val installedSubscription: Disposable
-  private val databaseSubscription: Disposable
   private val repositoryLock = Object()
   private val repositories = mutableMapOf<UUID, InventoryRepository>()
   private var stateActual : InventoryState = InventoryState.InventoryIdle
@@ -95,8 +90,6 @@ class Inventory private constructor(
   init {
     this.installedSubscription =
       this.installedPackages.events.subscribe(this::onInstalledPackageEvent)
-    this.databaseSubscription =
-      this.inventoryDatabase.events.subscribe(this::onDatabaseEvent)
 
     for (entry in this.inventoryDatabase.entries) {
       this.putRepositoryForEntry(entry)
@@ -104,20 +97,6 @@ class Inventory private constructor(
 
     val size = synchronized(this.repositoryLock, this.repositories::size)
     this.logger.debug("initialized {} repositories", size)
-  }
-
-  private fun onDatabaseEvent(event: InventoryRepositoryDatabaseEvent) {
-    return when (event) {
-      is DatabaseRepositoryAdded -> {
-        this.logger.debug("database repository added")
-      }
-      is DatabaseRepositoryRemoved -> {
-        this.logger.debug("database repository removed")
-      }
-      is DatabaseRepositoryUpdated -> {
-        this.logger.debug("database repository updated")
-      }
-    }
   }
 
   private fun onInstalledPackageEvent(event: InstalledPackageEvent) {

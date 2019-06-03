@@ -11,13 +11,13 @@ import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
+import org.joda.time.Instant
+import org.joda.time.Seconds
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
-import org.joda.time.Instant
-import org.joda.time.Seconds
 
 class InventoryTaskDownload(
   private val resources: InventoryStringResourcesType,

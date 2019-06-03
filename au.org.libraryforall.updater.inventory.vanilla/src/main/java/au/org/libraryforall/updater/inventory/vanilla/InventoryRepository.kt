@@ -1,7 +1,6 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
@@ -71,6 +70,7 @@ class InventoryRepository(
       }
 
     this.updateFrom(this.databaseEntry.repository)
+    this.installedPackages.poll()
   }
 
   private fun onRepositoryDatabaseEvent(event: InventoryRepositoryDatabaseEvent) {
@@ -96,12 +96,9 @@ class InventoryRepository(
   private fun updateFrom(repository: Repository): InventoryRepository {
     this.logger.debug("update: {}", repository.id)
 
-    val installed =
-      this.installedPackages.packages()
-
     val events =
       synchronized(this.stateLock) {
-        mergeRepository(installed, this.packagesActual, repository)
+        mergeRepository(this.packagesActual, repository)
       }
 
     for (event in events) {
@@ -111,19 +108,17 @@ class InventoryRepository(
   }
 
   private fun mergeRepository(
-    installed: Map<String, InstalledPackage>,
     viewCurrent: MutableMap<String, InventoryRepositoryPackageType>,
     repository: Repository): List<InventoryEvent> {
 
-    val events =
-      mutableListOf<InventoryEvent>()
+    val events = mutableListOf<InventoryEvent>()
 
     /*
      * Work out which packages are new.
      */
 
     for (repositoryPackage in repository.packagesNewest.values) {
-      if (!viewCurrent.containsKey(repositoryPackage.name)) {
+      if (!viewCurrent.containsKey(repositoryPackage.id)) {
         val newPackage =
           InventoryRepositoryPackage(
             repositoryId = this.id,
@@ -134,13 +129,12 @@ class InventoryRepository(
             apkInstaller = this.apkInstaller,
             resources = this.resources,
             executor = this.executor,
+            installedPackages = this.installedPackages,
             repositoryPackage = repositoryPackage)
 
         viewCurrent[newPackage.id] = newPackage
         this.logger.debug("[{}]: package {} now visible", repository.id, newPackage.id)
-        events.add(PackageBecameVisible(
-          repositoryId = this.id,
-          packageId = repositoryPackage.id))
+        events.add(PackageBecameVisible(repositoryId = this.id, packageId = repositoryPackage.id))
       }
     }
 
@@ -155,11 +149,8 @@ class InventoryRepository(
 
       if (!repository.packagesNewest.containsKey(existingPackage.id)) {
         this.logger.debug("[{}]: package {} now invisible", repository.id, existingPackage.id)
-
         iter.remove()
-        events.add(PackageBecameInvisible(
-          repositoryId = this.id,
-          packageId = existingPackage.id))
+        events.add(PackageBecameInvisible(repositoryId = this.id, packageId = existingPackage.id))
       }
     }
 

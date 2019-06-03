@@ -5,7 +5,6 @@ import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
 class InventoryTaskInstallAPK(

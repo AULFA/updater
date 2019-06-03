@@ -6,14 +6,33 @@ import androidx.core.content.FileProvider
 import com.google.common.util.concurrent.SettableFuture
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.lang.IllegalStateException
 
 class APKInstallerDevice : APKInstallerType {
 
+  override fun reportAPKRemoved(
+    packageName: String,
+    packageVersionCode: Int
+  ) {
+    this.logger.debug("reportAPKRemoved: ${packageName} ${packageVersionCode}: received")
+
+    val key = Pair(packageName, packageVersionCode)
+    synchronized(this.requestCodesLock) {
+      val task = this.requests[key]
+      if (task == null) {
+        this.logger.error("reportAPKRemoved: ${packageName} ${packageVersionCode}: no such task!")
+        return
+      }
+
+      this.logger.debug("reportAPKRemoved: ${packageName} ${packageVersionCode}: finished task")
+      this.requests.remove(key)
+      task.future.set(false)
+    }
+  }
+
   override fun reportAPKInstalled(
     packageName: String,
-    packageVersionCode: Int) {
-
+    packageVersionCode: Int
+  ) {
     this.logger.debug("reportAPKInstalled: ${packageName} ${packageVersionCode}: received")
 
     val key = Pair(packageName, packageVersionCode)

@@ -9,6 +9,7 @@ class MainPackageReceiver : BroadcastReceiver() {
 
   private val logger = LoggerFactory.getLogger(MainPackageReceiver::class.java)
   private val apkInstaller = MainServices.apkInstaller()
+  private val installedPackages = MainServices.installedPackages()
 
   init {
     this.logger.debug("started")
@@ -17,39 +18,47 @@ class MainPackageReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context?, intent: Intent?) {
     this.logger.debug("onReceive: {} {}", context, intent)
 
-    if (intent != null) {
-      val packageNameURI = intent.data
-      if (packageNameURI != null) {
-        val packageName = packageNameURI.schemeSpecificPart
-        val action = intent.action
-        this.logger.debug("onReceive: packageName: {}", packageName)
-        this.logger.debug("onReceive: action: {}", action)
+    try {
+      if (intent != null) {
+        val packageNameURI = intent.data
+        if (packageNameURI != null) {
+          val packageName = packageNameURI.schemeSpecificPart
+          val action = intent.action
+          this.logger.debug("onReceive: packageName: {}", packageName)
+          this.logger.debug("onReceive: action: {}", action)
 
-        return when (action) {
-          "android.intent.action.PACKAGE_ADDED" -> {
-            val packageInstalledInfo =
-              context!!.packageManager.getInstalledPackages(0)
-                .find { packageInfo -> packageInfo.packageName == packageName }
+          return when (action) {
+            "android.intent.action.PACKAGE_ADDED" -> {
+              val packageInstalledInfo =
+                context!!.packageManager.getInstalledPackages(0)
+                  .find { packageInfo -> packageInfo.packageName == packageName }
 
-            if (packageInstalledInfo == null) {
-              throw IllegalStateException(
-                """Package receiver received PACKAGE_ADDED for ${packageName},
-                  |but the package manager says no such package is installed""".trimMargin())
+              if (packageInstalledInfo == null) {
+                throw IllegalStateException(
+                  """Package receiver received PACKAGE_ADDED for ${packageName},
+                    |but the package manager says no such package is installed""".trimMargin())
+              }
+
+              val versionCode = packageInstalledInfo.versionCode
+              this.logger.debug("package version is {} {}", packageName, versionCode)
+              this.apkInstaller.reportAPKInstalled(packageName, versionCode)
             }
-
-            val versionCode = packageInstalledInfo.versionCode
-            this.logger.debug("package version is {} {}", packageName, versionCode)
-            this.apkInstaller.reportAPKInstalled(packageName, versionCode)
+            else -> {
+              this.logger.error("unrecognized action received")
+            }
           }
-          else -> {
-            this.logger.error("unrecognized action received")
-          }
+        } else {
+          this.logger.error("no package URI received")
         }
       } else {
-        this.logger.error("no package URI received")
+        this.logger.error("null intent received")
       }
-    } else {
-      this.logger.error("null intent received")
+    } finally {
+      try {
+        this.installedPackages.poll()
+      } catch (e: Exception) {
+        this.logger.error("could not poll installed packages: ", e)
+      }
     }
   }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
+import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.*
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -24,9 +25,9 @@ class InstalledPackages private constructor(
   }
 
   @Volatile
-  private var installedPackages: Set<String> = this.currentPackageSet()
+  private var installedPackages: Set<String> = this.fetchPackages()
 
-  private fun currentPackageSet(): Set<String> {
+  private fun fetchPackages(): Set<String> {
     return this.context.packageManager.getInstalledPackages(0)
       .map(PackageInfo::packageName)
       .toSet()
@@ -42,11 +43,8 @@ class InstalledPackages private constructor(
   }
 
   override fun poll() {
-    val nextPackageSet = this.currentPackageSet()
-    if (nextPackageSet != this.installedPackages) {
-      this.installedPackages = nextPackageSet
-      this.eventSubject.onNext(InstalledPackageEvent.InstalledPackagesChanged)
-    }
+    this.installedPackages = this.fetchPackages()
+    this.eventSubject.onNext(InstalledPackagesChanged)
   }
 
   private fun packageInfoToPackage(info: PackageInfo): InstalledPackage =

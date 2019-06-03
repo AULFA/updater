@@ -15,4 +15,8 @@ interface APKInstallerType {
     packageName: String,
     packageVersionCode: Int)
 
+  fun reportAPKRemoved(
+    packageName: String,
+    packageVersionCode: Int)
+
 }

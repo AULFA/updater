@@ -2,7 +2,9 @@ package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.*
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryRemoved
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
