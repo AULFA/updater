@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
+import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import au.org.libraryforall.updater.inventory.api.InventoryState
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import com.bluelinelabs.conductor.Controller
@@ -162,13 +163,13 @@ class RepositoryAddViewController : Controller() {
   private fun bundleErrorDetails(
     uri: URI,
     steps: List<InventoryTaskStep>
-  ): InventoryFailure {
+  ): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()
 
     attributes[resources.getString(R.string.install_failure_repository)] = uri.toString()
-    return InventoryFailure(
+    return InventoryFailureReport(
       title = resources.getString(R.string.repository_add_failed),
       attributes = attributes.toSortedMap(),
       taskSteps = steps)

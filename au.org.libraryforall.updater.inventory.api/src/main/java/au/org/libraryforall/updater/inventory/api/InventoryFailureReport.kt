@@ -1,9 +1,8 @@
-package au.org.libraryforall.updater.app
+package au.org.libraryforall.updater.inventory.api
 
-import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import java.io.Serializable
 
-data class InventoryFailure(
+data class InventoryFailureReport(
   val title: String,
   val attributes: Map<String, String>,
   val taskSteps: List<InventoryTaskStep>)

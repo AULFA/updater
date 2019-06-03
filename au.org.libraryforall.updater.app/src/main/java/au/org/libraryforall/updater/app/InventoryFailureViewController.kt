@@ -11,15 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import com.bluelinelabs.conductor.Controller
 import org.slf4j.LoggerFactory
 
 class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) {
 
-  constructor(failure: InventoryFailure) : this(bundleArguments(failure))
+  constructor(failure: InventoryFailureReport) : this(bundleArguments(failure))
 
   companion object {
-    private fun bundleArguments(failure: InventoryFailure): Bundle {
+    private fun bundleArguments(failure: InventoryFailureReport): Bundle {
       val bundle = Bundle()
       bundle.putSerializable("failure", failure)
       return bundle
@@ -35,7 +36,7 @@ class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) 
   private lateinit var adapter: InventoryFailureListAdapter
 
   private val failure =
-    arguments.getSerializable("failure") as InventoryFailure
+    arguments.getSerializable("failure") as InventoryFailureReport
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
     val mainLayout =

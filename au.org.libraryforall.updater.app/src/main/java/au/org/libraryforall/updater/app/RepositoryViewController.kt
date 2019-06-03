@@ -1,6 +1,5 @@
 package au.org.libraryforall.updater.app
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -22,6 +21,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryReposi
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameVisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
+import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryIdle
@@ -174,7 +174,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun bundleRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryPackageType,
-    result: InventoryPackageInstallResult): InventoryFailure {
+    result: InventoryPackageInstallResult): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()
@@ -184,7 +184,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     attributes[resources.getString(R.string.install_failure_package)] =
       "${repositoryPackage.id} ${repositoryPackage.versionName} (${repositoryPackage.versionCode})"
 
-    return InventoryFailure(
+    return InventoryFailureReport(
       title = resources.getString(R.string.install_failure_title),
       attributes = attributes.toSortedMap(),
       taskSteps = result.steps)
@@ -240,7 +240,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun bundleRepositoryUpdateFailure(
-    steps: List<InventoryTaskStep>): InventoryFailure {
+    steps: List<InventoryTaskStep>): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()
@@ -248,7 +248,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     attributes[resources.getString(R.string.install_failure_repository)] =
       this.repository.id.toString()
 
-    return InventoryFailure(
+    return InventoryFailureReport(
       title = resources.getString(R.string.inventory_repository_update_failed_title),
       attributes = attributes.toSortedMap(),
       taskSteps = steps)
