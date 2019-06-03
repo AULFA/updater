@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import com.bluelinelabs.conductor.Controller
+import org.joda.time.Instant
 import org.slf4j.LoggerFactory
 
 class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) {
@@ -90,5 +92,20 @@ class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) 
     this.recyclerView.layoutManager = LinearLayoutManager(view.context);
     this.recyclerView.adapter = this.adapter
     (this.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+
+    this.saveReport.setOnClickListener {
+      try {
+        val file = InventoryFailureReports.writeToStorage(view.context, Instant.now(), this.failure)
+        AlertDialog.Builder(this.activity!!)
+          .setTitle(R.string.failure_wrote_ok_title)
+          .setMessage(view.context.getString(R.string.failure_wrote_ok, file.toString()))
+          .show()
+      } catch (e: Exception) {
+        AlertDialog.Builder(this.activity!!)
+          .setTitle(R.string.failure_wrote_failed_title)
+          .setMessage(view.context.getString(R.string.failure_wrote_failed, e.message, e))
+          .show()
+      }
+    }
   }
 }

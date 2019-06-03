@@ -40,6 +40,9 @@ internal class InventoryRepositoryPackage(
   private val events: PublishSubject<InventoryEvent>,
   private val executor: ListeningExecutorService) : InventoryRepositoryPackageType {
 
+  override val sourceURI: URI
+    get() = this.repositoryPackage.source
+
   override val id: String
     get() = this.repositoryPackage.id
 

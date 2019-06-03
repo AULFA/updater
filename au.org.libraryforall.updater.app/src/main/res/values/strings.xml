@@ -111,4 +111,9 @@ Repository: %1$s
   <string name="repositories_empty">No repositories available.\n
 \n
 Add repositories using the action bar menu!</string>
+  <string name="failure_wrote_ok">Wrote report to file: %1$s</string>
+  <string name="failure_wrote_ok_title">Success</string>
+  <string name="ok">OK</string>
+  <string name="failure_wrote_failed_title">Failed</string>
+  <string name="failure_wrote_failed">Failed to save report: %1$s (%2$s)</string>
 </resources>
