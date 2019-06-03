@@ -3,67 +3,113 @@ package au.org.libraryforall.updater.apkinstaller.api
 import android.app.Activity
 import android.content.Intent
 import androidx.core.content.FileProvider
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Cancelled
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
+import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
+import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import com.google.common.util.concurrent.SettableFuture
 import org.slf4j.LoggerFactory
 import java.io.File
+import kotlin.random.Random
 
-class APKInstallerDevice : APKInstallerType {
+class APKInstallerDevice private constructor(
+  private val installedPackages: InstalledPackagesType) : APKInstallerType {
 
-  override fun reportAPKRemoved(
-    packageName: String,
-    packageVersionCode: Int
-  ) {
-    this.logger.debug("reportAPKRemoved: ${packageName} ${packageVersionCode}: received")
+  init {
+    this.installedPackages.events.subscribe(this::onInstalledPackageEvent)
+  }
 
-    val key = Pair(packageName, packageVersionCode)
+  private fun onInstalledPackageEvent(event: InstalledPackageEvent) =
+    when (event) {
+      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageAdded ->
+        this.reportAPKInstalled(event.installedPackage.id, event.installedPackage.versionCode)
+      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageRemoved ->
+        this.reportAPKRemoved(event.installedPackage.id)
+      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageUpdated ->
+        this.reportAPKInstalled(event.installedPackage.id, event.installedPackage.versionCode)
+    }
+
+  override fun reportStatus(requestCode: Int, resultCode: Int) {
     synchronized(this.requestCodesLock) {
-      val task = this.requests[key]
-      if (task == null) {
-        this.logger.error("reportAPKRemoved: ${packageName} ${packageVersionCode}: no such task!")
-        return
+      val task = this.requests.find { r -> r.requestCode == requestCode }
+      if (task != null) {
+        task.future.set(when (resultCode) {
+          Activity.RESULT_OK -> Succeeded
+          Activity.RESULT_CANCELED -> Cancelled
+          else -> Failed(resultCode)
+        })
+        this.requests.remove(task)
       }
+    }
+  }
 
-      this.logger.debug("reportAPKRemoved: ${packageName} ${packageVersionCode}: finished task")
-      this.requests.remove(key)
-      task.future.set(false)
+  override fun reportAPKRemoved(packageName: String) {
+    this.logger.debug("reportAPKRemoved: ${packageName}: received")
+
+    synchronized(this.requestCodesLock) {
+      val iter = this.requests.iterator()
+      while (iter.hasNext()) {
+        val request = iter.next()
+        if (request.packageName == packageName) {
+          this.logger.debug("reportAPKRemoved: ${packageName}: finished task")
+          request.future.set(Cancelled)
+          iter.remove()
+        }
+      }
     }
   }
 
   override fun reportAPKInstalled(
     packageName: String,
-    packageVersionCode: Int
-  ) {
+    packageVersionCode: Int) {
     this.logger.debug("reportAPKInstalled: ${packageName} ${packageVersionCode}: received")
 
-    val key = Pair(packageName, packageVersionCode)
     synchronized(this.requestCodesLock) {
-      val task = this.requests[key]
+      val task = this.findTaskLocked(packageName, packageVersionCode)
       if (task == null) {
         this.logger.error("reportAPKInstalled: ${packageName} ${packageVersionCode}: no such task!")
         return
       }
 
       this.logger.debug("reportAPKInstalled: ${packageName} ${packageVersionCode}: finished task")
-      this.requests.remove(key)
-      task.future.set(true)
+      task.future.set(Succeeded)
+      this.requests.remove(task)
     }
   }
 
   companion object {
-    fun create(): APKInstallerType =
-      APKInstallerDevice()
+    fun create(installedPackages: InstalledPackagesType): APKInstallerType =
+      APKInstallerDevice(installedPackages)
   }
 
   private val logger = LoggerFactory.getLogger(APKInstallerDevice::class.java)
   private val requestCodesLock = Object()
-  private val requests = HashMap<Pair<String, Int>, InstallTask>()
+  private val requests = mutableListOf<InstallTask>()
 
   inner class InstallTask(
     override val packageName: String,
     override val packageVersionCode: Int,
     override val file: File,
-    override val future: SettableFuture<Boolean>
+    override val future: SettableFuture<Status>,
+    val requestCode: Int
   ) : APKInstallTaskType
+
+  private fun withFreshRequestCode(receiver: (Int) -> InstallTask): InstallTask {
+    for (i in 0..10_000) {
+      val value = Random.nextInt(1, 65535)
+      synchronized(this.requestCodesLock) {
+        if (this.requests.find { r -> r.requestCode == value } == null) {
+          val task = receiver.invoke(value)
+          this.requests.add(task)
+          return task
+        }
+      }
+    }
+
+    throw IllegalStateException("Could not generate a fresh request code ID")
+  }
 
   override fun createInstallTask(
     activity: Any,
@@ -86,26 +132,35 @@ class APKInstallerDevice : APKInstallerType {
     this.logger.debug("resolved content URI: {}", targetFile)
 
     val future =
-      SettableFuture.create<Boolean>()
-    val installTask =
-      this.InstallTask(packageName, packageVersionCode, file, future)
+      SettableFuture.create<Status>()
 
-    synchronized(this.requestCodesLock) {
-      val key = Pair(packageName, packageVersionCode)
-      if (requests.containsKey(key)) {
-        this.logger.debug("reusing existing task for package ${packageName} ${packageVersionCode}")
-        return requests[key]!!
+    val installTask =
+      synchronized(this.requestCodesLock) {
+        val existingTask = this.findTaskLocked(packageName, packageVersionCode)
+        if (existingTask != null) {
+          this.logger.debug("reusing existing task for package ${packageName} ${packageVersionCode}")
+          return existingTask
+        }
+
+        this.logger.debug("registering task for package ${packageName} ${packageVersionCode}")
+        this.withFreshRequestCode { code ->
+          this.InstallTask(packageName, packageVersionCode, file, future, code)
+        }
       }
-      this.requests[key] = installTask
-    }
 
     this.logger.debug("starting installer for ${packageName} ${packageVersionCode}")
     val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
     intent.setDataAndType(targetFile, "application/vnd.android.package-archive")
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+    intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
     intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, activity.applicationInfo.packageName)
-    activity.startActivity(intent)
+    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+    activity.startActivityForResult(intent, installTask.requestCode)
     return installTask
+  }
+
+  private fun findTaskLocked(packageName: String, packageVersionCode: Int): InstallTask? {
+    return this.requests.find { t ->
+      t.packageName == packageName && t.packageVersionCode == packageVersionCode
+    }
   }
 }

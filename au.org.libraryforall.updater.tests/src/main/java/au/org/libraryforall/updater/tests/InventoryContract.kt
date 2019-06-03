@@ -2,6 +2,7 @@ package au.org.libraryforall.updater.tests
 
 import android.app.Activity
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.*
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
@@ -76,10 +77,6 @@ abstract class InventoryContract {
 
     override fun packages(): Map<String, InstalledPackage> =
       mapOf()
-
-    override fun poll() {
-
-    }
 
     override val events: Observable<InstalledPackageEvent>
       get() = this.eventSubject
@@ -246,8 +243,8 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Boolean>()
-    installFuture.set(true)
+    val installFuture = SettableFuture.create<APKInstallTaskType.Status>()
+    installFuture.set(Succeeded)
 
     Mockito.`when`(installTask.future)
       .thenReturn(installFuture)
@@ -487,8 +484,8 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Boolean>()
-    installFuture.set(false)
+    val installFuture = SettableFuture.create<APKInstallTaskType.Status>()
+    installFuture.set(Failed(23))
 
     Mockito.`when`(installTask.future)
       .thenReturn(installFuture)
@@ -580,7 +577,7 @@ abstract class InventoryContract {
     val installTask =
       Mockito.mock(APKInstallTaskType::class.java)
 
-    val installFuture = SettableFuture.create<Boolean>()
+    val installFuture = SettableFuture.create<APKInstallTaskType.Status>()
     installFuture.setException(Exception())
 
     Mockito.`when`(installTask.future)

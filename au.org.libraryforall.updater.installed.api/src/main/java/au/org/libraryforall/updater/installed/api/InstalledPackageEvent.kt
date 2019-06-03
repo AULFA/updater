@@ -10,6 +10,22 @@ sealed class InstalledPackageEvent {
    * The set of installed packages has changed.
    */
 
-  object InstalledPackagesChanged : InstalledPackageEvent()
+  sealed class InstalledPackagesChanged : InstalledPackageEvent() {
+
+    abstract val installedPackage: InstalledPackage
+
+    data class InstalledPackageAdded(
+      override val installedPackage: InstalledPackage)
+      : InstalledPackagesChanged()
+
+    data class InstalledPackageRemoved(
+      override val installedPackage: InstalledPackage)
+      : InstalledPackagesChanged()
+
+    data class InstalledPackageUpdated(
+      override val installedPackage: InstalledPackage)
+      : InstalledPackagesChanged()
+
+  }
 
 }

@@ -73,9 +73,13 @@ interface InventoryStringResourcesType {
 
   fun installVerificationFailedException(e: Exception): String
 
+  val installAPKCancelled: String
+
   val installAPKSucceeded: String
 
   fun installAPKFailedWithException(e: Exception): String
+
+  fun installAPKFailedWithCode(errorCode: Int): String
 
   val installWaitingForInstaller: String
 

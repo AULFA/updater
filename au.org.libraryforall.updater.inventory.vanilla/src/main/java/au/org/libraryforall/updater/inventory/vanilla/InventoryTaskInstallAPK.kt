@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
@@ -36,14 +37,22 @@ class InventoryTaskInstallAPK(
       val status = task.future.get(3L, TimeUnit.MINUTES)
       this.logger.debug("install task returned")
 
-      if (status == true) {
-        step.resolution = this.resources.installAPKSucceeded
-        step.failed = false
-        InventoryTaskMonad.InventoryTaskSuccess(Unit)
-      } else {
-        step.resolution = this.resources.installAPKFailedWithException(IllegalStateException("Install task returned 'false'"))
-        step.failed = true
-        InventoryTaskMonad.InventoryTaskFailed()
+      when (status) {
+        is APKInstallTaskType.Status.Failed -> {
+          step.resolution = this.resources.installAPKFailedWithCode(status.errorCode)
+          step.failed = true
+          InventoryTaskMonad.InventoryTaskFailed()
+        }
+        APKInstallTaskType.Status.Cancelled -> {
+          step.resolution = this.resources.installAPKCancelled
+          step.failed = false
+          InventoryTaskMonad.InventoryTaskSuccess(Unit)
+        }
+        APKInstallTaskType.Status.Succeeded -> {
+          step.resolution = this.resources.installAPKSucceeded
+          step.failed = false
+          InventoryTaskMonad.InventoryTaskSuccess(Unit)
+        }
       }
     } catch (e: Exception) {
       this.logger.error("APK install failed: ", e)

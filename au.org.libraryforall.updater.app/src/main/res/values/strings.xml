@@ -118,4 +118,5 @@ Add repositories using the action bar menu!</string>
   <string name="failure_wrote_failed">Failed to save report: %1$s (%2$s)</string>
   <string name="install_downloading">Downloading (%1$.2fM / %2$.2fM:  %3$.2fM/s)</string>
   <string name="install_downloading_indefinite">Downloading (%1$.2fM: %3.2fM/s)</string>
+  <string name="install_apk_cancelled">APK installation was cancelled</string>
 </resources>

@@ -1,5 +1,7 @@
 package au.org.libraryforall.updater.installed.api
 
+import org.joda.time.Instant
+
 /**
  * An installed package.
  */
@@ -28,4 +30,10 @@ data class InstalledPackage(
    * The humanly-readable name of the package.
    */
 
-  val name: String)
+  val name: String,
+
+  /**
+   * The time that the app was last updated.
+   */
+
+  val lastUpdated: Instant)

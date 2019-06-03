@@ -1,6 +1,7 @@
 dependencies {
   api project(":au.org.libraryforall.updater.installed.api")
 
+  implementation libraries.googleGuava
   implementation libraries.kotlinStdlib
   implementation libraries.jodaTime
   implementation libraries.rxjava

@@ -8,6 +8,12 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
+  override val installAPKCancelled: String =
+    "installAPKCancelled"
+
+  override fun installAPKFailedWithCode(errorCode: Int): String {
+    return "installAPKFailedWithCode"
+  }
 
   override fun installDownloading(
     receivedBytesTotal: Long,

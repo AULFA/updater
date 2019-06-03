@@ -70,7 +70,6 @@ class InventoryRepository(
       }
 
     this.updateFrom(this.databaseEntry.repository)
-    this.installedPackages.poll()
   }
 
   private fun onRepositoryDatabaseEvent(event: InventoryRepositoryDatabaseEvent) {

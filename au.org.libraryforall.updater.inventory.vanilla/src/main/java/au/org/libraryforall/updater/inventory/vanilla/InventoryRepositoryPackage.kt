@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
+import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
@@ -49,24 +49,34 @@ internal class InventoryRepositoryPackage(
 
   init {
     this.installedSubscription =
-      this.installedPackages.events.subscribe(this::onInstalledPackageEvent)
+      this.installedPackages.events.ofType(InstalledPackagesChanged::class.java)
+        .filter { event -> event.installedPackage.id == this.repositoryPackage.id }
+        .subscribe(this::onInstalledPackageEvent)
   }
 
-  private fun onInstalledPackageEvent(event: InstalledPackageEvent) {
+  private fun onInstalledPackageEvent(event: InstalledPackagesChanged) {
+    val stateCurrent = this.stateActual
     return when (event) {
-      InstalledPackageEvent.InstalledPackagesChanged -> {
-        val installed =
-          this.installedPackages.packages()
-        val isNowInstalled =
-          installed.containsKey(this.repositoryPackage.id)
-
-        val stateCurrent = this.stateActual
-        if (stateCurrent is NotInstalled && isNowInstalled) {
+      is InstalledPackagesChanged.InstalledPackageAdded -> {
+        if (stateCurrent is NotInstalled) {
           this.logger.debug("package {} became installed", this.repositoryPackage.id)
           this.stateActual = Installed(this)
-        } else if (stateCurrent is Installed && !isNowInstalled) {
+        } else {
+
+        }
+      }
+      is InstalledPackagesChanged.InstalledPackageRemoved -> {
+        if (stateCurrent is Installed) {
           this.logger.debug("package {} became uninstalled", this.repositoryPackage.id)
           this.stateActual = NotInstalled(this)
+        } else {
+
+        }
+      }
+      is InstalledPackagesChanged.InstalledPackageUpdated -> {
+        if (stateCurrent is NotInstalled) {
+          this.logger.debug("package {} became installed", this.repositoryPackage.id)
+          this.stateActual = Installed(this)
         } else {
 
         }

@@ -114,9 +114,7 @@ object MainServices {
     }
 
   private val inventoryDirectoryReference: AtomicService<InventoryAPKDirectoryType> =
-    AtomicService {
-      InventoryAPKDirectory.create(apkDirectory())
-    }
+    AtomicService { InventoryAPKDirectory.create(apkDirectory()) }
 
   private fun apkDirectory(): File {
     val dir0 = this.context.getExternalFilesDir("APKs")?.absoluteFile
@@ -131,7 +129,7 @@ object MainServices {
   }
 
   private val apkInstaller: AtomicService<APKInstallerType> =
-    AtomicService { APKInstallerDevice.create() }
+    AtomicService { APKInstallerDevice.create(this.installedPackages()) }
 
   fun apkInstaller(): APKInstallerType =
     this.apkInstaller.get()

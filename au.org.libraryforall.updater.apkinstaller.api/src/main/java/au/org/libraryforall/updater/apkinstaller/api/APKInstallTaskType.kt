@@ -11,6 +11,13 @@ interface APKInstallTaskType {
 
   val file: File
 
-  val future: ListenableFuture<Boolean>
+  val future: ListenableFuture<Status>
 
+  sealed class Status {
+    data class Failed(val errorCode: Int) : Status()
+
+    object Cancelled : Status()
+
+    object Succeeded : Status()
+  }
 }

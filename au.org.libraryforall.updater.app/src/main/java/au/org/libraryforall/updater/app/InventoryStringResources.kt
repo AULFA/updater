@@ -10,6 +10,12 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val installAPKCancelled: String =
+    this.context.getString(R.string.install_apk_cancelled)
+
+  override fun installAPKFailedWithCode(errorCode: Int): String =
+    this.context.getString(R.string.install_apk_failed_code, errorCode)
+
   override val installWaitingForInstaller: String =
     "Waiting for system installer."
 

@@ -11,12 +11,15 @@ interface APKInstallerType {
     file: File)
     : APKInstallTaskType
 
+  fun reportAPKRemoved(
+    packageName: String)
+
   fun reportAPKInstalled(
     packageName: String,
     packageVersionCode: Int)
 
-  fun reportAPKRemoved(
-    packageName: String,
-    packageVersionCode: Int)
+  fun reportStatus(
+    requestCode: Int,
+    resultCode: Int)
 
 }
