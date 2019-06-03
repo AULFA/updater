@@ -7,6 +7,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameInvisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameVisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
+import au.org.libraryforall.updater.inventory.api.InventoryPackageState
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
@@ -110,6 +111,7 @@ class InventoryRepository(
     viewCurrent: MutableMap<String, InventoryRepositoryPackageType>,
     repository: Repository): List<InventoryEvent> {
 
+    val installed = this.installedPackages.packages()
     val events = mutableListOf<InventoryEvent>()
 
     /*
@@ -118,6 +120,8 @@ class InventoryRepository(
 
     for (repositoryPackage in repository.packagesNewest.values) {
       if (!viewCurrent.containsKey(repositoryPackage.id)) {
+        val installedPackage = installed[repositoryPackage.id] != null
+
         val newPackage =
           InventoryRepositoryPackage(
             repositoryId = this.id,
@@ -129,6 +133,7 @@ class InventoryRepository(
             resources = this.resources,
             executor = this.executor,
             installedPackages = this.installedPackages,
+            initiallyInstalled = installedPackage,
             repositoryPackage = repositoryPackage)
 
         viewCurrent[newPackage.id] = newPackage

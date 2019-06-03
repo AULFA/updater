@@ -43,9 +43,24 @@ internal class InventoryRepositoryPackage(
   private val resources: InventoryStringResourcesType,
   private val events: PublishSubject<InventoryEvent>,
   private val installedPackages: InstalledPackagesType,
-  private val executor: ListeningExecutorService) : InventoryRepositoryPackageType {
+  private val executor: ListeningExecutorService,
+  initiallyInstalled: Boolean) : InventoryRepositoryPackageType {
 
   private val installedSubscription: Disposable
+
+  private val stateLock = Object()
+  private var stateActual: InventoryPackageState =
+    if (initiallyInstalled) {
+      Installed(this)
+    } else {
+      NotInstalled(this)
+    }
+    set(value) {
+      synchronized(this.stateLock) {
+        field = value
+      }
+      this.events.onNext(PackageChanged(this.repositoryId, this.id))
+    }
 
   init {
     this.installedSubscription =
@@ -244,16 +259,6 @@ internal class InventoryRepositoryPackage(
           maximumBytes = progress.maximumBytes,
           status = this.resources.installVerifying(progress.currentBytes, progress.maximumBytes)))
   }
-
-  private val stateLock = Object()
-  private var stateActual: InventoryPackageState =
-    NotInstalled(this)
-    set(value) {
-      synchronized(this.stateLock) {
-        field = value
-      }
-      this.events.onNext(PackageChanged(this.repositoryId, this.id))
-    }
 
   override val state: InventoryPackageState
     get() = synchronized(this.stateLock) { this.stateActual }
