@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
   private lateinit var router: Router
 
   private val inventory = MainServices.inventory()
-  private val apkInstaller = MainServices.apkInstaller()
 
   override fun onActivityResult(
     requestCode: Int,
@@ -28,8 +27,6 @@ class MainActivity : AppCompatActivity() {
     this.logger.debug("MainActivity: requestCode: {}", requestCode)
     this.logger.debug("MainActivity: resultCode:  {}", resultCode)
     this.logger.debug("MainActivity: data:        {}", data)
-
-    this.apkInstaller.reportStatus(requestCode, resultCode)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {

@@ -9,6 +9,21 @@ import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
 
+  override val installWaitingForInstaller: String =
+    "installWaitingForInstaller"
+
+  override val inventoryRepositoryRemovingFailed: String =
+    "inventoryRepositoryRemovingFailed"
+
+  override val inventoryRepositoryRemovingSucceeded: String =
+    "inventoryRepositoryRemovingSucceeded"
+
+  override val inventoryRepositoryRemoveNonexistent: String =
+    "inventoryRepositoryRemoveNonexistent"
+
+  override val inventoryRepositoryRemoving: String =
+    "inventoryRepositoryRemoving"
+
   override val inventoryRepositoryAddInProgress: String =
     "inventoryRepositoryAddInProgress"
 

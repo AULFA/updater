@@ -65,7 +65,7 @@ File vanished: %1$s</string>
 \n
 Exception: %1$s (%2$s)</string>
   <string name="install_verification_succeeded">Verified local data.</string>
-  <string name="install_apk_succeeded">APK install succeeded (Status code: %1$d)</string>
+  <string name="install_apk_succeeded">APK install succeeded.</string>
   <string name="install_apk_started">Started installing APK</string>
   <string name="install_apk_failed_exception">APK install failed: %1$s (%2$s)</string>
   <string name="install_apk_failed_code">APK install failed: Status code: %1$d</string>

@@ -11,6 +11,6 @@ interface APKInstallTaskType {
 
   val file: File
 
-  val future: ListenableFuture<Int>
+  val future: ListenableFuture<Boolean>
 
 }

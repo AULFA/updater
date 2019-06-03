@@ -5,6 +5,8 @@ import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.IllegalStateException
+import java.util.concurrent.TimeUnit
 
 class InventoryTaskInstallAPK(
   private val activity: Any,
@@ -16,13 +18,6 @@ class InventoryTaskInstallAPK(
 ) {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskInstallAPK::class.java)
-
-  /*
-   * The bizarre choice of value for standard "operation succeeded" results on Android. We
-   * assume any other value means something went wrong.
-   */
-
-  private val ACTIVITY_RESULT_OK = -1
 
   fun execute(): InventoryTaskMonad<Unit> {
     val step = InventoryTaskStep(description = this.resources.installAPKStarted)
@@ -39,15 +34,15 @@ class InventoryTaskInstallAPK(
           file = this.file)
 
       this.logger.debug("waiting for install task")
-      val status = task.future.get()
+      val status = task.future.get(3L, TimeUnit.MINUTES)
       this.logger.debug("install task returned")
 
-      if (status == ACTIVITY_RESULT_OK) {
-        step.resolution = this.resources.installAPKSucceeded(status)
+      if (status == true) {
+        step.resolution = this.resources.installAPKSucceeded
         step.failed = false
         InventoryTaskMonad.InventoryTaskSuccess(Unit)
       } else {
-        step.resolution = this.resources.installAPKFailedWithCode(status)
+        step.resolution = this.resources.installAPKFailedWithException(IllegalStateException("Install task returned 'false'"))
         step.failed = true
         InventoryTaskMonad.InventoryTaskFailed()
       }

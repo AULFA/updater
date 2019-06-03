@@ -10,6 +10,9 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val installWaitingForInstaller: String =
+    "Waiting for system installer."
+
   override val inventoryRepositoryRemovingFailed: String =
     this.context.resources.getString(R.string.repository_removing_failed)
 
@@ -69,11 +72,8 @@ class InventoryStringResources(private val context: Context) : InventoryStringRe
   override val inventoryRepositoryAddParsing: String =
     this.context.getString(R.string.inventory_repository_add_parsing)
 
-  override fun installAPKFailedWithCode(status: Int): String =
-    this.context.getString(R.string.install_apk_failed_code, status)
-
-  override fun installAPKSucceeded(status: Int): String =
-    this.context.getString(R.string.install_apk_succeeded, status)
+  override val installAPKSucceeded: String =
+    this.context.getString(R.string.install_apk_succeeded)
 
   override fun installAPKFailedWithException(e: Exception): String =
     this.context.getString(R.string.install_apk_failed_exception, e.message, e.javaClass.simpleName)

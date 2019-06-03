@@ -120,6 +120,11 @@ internal class InventoryRepositoryPackage(
                 onVerificationProgress = this::onInstallVerificationProgress
               ).execute()
             }.flatMap {
+              this.stateActual =
+                Installing(
+                  this,
+                  InstallingStatusIndefinite(
+                    status = this.resources.installWaitingForInstaller))
               InventoryTaskInstallAPK(
                 activity,
                 resources = this.resources,
