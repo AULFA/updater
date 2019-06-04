@@ -44,14 +44,17 @@ internal class InventoryRepositoryPackage(
   private val events: PublishSubject<InventoryEvent>,
   private val installedPackages: InstalledPackagesType,
   private val executor: ListeningExecutorService,
-  initiallyInstalled: Boolean) : InventoryRepositoryPackageType {
+  initiallyInstalledVersion: NamedVersion?) : InventoryRepositoryPackageType {
 
   private val installedSubscription: Disposable
 
   private val stateLock = Object()
   private var stateActual: InventoryPackageState =
-    if (initiallyInstalled) {
-      Installed(this)
+    if (initiallyInstalledVersion != null) {
+      Installed(
+        inventoryPackage = this,
+        installedVersionCode = initiallyInstalledVersion.code,
+        installedVersionName = initiallyInstalledVersion.name)
     } else {
       NotInstalled(this)
     }
@@ -75,7 +78,10 @@ internal class InventoryRepositoryPackage(
       is InstalledPackagesChanged.InstalledPackageAdded -> {
         if (stateCurrent is NotInstalled) {
           this.logger.debug("package {} became installed", this.repositoryPackage.id)
-          this.stateActual = Installed(this)
+          this.stateActual = Installed(
+            inventoryPackage = this,
+            installedVersionCode = event.installedPackage.versionCode,
+            installedVersionName = event.installedPackage.versionName)
         } else {
 
         }
@@ -91,7 +97,10 @@ internal class InventoryRepositoryPackage(
       is InstalledPackagesChanged.InstalledPackageUpdated -> {
         if (stateCurrent is NotInstalled) {
           this.logger.debug("package {} became installed", this.repositoryPackage.id)
-          this.stateActual = Installed(this)
+          this.stateActual = Installed(
+            inventoryPackage = this,
+            installedVersionCode = event.installedPackage.versionCode,
+            installedVersionName = event.installedPackage.versionName)
         } else {
 
         }
@@ -145,7 +154,18 @@ internal class InventoryRepositoryPackage(
   }
 
   override val isUpdateAvailable: Boolean
-    get() = false
+    get() = this.checkIsUpdateAvailable()
+
+  private fun checkIsUpdateAvailable(): Boolean {
+    return synchronized(this.stateLock) {
+      when (val state = this.stateActual) {
+        is NotInstalled -> true
+        is Installed -> state.installedVersionCode < this.repositoryPackage.versionCode
+        is InstallFailed -> true
+        is Installing -> false
+      }
+    }
+  }
 
   private fun runInstall(activity: Any): ListenableFuture<InventoryPackageInstallResult> {
     val step0 = InventoryTaskStep(description = this.resources.installStarted)
@@ -214,7 +234,7 @@ internal class InventoryRepositoryPackage(
 
     return when (result) {
       is InventoryTaskMonad.InventoryTaskSuccess -> {
-        this.stateActual = Installed(this)
+        this.stateActual = Installed(this, this.versionCode, this.versionName)
         installResult
       }
       is InventoryTaskMonad.InventoryTaskFailed -> {

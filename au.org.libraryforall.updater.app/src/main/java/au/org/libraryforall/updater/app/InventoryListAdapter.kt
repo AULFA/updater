@@ -131,8 +131,8 @@ class InventoryListAdapter(
         holder.viewHolderInstalled.packageInstalled.text =
           this.context.resources.getString(
             R.string.package_state_installed,
-            repositoryPackage.versionName,
-            repositoryPackage.versionCode)
+            state.installedVersionName,
+            state.installedVersionCode)
 
         if (repositoryPackage.isUpdateAvailable) {
           setVisibility(holder.viewHolderInstalled.packageButton, View.VISIBLE)

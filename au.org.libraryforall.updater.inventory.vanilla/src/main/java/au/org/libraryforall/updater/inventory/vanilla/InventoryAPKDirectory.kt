@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.security.MessageDigest
 
 /**
@@ -116,6 +117,11 @@ class InventoryAPKDirectory private constructor(private val base: File)
           return VerificationResult.VerificationCancelled
         }
       }
+
+      if (!file.setReadable(true, false)) {
+        throw IOException("Unable to set readable permissions on ${file}")
+      }
+
       val result = digest.digest()
       val resultText = Hex.encodeHexString(result, true)
       if (resultText == key.text) {

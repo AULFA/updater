@@ -9,7 +9,9 @@ sealed class InventoryPackageState {
     : InventoryPackageState()
 
   data class Installed(
-    override val inventoryPackage: InventoryRepositoryPackageType)
+    override val inventoryPackage: InventoryRepositoryPackageType,
+    val installedVersionCode: Int,
+    val installedVersionName: String)
     : InventoryPackageState()
 
   data class InstallFailed(
