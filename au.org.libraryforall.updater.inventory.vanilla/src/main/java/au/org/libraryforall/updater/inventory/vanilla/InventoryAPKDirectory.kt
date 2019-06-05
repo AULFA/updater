@@ -7,11 +7,9 @@ import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.Veri
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult
 import au.org.libraryforall.updater.repository.api.Hash
 import net.jcip.annotations.ThreadSafe
-import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.security.MessageDigest
 
 /**
@@ -118,12 +116,8 @@ class InventoryAPKDirectory private constructor(private val base: File)
         }
       }
 
-      if (!file.setReadable(true, false)) {
-        throw IOException("Unable to set readable permissions on ${file}")
-      }
-
       val result = digest.digest()
-      val resultText = Hex.encodeHexString(result, true)
+      val resultText = Hex.bytesToHex(result).toLowerCase()
       if (resultText == key.text) {
         VerificationResult.VerificationSuccess(file)
       } else {
