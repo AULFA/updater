@@ -1,6 +1,5 @@
 package au.org.libraryforall.updater.repository.xml.spi
 
-import java.lang.Exception
 import java.net.URI
 
 data class ParseError(

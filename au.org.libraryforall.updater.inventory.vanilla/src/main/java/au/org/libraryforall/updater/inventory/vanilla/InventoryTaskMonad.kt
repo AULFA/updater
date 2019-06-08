@@ -15,6 +15,10 @@ sealed class InventoryTaskMonad<A> {
     override val steps: List<InventoryTaskStep> = listOf())
     : InventoryTaskMonad<A>()
 
+  data class InventoryTaskCancelled<A>(
+    override val steps: List<InventoryTaskStep> = listOf())
+    : InventoryTaskMonad<A>()
+
   companion object {
 
     fun startWithStep(step: InventoryTaskStep): InventoryTaskMonad<Unit> {
@@ -31,10 +35,14 @@ sealed class InventoryTaskMonad<A> {
               InventoryTaskSuccess(result.value, m.steps.plus(result.steps))
             is InventoryTaskFailed ->
               InventoryTaskFailed(m.steps.plus(result.steps))
+            is InventoryTaskCancelled ->
+              InventoryTaskCancelled(m.steps.plus(result.steps))
           }
         }
         is InventoryTaskFailed ->
           InventoryTaskFailed(m.steps)
+        is InventoryTaskCancelled ->
+          InventoryTaskCancelled(m.steps)
       }
     }
 
@@ -50,6 +58,8 @@ sealed class InventoryTaskMonad<A> {
           InventoryTaskSuccess(f.invoke(m.value), m.steps)
         is InventoryTaskFailed ->
           InventoryTaskFailed(m.steps)
+        is InventoryTaskCancelled ->
+          InventoryTaskCancelled(m.steps)
       }
     }
   }

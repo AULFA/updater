@@ -10,6 +10,12 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val installVerificationCancelled: String
+    get() = this.context.getString(R.string.install_verify_cancelled)
+
+  override val installDownloadingCancelled: String
+    get() = this.context.getString(R.string.install_downloading_cancelled)
+
   override val installAPKCancelled: String =
     this.context.getString(R.string.install_apk_cancelled)
 

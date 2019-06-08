@@ -1,19 +1,14 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
 import au.org.libraryforall.updater.installed.api.InstalledPackagesType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAddException
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.*
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryStateChanged
 import au.org.libraryforall.updater.inventory.api.InventoryRemoveException
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryAddResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryRemoved
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryRemoveResult
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
@@ -21,6 +16,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryState
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.inventory.api.InventoryType
+import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskCancelled
 import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskFailed
 import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskSuccess
 import au.org.libraryforall.updater.repository.api.Repository
@@ -29,7 +25,6 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
@@ -82,7 +77,7 @@ class Inventory private constructor(
   private val eventSubject = PublishSubject.create<InventoryEvent>()
   private val repositoryLock = Object()
   private val repositories = mutableMapOf<UUID, InventoryRepository>()
-  private var stateActual : InventoryState = InventoryState.InventoryIdle
+  private var stateActual: InventoryState = InventoryState.InventoryIdle
 
   override val events: Observable<InventoryEvent>
     get() = this.eventSubject
@@ -123,6 +118,7 @@ class Inventory private constructor(
         repository = when (result) {
           is InventoryTaskSuccess -> result.value
           is InventoryTaskFailed -> null
+          is InventoryTaskCancelled -> null
         })
     })
   }
@@ -207,7 +203,7 @@ class Inventory private constructor(
           InventoryRepositoryAddResult(
             uri = uri,
             steps = result.steps,
-            repository = result.value )
+            repository = result.value)
         }
 
         is InventoryTaskFailed -> {
@@ -216,7 +212,16 @@ class Inventory private constructor(
           InventoryRepositoryAddResult(
             uri = uri,
             steps = result.steps,
-            repository = null )
+            repository = null)
+        }
+
+        is InventoryTaskCancelled -> {
+          this.stateActual = InventoryState.InventoryIdle
+          this.eventSubject.onNext(InventoryStateChanged)
+          InventoryRepositoryAddResult(
+            uri = uri,
+            steps = result.steps,
+            repository = null)
         }
       }
     })

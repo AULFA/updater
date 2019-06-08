@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatVersionedHandlerProviderType
 import au.org.libraryforall.updater.repository.xml.spi.ParseError
+import au.org.libraryforall.updater.repository.xml.spi.SPIFormatVersionedHandlerProviderType
 import au.org.libraryforall.updater.repository.xml.spi.SPIHardenedSAXParsers
 import au.org.libraryforall.updater.repository.xml.spi.SPISchemaResolutionMappings
 import au.org.libraryforall.updater.repository.xml.spi.XInclude

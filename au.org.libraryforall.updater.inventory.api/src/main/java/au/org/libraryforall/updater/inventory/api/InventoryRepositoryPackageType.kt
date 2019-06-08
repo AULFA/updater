@@ -22,4 +22,6 @@ interface InventoryRepositoryPackageType {
   val sourceURI: URI
 
   fun install(activity: Any): ListenableFuture<InventoryPackageInstallResult>
+
+  fun cancel()
 }

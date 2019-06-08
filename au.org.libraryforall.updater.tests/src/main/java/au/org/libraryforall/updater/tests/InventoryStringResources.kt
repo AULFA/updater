@@ -8,6 +8,13 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
+
+  override val installVerificationCancelled: String
+    get() = "installVerificationCancelled"
+
+  override val installDownloadingCancelled: String
+    get() = "installDownloadingCancelled"
+
   override val installAPKCancelled: String =
     "installAPKCancelled"
 

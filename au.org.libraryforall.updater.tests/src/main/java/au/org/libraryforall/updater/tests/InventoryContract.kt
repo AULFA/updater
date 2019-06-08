@@ -2,7 +2,8 @@ package au.org.libraryforall.updater.tests
 
 import android.app.Activity
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.*
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
+import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
@@ -29,7 +30,9 @@ import io.reactivex.subjects.PublishSubject
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
-import one.irradia.http.api.HTTPResult.HTTPFailed.*
+import one.irradia.http.api.HTTPResult.HTTPFailed.HTTPError
+import one.irradia.http.api.HTTPResult.HTTPFailed.HTTPFailure
+import org.joda.time.Instant
 import org.joda.time.LocalDateTime
 import org.junit.After
 import org.junit.Assert
@@ -39,13 +42,14 @@ import org.mockito.Mockito
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.lang.Exception
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.Executors
 
 abstract class InventoryContract {
 
+  private lateinit var installedPackages: InstalledPackagesType
+  private lateinit var installedPackagesEvents: PublishSubject<InstalledPackageEvent>
   private lateinit var database: InventoryRepositoryDatabaseType
   private lateinit var databaseDirectory: File
   private lateinit var apkDirectory: File
@@ -82,8 +86,6 @@ abstract class InventoryContract {
       get() = this.eventSubject
   }
 
-
-
   @Before
   fun setup() {
     this.logger = this.logger()
@@ -101,7 +103,15 @@ abstract class InventoryContract {
         this.repositoryXMLSerializers,
         this.databaseDirectory)
 
-    this.executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(4))
+    this.installedPackagesEvents =
+      PublishSubject.create<InstalledPackageEvent>()
+    this.installedPackages =
+      Mockito.mock(InstalledPackagesType::class.java)
+    Mockito.`when`(this.installedPackages.events)
+      .thenReturn(this.installedPackagesEvents)
+
+    this.executor =
+      MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(4))
   }
 
   @After
@@ -201,7 +211,7 @@ abstract class InventoryContract {
         apkInstaller = apkInstaller,
         repositoryParsers = this.repositoryXMLParsers,
         database = this.database,
-        packages = EmptyInstalledPackages())
+        packages = this.installedPackages)
 
     val package0 =
       RepositoryPackage(
@@ -257,9 +267,22 @@ abstract class InventoryContract {
         file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
-    val result =
+    val future =
       inventoryPackage.install(activity)
-        .get()
+
+    val installedPackage =
+      InstalledPackage(
+        id = package0.id,
+        versionCode = package0.versionCode,
+        versionName = package0.versionName,
+        name = package0.name,
+        lastUpdated = Instant.now())
+
+    Mockito.`when`(this.installedPackages.packages())
+      .thenReturn(mapOf(Pair(package0.id, installedPackage)))
+
+    val result =
+      future.get()
 
     Assert.assertTrue(
       "All steps succeeded",

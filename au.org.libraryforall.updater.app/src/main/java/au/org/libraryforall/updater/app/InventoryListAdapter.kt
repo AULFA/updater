@@ -155,7 +155,7 @@ class InventoryListAdapter(
         holder.viewHolderInstalling.packageButton.isEnabled = true
         holder.viewHolderInstalling.packageButton.setOnClickListener {
           holder.viewHolderInstalling.packageButton.isEnabled = false
-          throw NullPointerException()
+          repositoryPackage.cancel()
         }
 
         val progressState = state.state
