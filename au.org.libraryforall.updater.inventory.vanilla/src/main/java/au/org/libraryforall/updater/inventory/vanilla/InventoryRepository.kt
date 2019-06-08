@@ -6,6 +6,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameInvisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameVisible
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
@@ -158,6 +159,41 @@ class InventoryRepository(
         this.logger.debug("[{}]: package {} now invisible", repository.id, existingPackage.id)
         iter.remove()
         events.add(PackageBecameInvisible(repositoryId = this.id, packageId = existingPackage.id))
+      }
+    }
+
+    /*
+     * Work out which packages now have new versions.
+     */
+
+    for (repositoryPackage in repository.packagesNewest.values) {
+      val existing = viewCurrent[repositoryPackage.id]
+      if (existing != null) {
+        if (repositoryPackage.versionCode > existing.versionCode) {
+          val installedPackage = installed[repositoryPackage.id]
+          val installedVersion =
+            installedPackage?.let { pack ->
+              NamedVersion(pack.versionName, pack.versionCode)
+            }
+
+          val newPackage =
+            InventoryRepositoryPackage(
+              repositoryId = this.id,
+              events = this.eventSubject,
+              http = this.http,
+              httpAuthentication = this.httpAuthentication,
+              directory = this.apkDirectory,
+              apkInstaller = this.apkInstaller,
+              resources = this.resources,
+              executor = this.executor,
+              installedPackages = this.installedPackages,
+              initiallyInstalledVersion = installedVersion,
+              repositoryPackage = repositoryPackage)
+
+          viewCurrent[newPackage.id] = newPackage
+          this.logger.debug("[{}]: package {} upgrade available", repository.id, newPackage.id)
+          events.add(PackageChanged(repositoryId = this.id, packageId = repositoryPackage.id))
+        }
       }
     }
 
