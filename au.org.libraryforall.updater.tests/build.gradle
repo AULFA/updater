@@ -11,6 +11,8 @@ dependencies {
   implementation libraries.slf4j
   implementation libraries.junit
   implementation libraries.irradiaHTTPAPI
+  implementation libraries.irradiaHTTPVanilla
+  implementation libraries.nanohttpd
 
   testImplementation libraries.logbackClassic
 }
