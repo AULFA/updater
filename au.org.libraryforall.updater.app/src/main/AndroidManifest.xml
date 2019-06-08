@@ -7,7 +7,10 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
-  <application android:name="au.org.libraryforall.updater.app.MainApplication">
+  <application
+    android:icon="@drawable/lfa_updater"
+    android:label="@string/main_title"
+    android:name="au.org.libraryforall.updater.app.MainApplication">
     <provider
       android:name="androidx.core.content.FileProvider"
       android:authorities="au.org.libraryforall.updater.app.provider"
