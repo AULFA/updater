@@ -1,8 +1,10 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryReceivers
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryThrottledVerificationReceiver
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.*
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.ReservationUnavailableException
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult
 import au.org.libraryforall.updater.repository.api.Hash
 import org.junit.After
 import org.junit.Assert
@@ -17,6 +19,7 @@ import java.io.FileOutputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class InventoryAPKDirectoryContract {
 
@@ -150,37 +153,50 @@ abstract class InventoryAPKDirectoryContract {
     }
   }
 
-  @Test
+  @Test(timeout = 20_000L)
   fun testThrottledReceiver10() {
-    this.runThrottledReceiver(10)
+    this.runThrottledReceiver(10, AtomicBoolean(false))
   }
 
-  @Test
+  @Test(timeout = 20_000L)
   fun testThrottledReceiver100() {
-    this.runThrottledReceiver(100)
+    this.runThrottledReceiver(100, AtomicBoolean(false))
   }
 
-  @Test
-  fun testThrottledReceiver1() {
-    this.runThrottledReceiver(1)
+  @Test(timeout = 20_000L)
+  fun testThrottledReceiverCancel() {
+    this.runThrottledReceiver(100, AtomicBoolean(true))
   }
 
-  private fun runThrottledReceiver(approximateCalls: Int) {
+  private fun runThrottledReceiver(approximateCalls: Int, cancel: AtomicBoolean) {
     var calls = 0
     val receiver =
-      InventoryAPKDirectoryReceivers.throttledReceiver(approximateCalls) { progress ->
+      InventoryAPKDirectoryThrottledVerificationReceiver({ progress ->
         this.logger.debug("({}) {}/{}", approximateCalls, progress.currentBytes, progress.maximumBytes)
         ++calls
+      }, cancel)
+
+    var cancelled = false
+    for (i in 0L..1000L) {
+      if (cancelled) {
+        break
       }
 
-    for (i in 0L..1000L) {
+      Thread.sleep(10L)
       receiver.invoke(object: VerificationProgressType {
         override val currentBytes: Long = i
         override val maximumBytes: Long = 1000L
         override fun cancel() {
-
+          cancelled = true
         }
       })
+    }
+
+    if (cancelled) {
+      Assert.assertTrue(
+        "Must have received 0 calls (${calls})",
+        calls == 0)
+      return
     }
 
     Assert.assertTrue(

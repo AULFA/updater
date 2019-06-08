@@ -7,6 +7,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 class InventoryTaskInstallAPK(
   private val activity: Any,
@@ -14,7 +15,8 @@ class InventoryTaskInstallAPK(
   private val packageName: String,
   private val packageVersionCode: Int,
   private val file: File,
-  private val apkInstaller: APKInstallerType
+  private val apkInstaller: APKInstallerType,
+  val cancel: AtomicBoolean
 ) {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskInstallAPK::class.java)

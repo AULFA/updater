@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryReceivers
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryThrottledVerificationReceiver
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.KeyReservationType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationResult.VerificationCancelled
@@ -11,45 +11,43 @@ import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
-import org.joda.time.Instant
-import org.joda.time.Seconds
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
+import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * A task that:
+ *
+ * 1. Checks that a local file exists.
+ * 2. If the local file exists, checks that the content is correct.
+ * 3. If the content is correct, returns immediately.
+ * 4. If the content is not correct, downloads a remote file.
+ * 5. Checks that the downloaded file is correct.
+ */
 
 class InventoryTaskDownload(
   private val resources: InventoryStringResourcesType,
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val reservation: KeyReservationType,
-  private val onDownloadProgress: (DownloadProgressType) -> Unit,
+  private val onDownloadProgress: (InventoryTaskDownloadProgressType) -> Unit,
   private val onVerificationProgress: (VerificationProgressType) -> Unit,
-  private val uri: URI) {
-
-  interface DownloadProgressType {
-
-    val expectedBytesTotal : Long?
-
-    val receivedBytesTotal : Long
-
-    val receivedBytesPerSecond : Long
-  }
+  private val uri: URI,
+  private val cancel: AtomicBoolean) {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskDownload::class.java)
 
   fun execute(): InventoryTaskMonad<File> {
-    return this.fileNeedsDownloadingTask()
-      .flatMap { downloadRequired ->
-        if (downloadRequired) {
-          this.openConnectionTask().flatMap { pair ->
-            this.fileDownloadTask(pair.first, pair.second)
-          }
-        } else {
-          InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
-        }
+    return this.fileNeedsDownloadingTask().flatMap { downloadRequired ->
+      if (downloadRequired) {
+        this.openConnectionTask().flatMap { pair -> this.fileDownloadTask(pair.first, pair.second) }
+      } else {
+        InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
       }
+    }
   }
 
   private fun fileNeedsDownloadingTask(): InventoryTaskMonad<Boolean> {
@@ -61,23 +59,25 @@ class InventoryTaskDownload(
       exception = null,
       failed = false)
 
-    val verificationReceiver =
-      InventoryAPKDirectoryReceivers.throttledReceiver(
-        approximateCalls = 5,
-        progress = onVerificationProgress::invoke)
+    val receiver =
+      InventoryAPKDirectoryThrottledVerificationReceiver(
+        this.onVerificationProgress,
+        this.cancel)
 
     return InventoryTaskMonad.startWithStep(step)
-      .flatMap { this.runDownloadVerificationCheck(verificationReceiver, step) }
+      .flatMap { this.runDownloadVerificationCheck(receiver, step) }
   }
 
   private fun runDownloadVerificationCheck(
     receiver: (VerificationProgressType) -> Unit,
     step: InventoryTaskStep
-  ): InventoryTaskMonad.InventoryTaskSuccess<Boolean> {
+  ): InventoryTaskMonad<Boolean> {
+    this.logger.debug("running pre-download verification check")
     return try {
       if (this.reservation.file.isFile) {
         when (val verification = this.reservation.verify(receiver)) {
           is VerificationFailure -> {
+            this.logger.debug("verification failed, download required")
             step.failed = false
             step.resolution = this.resources.installDownloadNeededHashFailed(
               expected = this.reservation.hash,
@@ -85,15 +85,20 @@ class InventoryTaskDownload(
             InventoryTaskMonad.InventoryTaskSuccess(true)
           }
           is VerificationSuccess -> {
+            this.logger.debug("verification succeeded, no download required")
             step.failed = false
             step.resolution = this.resources.installDownloadNeededNot
             InventoryTaskMonad.InventoryTaskSuccess(false)
           }
           VerificationCancelled -> {
-            TODO()
+            this.logger.debug("verification cancelled")
+            step.failed = false
+            step.resolution = this.resources.installVerificationCancelled
+            InventoryTaskMonad.InventoryTaskCancelled()
           }
         }
       } else {
+        this.logger.debug("file does not exist, download required")
         step.failed = false
         step.resolution = this.resources.installDownloadNeeded
         InventoryTaskMonad.InventoryTaskSuccess(true)
@@ -123,39 +128,6 @@ class InventoryTaskDownload(
       .flatMap { this.runDownload(expectedBytes, inputStream, step) }
   }
 
-  private class ThrottledDownloadReceiver(
-    override val expectedBytesTotal: Long?,
-    val progress: (DownloadProgressType) -> Unit) : DownloadProgressType {
-
-    override val receivedBytesTotal: Long
-      get() = this.receivedLast
-
-    override val receivedBytesPerSecond: Long
-      get() = this.receivedBPS
-
-    @Volatile
-    private var receivedBPS = 0L
-
-    @Volatile
-    private var receivedLast = 0L
-
-    @Volatile
-    private var timeLast = Instant.now()
-
-    @Volatile
-    private var timeCurrent = Instant.now()
-
-    fun receivedNow(receivedNow: Long) {
-      this.timeCurrent = Instant.now()
-      if (Seconds.secondsBetween(this.timeLast, this.timeCurrent).seconds >= 1) {
-        this.receivedBPS = Math.max(0L, receivedNow - this.receivedLast)
-        this.receivedLast = receivedNow
-        this.timeLast = this.timeCurrent
-        this.progress.invoke(this)
-      }
-    }
-  }
-
   private fun runDownload(
     expectedBytes: Long?,
     inputStream: InputStream,
@@ -163,7 +135,7 @@ class InventoryTaskDownload(
   ): InventoryTaskMonad<File> {
 
     val receiver =
-      ThrottledDownloadReceiver(expectedBytes, this.onDownloadProgress)
+      InventoryTaskDownloadThrottledReceiver(expectedBytes, this.onDownloadProgress)
 
     return try {
       inputStream.use {
@@ -171,6 +143,13 @@ class InventoryTaskDownload(
           val buffer = ByteArray(4096)
           var received = 0L
           while (true) {
+            if (this.cancel.get()) {
+              this.logger.debug("download cancelled")
+              step.resolution = this.resources.installDownloadingCancelled
+              step.failed = false
+              return InventoryTaskMonad.InventoryTaskCancelled()
+            }
+
             receiver.receivedNow(received)
 
             val r = inputStream.read(buffer)
@@ -184,6 +163,7 @@ class InventoryTaskDownload(
         }
       }
 
+      this.logger.debug("download succeeded")
       step.resolution = this.resources.installDownloadingSucceeded
       step.failed = false
       InventoryTaskMonad.InventoryTaskSuccess(this.reservation.file)
@@ -192,7 +172,7 @@ class InventoryTaskDownload(
       step.resolution = this.resources.installDownloadingFailed(e)
       step.exception = e
       step.failed = true
-      InventoryTaskMonad.InventoryTaskFailed<File>()
+      InventoryTaskMonad.InventoryTaskFailed()
     }
   }
 
@@ -216,7 +196,7 @@ class InventoryTaskDownload(
             ),
             failed = false))
           .andThen(InventoryTaskMonad.InventoryTaskSuccess(
-            Pair(knownContentLengthOrNull(result.contentLength), result.result)))
+            Pair(this.knownContentLengthOrNull(result.contentLength), result.result)))
       is HTTPResult.HTTPFailed.HTTPError ->
         InventoryTaskMonad.startWithStep(
           InventoryTaskStep(

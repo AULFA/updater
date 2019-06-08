@@ -71,8 +71,8 @@ interface InventoryAPKDirectoryType {
 
     /**
      * Run verification for the given file. The given `progress` function receives progress
-     * information in the form of the current and maximum byte offset, respectively, and should
-     * return `true` if verification should continue.
+     * information in the form of the current and maximum byte offset, and can optionally cancel
+     * verification.
      */
 
     @Throws(IOException::class)
@@ -85,9 +85,21 @@ interface InventoryAPKDirectoryType {
 
   interface VerificationProgressType {
 
+    /**
+     * The current number of bytes verified.
+     */
+
     val currentBytes: Long
 
+    /**
+     * The maximum number of bytes that will be verified.
+     */
+
     val maximumBytes: Long
+
+    /**
+     * Cancel verification.
+     */
 
     fun cancel()
 
