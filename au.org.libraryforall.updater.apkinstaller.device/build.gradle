@@ -1,0 +1,8 @@
+dependencies {
+  api project(":au.org.libraryforall.updater.apkinstaller.api")
+  api project(":au.org.libraryforall.updater.installed.api")
+
+  implementation libraries.androidXCore
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+  <string name="main_title">LFA Updater</string>
+
+  <string name="package_install">Install</string>
+  <string name="package_uninstall">Uninstall</string>
+  <string name="package_update">Update</string>
+  <string name="package_cancel">Cancel</string>
+  <string name="package_retry">Retry</string>
+  <string name="package_details">Details</string>
+
+  <string name="package_state_available">Available: %1$s (%2$d)</string>
+  <string name="package_state_installed">Installed: %1$s (%2$d)</string>
+
+  <string name="inventory_menu_repository_add">Add Repository…</string>
+  <string name="inventory_menu_repository_delete">Delete Repository…</string>
+  <string name="inventory_menu_version">Application Version…</string>
+
+  <string name="failure_steps_title">Task Steps</string>
+
+  <string name="install_started">Install started</string>
+  <string name="install_already_running">Already installing/updating</string>
+  <string name="install_failure_title">Install Failed</string>
+  <string name="install_failure_repository">Repository</string>
+  <string name="install_failure_package">Package</string>
+  <string name="install_failure_save_report">Save Report</string>
+  <string name="install_failure_package_version">Package Version</string>
+  <string name="install_failure_package_uri">Package URI</string>
+  <string name="install_opening_connection_to">Attempted connection to %1$s</string>
+  <string name="install_connected_ok">Connected: %1$d %2$s, %3$d bytes of %4$s</string>
+  <string name="install_connected_server_error">Server error: %1$d %2$s</string>
+  <string name="install_connection_failed">Could not open a connection to the server: %1$s (%2$s)</string>
+
+  <string name="install_downloading_to">Attempted download to temporary file.\n
+\n
+File: %1$s</string>
+
+  <string name="install_downloading_failed">Downloading failed: %1$s (%2$s)</string>
+  <string name="install_downloading_succeeded">Downloaded successfully</string>
+  <string name="install_renaming_to">Attempted renaming temporary file %1$s to %2$s</string>
+  <string name="install_download_needed">Local data is not present; download is required</string>
+  <string name="install_download_needed_not">Local data is verified; no download required</string>
+  <string name="install_download_reservation_failed">Could not reserve a local file (another task may be using it): %1$s (%2$s)</string>
+  <string name="install_download_check_required">
+    Checked to see if local data could be reused.\n
+\n
+File: %1$s</string>
+  <string name="install_download_needed_hash_failed">Local data could not be verified, so downloading is required.\n
+\n
+Expected: %1$s\n
+Received: %2$s</string>
+  <string name="install_download_needed_exception">An exception occurred whilst trying to verify local data: %1$s (%2$s). Downloading is required.</string>
+  <string name="install_verifying">Verifying (%1$.2fM / %2$.2fM)</string>
+  <string name="install_verified_file">Attempted to verify local file.\n
+\n
+File: %1$s</string>
+  <string name="install_verification_failed">Verification failed.\n
+\n
+Expected: %1$s\n
+Received: %2$s</string>
+  <string name="install_verification_failed_missing">Verification failed due to missing file.\n
+\n
+File vanished: %1$s</string>
+  <string name="install_verification_failed_exception">Verification failed due to exception.\n
+\n
+Exception: %1$s (%2$s)</string>
+  <string name="install_verification_succeeded">Verified local data.</string>
+  <string name="install_apk_succeeded">APK install succeeded.</string>
+  <string name="install_apk_started">Started installing APK</string>
+  <string name="install_apk_failed_exception">APK install failed: %1$s (%2$s)</string>
+  <string name="install_apk_failed_code">APK install failed: Status code: %1$d</string>
+  <string name="versions_revision">Revision</string>
+  <string name="versions_version">Version</string>
+  <string name="inventory_menu_repository_reload">Reload Repository</string>
+  <string name="inventory_repository_add_already_exists">Repository already exists</string>
+  <string name="inventory_repository_add_fetching">Attempted to fetch repository.\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_add_fetched">Fetched repository data (%1$d milliseconds)</string>
+  <string name="inventory_repository_add_parsed">Parsed repository data (%1$d milliseconds)</string>
+  <string name="inventory_repository_saving">Attempted to save repository data\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_save_success">Saved repository data\n
+\n
+Repository: %1$s</string>
+  <string name="inventory_repository_save_failure">
+    Failed to save repository data\n
+\n
+Repository: %1$s
+  </string>
+  <string name="inventory_repository_add_parsing">Attempted to parse repository data.</string>
+  <string name="inventory_repository_update_failed_title">Repository Update Failed</string>
+  <string name="inventory_repository_add_parse_failed">Parsing repository data failed</string>
+  <string name="repositories">Repositories</string>
+  <string name="repository">Repository</string>
+  <string name="repository_uri">Repository URI</string>
+  <string name="repository_add">Add</string>
+  <string name="repository_uri_invalid">Not a valid URI</string>
+  <string name="repository_add_in_progress">Repository addition in progress…</string>
+  <string name="repository_add_failed">Repository addition failed</string>
+  <string name="repository_add_title">Add Repository</string>
+  <string name="error_report">Error Report</string>
+  <string name="repository_delete_confirm_title">Confirm Delete</string>
+  <string name="repository_delete_confirm">Are you sure you want to delete this repository?</string>
+  <string name="repository_delete">Delete</string>
+  <string name="repository_removing_failed">Removing the repository failed.</string>
+  <string name="repository_removing_succeeded">Removing the repository succeeded.</string>
+  <string name="repository_removing_nonexistent">The given repository does not exist!</string>
+  <string name="repository_removing">Attempted to remove a repository.</string>
+  <string name="repositories_empty">No repositories available.\n
+\n
+Add repositories using the action bar menu!</string>
+  <string name="failure_wrote_ok">Wrote report to file: %1$s</string>
+  <string name="failure_wrote_ok_title">Success</string>
+  <string name="ok">OK</string>
+  <string name="failure_wrote_failed_title">Failed</string>
+  <string name="failure_wrote_failed">Failed to save report: %1$s (%2$s)</string>
+  <string name="install_downloading">Downloading (%1$.2fM / %2$.2fM:  %3$.2fM/s)</string>
+  <string name="install_downloading_indefinite">Downloading (%1$.2fM: %3.2fM/s)</string>
+  <string name="install_apk_cancelled">APK installation was cancelled</string>
+  <string name="install_verify_cancelled">Verification cancelled</string>
+  <string name="install_downloading_cancelled">Download cancelled</string>
+</resources>

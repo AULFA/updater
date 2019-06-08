@@ -1,0 +1,6 @@
+*.iml
+.attach_pid*
+.gradle
+.idea
+build
+local.properties

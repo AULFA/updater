@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+    android:id="@+id/menuItemRepositoryReload"
+    android:icon="@drawable/reload"
+    android:title="@string/inventory_menu_repository_reload"
+    android:visible="true"
+    app:showAsAction="ifRoom" />
+
+  <item
+    android:id="@+id/menuItemRepositoryDelete"
+    android:icon="@drawable/delete"
+    android:title="@string/inventory_menu_repository_delete"
+    android:visible="true" />
+
+</menu>
