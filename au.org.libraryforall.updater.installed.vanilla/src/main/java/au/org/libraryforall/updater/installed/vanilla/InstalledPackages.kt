@@ -1,7 +1,6 @@
 package au.org.libraryforall.updater.installed.vanilla
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import au.org.libraryforall.updater.installed.api.InstalledPackage
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
 import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageAdded
@@ -14,6 +13,9 @@ import io.reactivex.subjects.PublishSubject
 import org.joda.time.Instant
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
+import android.content.Intent
+import android.content.pm.ResolveInfo
+
 
 class InstalledPackages private constructor(
   private val context: Context) : InstalledPackagesType {
@@ -42,8 +44,10 @@ class InstalledPackages private constructor(
   private val eventSubject: PublishSubject<InstalledPackageEvent> = PublishSubject.create()
 
   override fun packages(): Map<String, InstalledPackage> {
-    return this.context.packageManager.getInstalledPackages(0)
-      .map(this::packageInfoToPackage)
+    val intent = Intent(Intent.ACTION_MAIN, null)
+    intent.addCategory(Intent.CATEGORY_LAUNCHER)
+    return this.context.packageManager.queryIntentActivities(intent, 0)
+      .mapNotNull(this::packageInfoToPackage)
       .map { pkg -> Pair(pkg.id, pkg) }
       .toMap()
   }
@@ -105,13 +109,22 @@ class InstalledPackages private constructor(
     }
   }
 
-  private fun packageInfoToPackage(info: PackageInfo): InstalledPackage =
-    InstalledPackage(
-      id = info.packageName,
-      versionName = info.versionName ?: info.versionCode.toString(),
-      versionCode = info.versionCode,
-      lastUpdated = Instant.ofEpochMilli(info.lastUpdateTime),
-      name = info.applicationInfo.name ?: info.packageName)
+  private fun packageInfoToPackage(info: ResolveInfo): InstalledPackage? {
+    return try {
+      val packageInfo =
+        this.context.packageManager.getPackageInfo(info.activityInfo.packageName, 0)
+
+      InstalledPackage(
+        id = packageInfo.packageName,
+        versionName = packageInfo.versionName ?: packageInfo.versionCode.toString(),
+        versionCode = packageInfo.versionCode,
+        lastUpdated = Instant.ofEpochMilli(packageInfo.lastUpdateTime),
+        name = packageInfo.applicationInfo.name ?: packageInfo.packageName)
+    } catch (e: Exception) {
+      this.logger.error("error getting package info for {}: ", info.activityInfo.packageName, e)
+      null
+    }
+  }
 
   override val events: Observable<InstalledPackageEvent>
     get() = this.eventSubject
