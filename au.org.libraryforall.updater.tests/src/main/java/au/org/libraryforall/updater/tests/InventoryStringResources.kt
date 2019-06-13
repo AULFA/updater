@@ -8,6 +8,17 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
+  
+  override val inventoryRepositoryRequiredUUIDChecking: String
+    get() = "inventoryRepositoryRequiredUUIDChecking"
+
+  override fun inventoryRepositoryRequiredUUIDCheckingFailed(requiredUUID: UUID, receivedUUID: UUID): String {
+    return "inventoryRepositoryRequiredUUIDCheckingFailed"
+  }
+
+  override fun inventoryRepositoryRequiredUUIDCheckingOK(requiredUUID: UUID?, receivedUUID: UUID): String {
+    return "inventoryRepositoryRequiredUUIDCheckingOK"
+  }
 
   override val installVerificationCancelled: String
     get() = "installVerificationCancelled"
