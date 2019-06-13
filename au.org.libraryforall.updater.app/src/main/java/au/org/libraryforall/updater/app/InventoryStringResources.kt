@@ -10,6 +10,17 @@ import java.util.UUID
 
 class InventoryStringResources(private val context: Context) : InventoryStringResourcesType {
 
+  override val inventoryRepositoryRequiredUUIDChecking: String
+    get() = this.context.getString(R.string.inventory_required_uuid_checking)
+
+  override fun inventoryRepositoryRequiredUUIDCheckingFailed(requiredUUID: UUID, receivedUUID: UUID): String {
+    return this.context.getString(R.string.inventory_required_uuid_checking_failed, requiredUUID, receivedUUID)
+  }
+
+  override fun inventoryRepositoryRequiredUUIDCheckingOK(requiredUUID: UUID?, receivedUUID: UUID): String {
+    return this.context.getString(R.string.inventory_required_uuid_checking_succeeded, requiredUUID ?: "(none)", receivedUUID)
+  }
+
   override val installVerificationCancelled: String
     get() = this.context.getString(R.string.install_verify_cancelled)
 

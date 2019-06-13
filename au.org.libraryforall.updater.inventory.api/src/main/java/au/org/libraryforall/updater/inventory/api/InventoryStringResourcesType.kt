@@ -115,6 +115,8 @@ interface InventoryStringResourcesType {
 
   fun inventoryRepositoryAddFetched(duration: Duration): String
 
+  val inventoryRepositoryRequiredUUIDChecking: String
+
   fun inventoryRepositoryAddServerError(
     statusCode: Int,
     message: String,
@@ -133,6 +135,14 @@ interface InventoryStringResourcesType {
   fun inventoryRepositorySavingSucceeded(id: UUID): String
 
   fun inventoryRepositorySavingFailed(id: UUID): String
+
+  fun inventoryRepositoryRequiredUUIDCheckingFailed(
+    requiredUUID: UUID,
+    receivedUUID: UUID): String
+
+  fun inventoryRepositoryRequiredUUIDCheckingOK(
+    requiredUUID: UUID?,
+    receivedUUID: UUID): String
 
   val inventoryRepositoryAddParseFailed: String
 

@@ -121,4 +121,16 @@ Add repositories using the action bar menu!</string>
   <string name="install_apk_cancelled">APK installation was cancelled</string>
   <string name="install_verify_cancelled">Verification cancelled</string>
   <string name="install_downloading_cancelled">Download cancelled</string>
+
+  <string name="inventory_required_uuid_checking">Checking that repository has required UUID…</string>
+  <string name="inventory_required_uuid_checking_failed">Repository has incorrect UUID.\n
+\n
+Required: %1$s\n
+Received: %2$s
+  </string>
+  <string name="inventory_required_uuid_checking_succeeded">Repository has correct UUID.\n
+\n
+Required: %1$s\n
+Received: %2$s
+  </string>
 </resources>

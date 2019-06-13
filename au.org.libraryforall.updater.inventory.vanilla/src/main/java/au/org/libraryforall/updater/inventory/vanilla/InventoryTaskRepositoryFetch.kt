@@ -13,13 +13,15 @@ import org.joda.time.Instant
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.URI
+import java.util.UUID
 
 class InventoryTaskRepositoryFetch(
   private val resources: InventoryStringResourcesType,
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val repositoryParsers: RepositoryXMLParserProviderType,
-  private val uri: URI) {
+  private val uri: URI,
+  private val requiredUUID: UUID?) {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskRepositoryFetch::class.java)
 
@@ -112,7 +114,36 @@ class InventoryTaskRepositoryFetch(
     }
   }
 
+  private fun checkRequiredUUID(repository: Repository): InventoryTaskMonad<Repository> {
+    val step = InventoryTaskStep(
+      description = this.resources.inventoryRepositoryRequiredUUIDChecking,
+      resolution = "",
+      exception = null,
+      failed = false)
+
+    return when (this.requiredUUID) {
+      null -> {
+        step.failed = false
+        step.resolution = this.resources.inventoryRepositoryRequiredUUIDCheckingOK(this.requiredUUID, repository.id)
+        InventoryTaskMonad.InventoryTaskSuccess(repository)
+      }
+      else -> {
+        if (this.requiredUUID != repository.id) {
+          step.failed = true
+          step.resolution = this.resources.inventoryRepositoryRequiredUUIDCheckingFailed(this.requiredUUID, repository.id)
+          InventoryTaskMonad.InventoryTaskFailed()
+        } else {
+          step.failed = false
+          step.resolution = this.resources.inventoryRepositoryRequiredUUIDCheckingOK(this.requiredUUID, repository.id)
+          InventoryTaskMonad.InventoryTaskSuccess(repository)
+        }
+      }
+    }
+  }
+
   fun execute(): InventoryTaskMonad<Repository> =
-    this.fetchHTTP().flatMap(this::parse)
+    this.fetchHTTP()
+      .flatMap(this::parse)
+      .flatMap(this::checkRequiredUUID)
 
 }

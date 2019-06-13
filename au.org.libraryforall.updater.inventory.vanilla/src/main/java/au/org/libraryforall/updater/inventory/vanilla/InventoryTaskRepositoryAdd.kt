@@ -7,6 +7,7 @@ import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProvid
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import java.net.URI
+import java.util.UUID
 
 class InventoryTaskRepositoryAdd(
   private val resources: InventoryStringResourcesType,
@@ -14,15 +15,17 @@ class InventoryTaskRepositoryAdd(
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val repositoryParsers: RepositoryXMLParserProviderType,
   private val database: InventoryRepositoryDatabaseType,
-  private val uri: URI) {
+  private val uri: URI,
+  private val requiredUUID: UUID?) {
 
   fun execute(): InventoryTaskMonad<InventoryRepositoryDatabaseEntryType> {
     return InventoryTaskRepositoryFetch(
-      resources = resources,
-      http = http,
-      httpAuthentication = httpAuthentication,
-      repositoryParsers = repositoryParsers,
-      uri = uri
+      resources = this.resources,
+      http = this.http,
+      httpAuthentication = this.httpAuthentication,
+      repositoryParsers = this.repositoryParsers,
+      uri = this.uri,
+      requiredUUID = this.requiredUUID
     ).execute()
       .flatMap { repository ->
         InventoryTaskRepositorySave(this.resources, this.database, repository).execute()

@@ -175,9 +175,11 @@ class InventoryRepositoryDatabase private constructor(
     } else {
       this.logger.debug("createOrUpdate: {} does not exist", repository.id)
       val baseDirectory = File(this.directory, repository.id.toString())
-      val entry =
-        this.Entry(baseDirectory, repository)
+      val entry = this.Entry(baseDirectory, repository)
       entry.update(repository)
+      synchronized(this.entriesLock) {
+        this.entriesCurrent[repository.id] = entry
+      }
       this.eventSubject.onNext(DatabaseRepositoryAdded(repository.id))
       entry
     }

@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
 
     this.router = Conductor.attachRouter(this, container, savedInstanceState)
     if (!this.router.hasRootController()) {
+      MainServices.backgroundExecutor().execute {
+        BundledRepositoriesTask(this, this.inventory).execute()
+      }
+
       this.router.setRoot(RouterTransaction.with(RepositoriesViewController()))
     }
   }

@@ -17,6 +17,7 @@ import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProvid
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
+import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.vanilla.HTTPClientsOkHTTP
@@ -52,6 +53,15 @@ object MainServices {
   }
 
   private lateinit var context: Context
+
+  private val backgroundExecutor =
+    MoreExecutors.listeningDecorator(
+      Executors.newFixedThreadPool(1) { runnable ->
+        val th = Thread(runnable)
+        th.name = "au.org.libraryforall.updater.app.bundled[${th.id}]"
+        android.os.Process.setThreadPriority(19)
+        th
+      })
 
   private val inventoryExecutor =
     MoreExecutors.listeningDecorator(
@@ -148,6 +158,9 @@ object MainServices {
 
   fun inventory(): InventoryType =
     this.inventory.get()
+
+  fun backgroundExecutor(): ListeningExecutorService =
+    this.backgroundExecutor
 
   fun initialize(context: Context) {
     this.context = context

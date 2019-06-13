@@ -265,7 +265,8 @@ class InventoryRepository(
       httpAuthentication = this.httpAuthentication,
       repositoryParsers = this.repositoryParsers,
       database = this.databaseEntry.database,
-      uri = this.databaseEntry.repository.self)
+      uri = this.databaseEntry.repository.self,
+      requiredUUID = this.id)
       .execute()
       .flatMap { InventoryTaskSuccess(Unit) }
   }

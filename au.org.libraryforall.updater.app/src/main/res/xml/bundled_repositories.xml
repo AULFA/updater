@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bundled-repositories>
+  <bundled-repository
+    source="https://builds.lfa.one/apk/releases.xml"
+    title="LFA Releases"
+    uuid="378142a2-23ff-44c9-964f-b621fe45ed0c" />
+  <bundled-repository
+    source="https://builds.lfa.one/apk/releases-old.xml"
+    title="LFA Releases (Outdated for demonstration purposes)"
+    uuid="5659ab41-2faf-44e5-aa38-d9c76205a342" />
+  <bundled-repository
+    source="https://hotspot.lfa.one:8080/apk/hotspot.xml"
+    title="LFA Hotspot Mirror"
+    uuid="f2e20610-63c1-46ce-95aa-606a7c9e2391" />
+</bundled-repositories>

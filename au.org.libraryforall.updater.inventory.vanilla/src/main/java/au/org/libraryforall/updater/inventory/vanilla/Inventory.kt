@@ -157,7 +157,10 @@ class Inventory private constructor(
     })
   }
 
-  override fun inventoryRepositoryAdd(uri: URI): ListenableFuture<InventoryRepositoryAddResult> {
+  override fun inventoryRepositoryAdd(
+    uri: URI,
+    requiredUUID: UUID?
+  ): ListenableFuture<InventoryRepositoryAddResult> {
     synchronized(this.repositoryLock) {
       when (this.stateActual) {
         InventoryState.InventoryIdle,
@@ -192,7 +195,8 @@ class Inventory private constructor(
           httpAuthentication = this.httpAuthentication,
           repositoryParsers = this.repositoryParsers,
           database = this.inventoryDatabase,
-          uri = uri
+          uri = uri,
+          requiredUUID = requiredUUID
         ).execute()
           .flatMap { entry -> InventoryTaskSuccess(this.putRepositoryForEntry(entry)) }
 
