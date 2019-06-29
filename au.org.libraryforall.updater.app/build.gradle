@@ -56,6 +56,30 @@ def getGitHash = { ->
 android {
   def version = versionValues()
 
+  signingConfigs {
+    debug {
+      keyAlias findProperty("au.org.libraryforall.keyAlias")
+      keyPassword findProperty("au.org.libraryforall.keyPassword")
+      storeFile file("${project.rootDir}/lfa-keystore.jks")
+      storePassword findProperty("au.org.libraryforall.storePassword")
+    }
+    release {
+      keyAlias findProperty("au.org.libraryforall.keyAlias")
+      keyPassword findProperty("au.org.libraryforall.keyPassword")
+      storeFile file("${project.rootDir}/lfa-keystore.jks")
+      storePassword findProperty("au.org.libraryforall.storePassword")
+    }
+  }
+
+  buildTypes {
+    debug {
+      signingConfig signingConfigs.debug
+    }
+    release {
+      signingConfig signingConfigs.release
+    }
+  }
+
   defaultConfig {
     buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
     versionName = VERSION_NAME
