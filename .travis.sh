@@ -6,6 +6,12 @@ then
   exit 1
 fi
 
+if [ -z "${LFA_KEYSTORE_PASSWORD}" ]
+then
+  echo "LFA_KEYSTORE_PASSWORD not set"
+  exit 1
+fi
+
 #------------------------------------------------------------------------
 # Configure SSH
 
