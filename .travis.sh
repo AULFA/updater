@@ -1,7 +1,8 @@
 #!/bin/sh
 
 (cat <<EOF
-
+nexusUsername = notausername
+nexusPassword = notapassword
 EOF
 ) > gradle.properties.tmp || exit 1
 
