@@ -18,4 +18,4 @@ EOF
 
 ./gradlew clean assemble test || exit 1
 
-scp ./au.org.libraryforall.updater.app/build/outputs/apk/debug/*.apk travis-ci@builds.lfa.one:/sites/builds.lfa.one/apk/ || exit 1
+scp -P 1022 ./au.org.libraryforall.updater.app/build/outputs/apk/debug/*.apk travis-ci@builds.lfa.one:/sites/builds.lfa.one/apk/ || exit 1
