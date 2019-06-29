@@ -28,6 +28,10 @@ scp -P 1022 travis-ci@builds.lfa.one:lfa-keystore.jks .
 
 nexusUsername = notausername
 nexusPassword = notapassword
+
+au.org.libraryforall.keyAlias=main
+au.org.libraryforall.keyPassword=${LFA_KEYSTORE_PASSWORD}
+au.org.libraryforall.storePassword=${LFA_KEYSTORE_PASSWORD}
 EOF
 ) >> gradle.properties || exit 1
 
