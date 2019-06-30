@@ -8,6 +8,13 @@ updater
 The LFA Updater application downloads and installs updates to applications published in
 [repositories](#repositories).
 
+## Features
+
+* Install and update applications from self-hosted repositories
+* Minimal repository hosting requirements: Consumes static XML and APK files
+* High coverage test suite
+* Apache 2.0 License
+
 ## Repositories
 
 A _repository_ is an XML file conforming to the published [updater xml schema](au.org.libraryforall.updater.repository.xml.v1_0/src/main/resources/au/org/libraryforall/updater/repository/xml/v1_0/schema-1.0.xsd).
