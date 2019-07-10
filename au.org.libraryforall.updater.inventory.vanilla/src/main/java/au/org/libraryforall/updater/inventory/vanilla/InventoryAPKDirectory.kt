@@ -31,6 +31,37 @@ class InventoryAPKDirectory private constructor(private val base: File)
     this.base.mkdirs()
   }
 
+  override fun clear(): List<InventoryAPKDirectoryType.Deleted> {
+    val baseList: Array<String> = this.base.list() ?: emptyArray()
+
+    val deleted =
+      mutableListOf<InventoryAPKDirectoryType.Deleted>()
+
+    for (name in baseList) {
+      try {
+        val hash = Hash(name.removeSuffix(".apk"))
+        val file = synchronized(this.reservationLock) {
+          if (!this.reservations.containsKey(hash)) {
+            File(this.base, hash.text + ".apk")
+          } else {
+            null
+          }
+        }
+
+        if (file != null) {
+          val size = file.length()
+          this.logger.debug("deleting {} ({} bytes)", file, size)
+          file.delete()
+          deleted.add(InventoryAPKDirectoryType.Deleted(file, hash, size))
+        }
+      } catch (e: IllegalArgumentException) {
+        this.logger.debug("unusual file in APK directory: {}: ", name, e)
+      }
+    }
+
+    return deleted.toList()
+  }
+
   override fun <T> withKey(
     key: Hash,
     receiver: (KeyReservationType) -> T)
@@ -44,7 +75,7 @@ class InventoryAPKDirectory private constructor(private val base: File)
         if (existing != null) {
           throw ReservationUnavailableException("Reservation unavailable for ${key.text}")
         } else {
-          val reservation = Reservation(key, File(base, "${key.text}.apk"))
+          val reservation = this.Reservation(key, File(this.base, "${key.text}.apk"))
           this.reservations[key] = reservation
           reservation
         }
@@ -64,7 +95,7 @@ class InventoryAPKDirectory private constructor(private val base: File)
     override val file: File) : KeyReservationType {
 
     override fun verify(progress: (VerificationProgressType) -> Unit): VerificationResult =
-      verifyFileWithProgress(this.hash, progress)
+      this@InventoryAPKDirectory.verifyFileWithProgress(this.hash, progress)
   }
 
   private class Verification(
@@ -75,10 +106,10 @@ class InventoryAPKDirectory private constructor(private val base: File)
     var wantCancel: Boolean) : VerificationProgressType {
 
     override val currentBytes: Long
-      get() = currentBytesValue
+      get() = this.currentBytesValue
 
     override val maximumBytes: Long
-      get() = maximumBytesValue
+      get() = this.maximumBytesValue
 
     override fun cancel() {
       this.wantCancel = true

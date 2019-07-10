@@ -68,4 +68,10 @@ interface InventoryType {
     id: UUID)
     : ListenableFuture<InventoryRepositoryRemoveResult>
 
+  /**
+   * Delete all cached data.
+   */
+
+  fun inventoryDeleteCachedData()
+    : ListenableFuture<List<InventoryAPKDirectoryType.Deleted>>
 }

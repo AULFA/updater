@@ -157,6 +157,10 @@ class Inventory private constructor(
     })
   }
 
+  override fun inventoryDeleteCachedData(): ListenableFuture<List<InventoryAPKDirectoryType.Deleted>> {
+    return this.executor.submit(Callable { this.apkDirectory.clear() })
+  }
+
   override fun inventoryRepositoryAdd(
     uri: URI,
     requiredUUID: UUID?

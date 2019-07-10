@@ -14,4 +14,9 @@
     android:title="@string/inventory_menu_version"
     android:visible="true" />
 
+  <item
+    android:id="@+id/menuItemDeleteCachedData"
+    android:title="@string/inventory_menu_delete_cached_data"
+    android:visible="true" />
+
 </menu>

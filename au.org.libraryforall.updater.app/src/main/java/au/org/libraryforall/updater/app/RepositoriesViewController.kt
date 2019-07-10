@@ -7,10 +7,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import com.bluelinelabs.conductor.Controller
@@ -72,12 +74,50 @@ class RepositoriesViewController : Controller() {
         this.onSelectedVersion()
         true
       }
+
       R.id.menuItemRepositoryAdd -> {
         this.onSelectedRepositoryAdd()
         true
       }
 
+      R.id.menuItemDeleteCachedData -> {
+        this.onSelectedDeleteCachedData()
+        true
+      }
+
       else -> super.onOptionsItemSelected(item)
+    }
+  }
+
+  private fun onSelectedDeleteCachedData() {
+    AlertDialog.Builder(this.activity!!)
+      .setTitle(R.string.delete_cached_confirm_title)
+      .setMessage(R.string.delete_cached_confirm)
+      .setPositiveButton(R.string.delete_cached, { dialog, which ->
+        val future = this.inventory.inventoryDeleteCachedData()
+        future.addListener(Runnable {
+          this.onDeletedCachedData(future.get())
+        }, MainServices.backgroundExecutor())
+      })
+      .show()
+  }
+
+  private fun onDeletedCachedData(deletedFiles: List<InventoryAPKDirectoryType.Deleted>) {
+
+    UIThread.execute {
+      val deletedSize =
+        deletedFiles.fold(0.0, { acc, deleted -> acc + deleted.size })
+
+      val message =
+        this.resources!!.getString(
+          R.string.deleted_cached,
+          deletedFiles.size,
+          deletedSize / 1_000_000.0)
+
+      AlertDialog.Builder(this.activity!!)
+        .setTitle(R.string.deleted_cached_title)
+        .setMessage(message)
+        .show()
     }
   }
 

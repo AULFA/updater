@@ -16,6 +16,30 @@ import java.io.IOException
 interface InventoryAPKDirectoryType {
 
   /**
+   * The result of deleting a file.
+   */
+
+  data class Deleted(
+
+    /**
+     * The deleted file.
+     */
+
+    val file: File,
+
+    /**
+     * The hash the file had.
+     */
+
+    val hash: Hash,
+
+    /**
+     * The size of the deleted file.
+     */
+
+    val size: Long)
+
+  /**
    * The result of executing verification of a file.
    */
 
@@ -114,4 +138,10 @@ interface InventoryAPKDirectoryType {
     key: Hash,
     receiver: (KeyReservationType) -> T
   ): T
+
+  /**
+   * Delete all cached, non-locked files.
+   */
+
+  fun clear(): List<Deleted>
 }

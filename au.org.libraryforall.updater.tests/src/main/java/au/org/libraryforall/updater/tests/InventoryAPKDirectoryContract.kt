@@ -153,6 +153,39 @@ abstract class InventoryAPKDirectoryContract {
     }
   }
 
+  @Test
+  fun testClear() {
+    val index = this.hashIndexedDirectory(this.directory)
+
+    val hashes =
+      listOf<Hash>(
+        Hash("5a936ee19a0cf3c70d8cb0006111b7a52f45ec01703e0af8cdc8c6d81ac5850c"),
+        Hash("91e9240f415223982edc345532630710e94a7f52cd5f48f5ee1afc555078f0ab"),
+        Hash("87298cc2f31fba73181ea2a9e6ef10dce21ed95e98bdac9c4e1504ea16f486e4"))
+
+    val data =
+      listOf<String>(
+        "hello0",
+        "hello1",
+        "hello2")
+
+    for (dataIndex in 0 until 3) {
+      val hash = hashes[dataIndex]
+      val data = data[dataIndex]
+
+      index.withKey(hash) { reservation ->
+        FileOutputStream(reservation.file).use { stream ->
+          stream.write(data.toByteArray())
+          stream.flush()
+        }
+      }
+    }
+
+    val deletions = index.clear()
+    Assert.assertEquals(3, deletions.size)
+    Assert.assertEquals(hashes.toSet(), deletions.map { deletion -> deletion.hash }.toSet())
+  }
+
   @Test(timeout = 20_000L)
   fun testThrottledReceiver10() {
     this.runThrottledReceiver(10, AtomicBoolean(false))
