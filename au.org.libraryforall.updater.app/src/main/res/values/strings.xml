@@ -15,6 +15,8 @@
   <string name="inventory_menu_repository_add">Add Repository…</string>
   <string name="inventory_menu_repository_delete">Delete Repository…</string>
   <string name="inventory_menu_version">Application Version…</string>
+  <string name="inventory_menu_delete_cached_data">Delete cached data…</string>
+  <string name="inventory_menu_overview">Overview…</string>
 
   <string name="failure_steps_title">Task Steps</string>
 
@@ -133,10 +135,10 @@ Received: %2$s
 Required: %1$s\n
 Received: %2$s
   </string>
-  <string name="inventory_menu_delete_cached_data">Delete cached data…</string>
   <string name="delete_cached_confirm_title">Delete cached data?</string>
   <string name="delete_cached_confirm">Are you sure you want to delete all cached data?</string>
   <string name="delete_cached">Delete</string>
   <string name="deleted_cached_title">Deletion completed</string>
   <string name="deleted_cached">Deleted %1$d files totalling %2$.2fM of data</string>
+  <string name="overview">Updates Overview</string>
 </resources>

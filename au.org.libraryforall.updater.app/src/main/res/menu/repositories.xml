@@ -3,6 +3,13 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
+    android:id="@+id/menuItemOverview"
+    android:icon="@drawable/overview"
+    android:title="@string/inventory_menu_overview"
+    android:visible="true"
+    app:showAsAction="ifRoom" />
+
+  <item
     android:id="@+id/menuItemRepositoryAdd"
     android:icon="@drawable/add"
     android:title="@string/inventory_menu_repository_add"

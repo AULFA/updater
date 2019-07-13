@@ -70,6 +70,11 @@ class RepositoriesViewController : Controller() {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
+      R.id.menuItemOverview -> {
+        this.onSelectedOverview()
+        true
+      }
+
       R.id.menuItemVersion -> {
         this.onSelectedVersion()
         true
@@ -87,6 +92,13 @@ class RepositoriesViewController : Controller() {
 
       else -> super.onOptionsItemSelected(item)
     }
+  }
+
+  private fun onSelectedOverview() {
+    this.router.pushController(
+      RouterTransaction.with(OverviewViewController())
+        .pushChangeHandler(HorizontalChangeHandler())
+        .popChangeHandler(HorizontalChangeHandler()))
   }
 
   private fun onSelectedDeleteCachedData() {
