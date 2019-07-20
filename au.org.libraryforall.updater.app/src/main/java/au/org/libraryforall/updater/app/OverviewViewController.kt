@@ -89,7 +89,7 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
     for (repository in this.inventory.inventoryRepositories()) {
       for (packageCurrent in repository.packages) {
-        if (packageIsSuitableForOverview(packageCurrent)) {
+        if (this.packageIsSuitableForOverview(packageCurrent)) {
           val existing = updates[packageCurrent.id]
           if (existing == null || packageCurrent.versionCode > existing.versionCode) {
             updates[packageCurrent.id] = packageCurrent
