@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryPackageState
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
@@ -88,7 +89,7 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
     for (repository in this.inventory.inventoryRepositories()) {
       for (packageCurrent in repository.packages) {
-        if (packageCurrent.isUpdateAvailable) {
+        if (packageIsSuitableForOverview(packageCurrent)) {
           val existing = updates[packageCurrent.id]
           if (existing == null || packageCurrent.versionCode > existing.versionCode) {
             updates[packageCurrent.id] = packageCurrent
@@ -106,6 +107,14 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
       this.listAdapter.notifyDataSetChanged()
     }
   }
+
+  private fun packageIsSuitableForOverview(packageCurrent: InventoryRepositoryPackageType) =
+    packageCurrent.isUpdateAvailable || when (packageCurrent.state) {
+      is InventoryPackageState.NotInstalled -> false
+      is InventoryPackageState.Installed -> false
+      is InventoryPackageState.InstallFailed -> true
+      is InventoryPackageState.Installing -> true
+    }
 
   private fun showRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryPackageType,
