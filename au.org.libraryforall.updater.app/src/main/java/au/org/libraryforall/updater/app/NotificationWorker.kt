@@ -36,6 +36,7 @@ class NotificationWorker(
     for (repository in inventory.inventoryRepositories()) {
       for (repositoryPackage in repository.packages) {
         if (repositoryPackage.isUpdateAvailable) {
+          this.logger.debug("update available for {}, showing notification", repositoryPackage.id)
           this.publishNotification()
           return Result.success()
         }
