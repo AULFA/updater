@@ -9,8 +9,4 @@
     source="http://hotspot.lfa.one:8080/apk/releases.xml"
     title="LFA Hotspot Mirror"
     uuid="f2e20610-63c1-46ce-95aa-606a7c9e2391" />
-  <bundled-repository
-    source="https://builds.lfa.one/apk/outdated/releases.xml"
-    title="LFA Releases (Outdated)"
-    uuid="e21216c2-33f9-4cb5-933f-faf1b18a09a6" />
 </bundled-repositories>
