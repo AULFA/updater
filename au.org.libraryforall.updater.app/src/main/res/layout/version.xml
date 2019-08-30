@@ -11,7 +11,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:text="@string/versions_revision"
-    android:textSize="14sp"
+    android:textSize="18sp"
     android:textStyle="bold" />
 
   <TextView
@@ -29,7 +29,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:text="@string/versions_version"
-    android:textSize="14sp"
+    android:textSize="18sp"
     android:textStyle="bold" />
 
   <TextView
@@ -37,9 +37,34 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
+    android:layout_marginBottom="16dp"
     android:layout_below="@id/version_version_title"
     android:fontFamily="monospace"
     android:textSize="12sp"
     android:text="1.0.0 (2000)" />
+
+  <LinearLayout
+    android:id="@+id/version_developer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:visibility="invisible">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginBottom="16dp"
+      android:text="@string/devSettingsTitle"
+      android:textSize="18sp"
+      android:textStyle="bold" />
+
+    <Button
+      android:id="@+id/openOverviewActivity"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="@string/devTargetOverview" />
+  </LinearLayout>
 
 </LinearLayout>

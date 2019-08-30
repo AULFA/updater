@@ -9,4 +9,8 @@ object UIThread {
     Handler(Looper.getMainLooper()).post(runnable)
   }
 
+  fun executeLater(runnable: () -> Unit, milliseconds: Long) {
+    Handler(Looper.getMainLooper()).postDelayed(runnable, milliseconds)
+  }
+
 }

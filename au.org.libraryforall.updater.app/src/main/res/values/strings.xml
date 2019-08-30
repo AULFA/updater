@@ -141,4 +141,8 @@ Received: %2$s
   <string name="deleted_cached_title">Deletion completed</string>
   <string name="deleted_cached">Deleted %1$d files totalling %2$.2fM of data</string>
   <string name="overview">Updates Overview</string>
+
+  <!-- Developer settings strings -->
+  <string name="devTargetOverview">Launch Overview Activity</string>
+  <string name="devSettingsTitle">Developer Settings</string>
 </resources>
