@@ -15,15 +15,17 @@ dependencies {
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXCore
+  implementation libraries.androidXWorkManager
   implementation libraries.conductor
+  implementation libraries.irradiaHTTPAPI
+  implementation libraries.irradiaHTTPVanilla
   implementation libraries.kotlinStdlib
+  implementation libraries.logbackAndroid
   implementation libraries.rxjava
+
   implementation (libraries.slf4j) {
     force = true
   }
-  implementation libraries.logbackAndroid
-  implementation libraries.irradiaHTTPAPI
-  implementation libraries.irradiaHTTPVanilla
 }
 
 def versionValues() {

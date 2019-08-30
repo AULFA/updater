@@ -5,11 +5,16 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,6 +80,31 @@ class MainActivity : AppCompatActivity() {
         }
       }
     }
+
+    this.enqueueUpdateTask()
+  }
+
+  private fun enqueueUpdateTask() {
+
+    /*
+     * Start a task to handle updates.
+     */
+
+    val workRequestContraints =
+      Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiresStorageNotLow(true)
+        .build()
+
+    val workRequest =
+      PeriodicWorkRequestBuilder<NotificationWorker>(1, TimeUnit.HOURS)
+        .setConstraints(workRequestContraints)
+        .setInitialDelay(1L, TimeUnit.MINUTES)
+        .addTag("au.org.libraryforall.updater.app.Updates")
+        .build()
+
+    WorkManager.getInstance(this)
+      .enqueue(workRequest)
   }
 
   override fun onBackPressed() {

@@ -142,6 +142,9 @@ Received: %2$s
   <string name="deleted_cached">Deleted %1$d files totalling %2$.2fM of data</string>
   <string name="overview">Updates Overview</string>
 
+  <string name="notificationUpdatesTitle">Updates available!</string>
+  <string name="notificationUpdatesText">One or more application updates are available in the updater…</string>
+
   <!-- Developer settings strings -->
   <string name="devTargetOverview">Launch Overview Activity</string>
   <string name="devSettingsTitle">Developer Settings</string>
