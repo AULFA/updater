@@ -36,7 +36,7 @@ class InventoryTaskInstallAPK(
           file = this.file)
 
       this.logger.debug("waiting for install task")
-      val status = task.future.get(3L, TimeUnit.MINUTES)
+      val status = task.future.get(10L, TimeUnit.MINUTES)
       this.logger.debug("install task returned")
 
       when (status) {
