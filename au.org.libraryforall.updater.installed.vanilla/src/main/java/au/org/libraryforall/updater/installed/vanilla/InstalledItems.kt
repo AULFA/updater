@@ -1,12 +1,12 @@
 package au.org.libraryforall.updater.installed.vanilla
 
 import android.content.Context
-import au.org.libraryforall.updater.installed.api.InstalledPackage
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageAdded
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageRemoved
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageUpdated
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItem
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemAdded
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemRemoved
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemUpdated
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -16,17 +16,21 @@ import java.util.concurrent.Executors
 import android.content.Intent
 import android.content.pm.ResolveInfo
 
+/**
+ * The default implementation of the [InstalledItemsType] interface.
+ */
 
-class InstalledPackages private constructor(
-  private val context: Context) : InstalledPackagesType {
+class InstalledItems private constructor(
+  private val context: Context
+) : InstalledItemsType {
 
-  private val logger = LoggerFactory.getLogger(InstalledPackages::class.java)
+  private val logger = LoggerFactory.getLogger(InstalledItems::class.java)
 
   private val executor =
     MoreExecutors.listeningDecorator(
       Executors.newFixedThreadPool(1) { runnable ->
         val th = Thread(runnable)
-        th.name = "au.org.libraryforall.updater.installed.vanilla.InstalledPackages.poll[${th.id}]"
+        th.name = "au.org.libraryforall.updater.installed.vanilla.InstalledItems.poll[${th.id}]"
         android.os.Process.setThreadPriority(19)
         th
       })
@@ -37,13 +41,13 @@ class InstalledPackages private constructor(
   }
 
   companion object {
-    fun create(context: Context): InstalledPackagesType =
-      InstalledPackages(context)
+    fun create(context: Context): InstalledItemsType =
+      InstalledItems(context)
   }
 
-  private val eventSubject: PublishSubject<InstalledPackageEvent> = PublishSubject.create()
+  private val eventSubject: PublishSubject<InstalledItemEvent> = PublishSubject.create()
 
-  override fun packages(): Map<String, InstalledPackage> {
+  override fun items(): Map<String, InstalledItem> {
     val intent = Intent(Intent.ACTION_MAIN, null)
     intent.addCategory(Intent.CATEGORY_LAUNCHER)
     return this.context.packageManager.queryIntentActivities(intent, 0)
@@ -55,16 +59,16 @@ class InstalledPackages private constructor(
   private fun pollingTask() {
     var installedThen =
       try {
-        this.packages()
+        this.items()
       } catch (e: Exception) {
         this.logger.error("polling task initial: ", e)
-        mapOf<String, InstalledPackage>()
+        mapOf<String, InstalledItem>()
       }
 
     while (true) {
       try {
         val installedNow =
-          this.packages()
+          this.items()
 
         val added =
           installedNow.filter { p -> !installedThen.containsKey(p.key) }
@@ -81,19 +85,19 @@ class InstalledPackages private constructor(
             }
           }
 
-        this.logger.trace("{} packages added", added.size)
+        this.logger.trace("{} items added", added.size)
         for (p in added) {
-          this.eventSubject.onNext(InstalledPackageAdded(p.value))
+          this.eventSubject.onNext(InstalledItemAdded(p.value))
         }
 
-        this.logger.trace("{} packages removed", removed.size)
+        this.logger.trace("{} items removed", removed.size)
         for (p in removed) {
-          this.eventSubject.onNext(InstalledPackageRemoved(p.value))
+          this.eventSubject.onNext(InstalledItemRemoved(p.value))
         }
 
-        this.logger.trace("{} packages updated", updated.size)
+        this.logger.trace("{} items updated", updated.size)
         for (p in updated) {
-          this.eventSubject.onNext(InstalledPackageUpdated(p.value))
+          this.eventSubject.onNext(InstalledItemUpdated(p.value))
         }
 
         installedThen = installedNow
@@ -109,15 +113,15 @@ class InstalledPackages private constructor(
     }
   }
 
-  private fun packageInfoToPackage(info: ResolveInfo): InstalledPackage? {
+  private fun packageInfoToPackage(info: ResolveInfo): InstalledItem? {
     return try {
       val packageInfo =
         this.context.packageManager.getPackageInfo(info.activityInfo.packageName, 0)
 
-      InstalledPackage(
+      InstalledItem(
         id = packageInfo.packageName,
         versionName = packageInfo.versionName ?: packageInfo.versionCode.toString(),
-        versionCode = packageInfo.versionCode,
+        versionCode = packageInfo.versionCode.toLong(),
         lastUpdated = Instant.ofEpochMilli(packageInfo.lastUpdateTime),
         name = packageInfo.applicationInfo.name ?: packageInfo.packageName)
     } catch (e: Exception) {
@@ -126,7 +130,7 @@ class InstalledPackages private constructor(
     }
   }
 
-  override val events: Observable<InstalledPackageEvent>
+  override val events: Observable<InstalledItemEvent>
     get() = this.eventSubject
 
 }

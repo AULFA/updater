@@ -9,28 +9,33 @@ import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Cancelled
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import com.google.common.util.concurrent.SettableFuture
 import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.random.Random
 
+/**
+ * An APK installer that calls the real Android API to install files.
+ */
+
 class APKInstallerDevice private constructor(
-  private val installedPackages: InstalledPackagesType) : APKInstallerType {
+  private val installedItems: InstalledItemsType
+) : APKInstallerType {
 
   init {
-    this.installedPackages.events.subscribe(this::onInstalledPackageEvent)
+    this.installedItems.events.subscribe(this::onInstalledItemEvent)
   }
 
-  private fun onInstalledPackageEvent(event: InstalledPackageEvent) =
+  private fun onInstalledItemEvent(event: InstalledItemEvent) =
     when (event) {
-      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageAdded ->
-        this.reportAPKInstalled(event.installedPackage.id, event.installedPackage.versionCode)
-      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageRemoved ->
-        this.reportAPKRemoved(event.installedPackage.id)
-      is InstalledPackageEvent.InstalledPackagesChanged.InstalledPackageUpdated ->
-        this.reportAPKInstalled(event.installedPackage.id, event.installedPackage.versionCode)
+      is InstalledItemEvent.InstalledItemsChanged.InstalledItemAdded ->
+        this.reportAPKInstalled(event.installedItem.id, event.installedItem.versionCode.toInt())
+      is InstalledItemEvent.InstalledItemsChanged.InstalledItemRemoved ->
+        this.reportAPKRemoved(event.installedItem.id)
+      is InstalledItemEvent.InstalledItemsChanged.InstalledItemUpdated ->
+        this.reportAPKInstalled(event.installedItem.id, event.installedItem.versionCode.toInt())
     }
 
   override fun reportStatus(requestCode: Int, resultCode: Int) {
@@ -82,8 +87,13 @@ class APKInstallerDevice private constructor(
   }
 
   companion object {
-    fun create(installedPackages: InstalledPackagesType): APKInstallerType =
-      APKInstallerDevice(installedPackages)
+
+    /**
+     * Create a new installer.
+     */
+
+    fun create(installedItems: InstalledItemsType): APKInstallerType =
+      APKInstallerDevice(installedItems)
   }
 
   private val logger = LoggerFactory.getLogger(APKInstallerDevice::class.java)

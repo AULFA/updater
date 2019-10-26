@@ -51,23 +51,23 @@ abstract class RepositoryXMLParserContract {
     Assert.assertEquals(URI.create("http://www.example.com/self"), repository.self)
     Assert.assertEquals("2019-01-01T00:00:00.000", repository.updated.toString())
 
-    Assert.assertEquals(3, repository.packages.size)
+    Assert.assertEquals(3, repository.items.size)
 
-    val p0 = repository.packages[0]
+    val p0 = repository.items[0]
     Assert.assertEquals("com.example.p0", p0.id)
     Assert.assertEquals(23, p0.versionCode)
     Assert.assertEquals("1.0.0", p0.versionName)
     Assert.assertEquals("87298cc2f31fba73181ea2a9e6ef10dce21ed95e98bdac9c4e1504ea16f486e4", p0.sha256.text)
     Assert.assertEquals("http://www.example.com/1", p0.source.toASCIIString())
 
-    val p1 = repository.packages[1]
+    val p1 = repository.items[1]
     Assert.assertEquals("com.example.p1", p1.id)
     Assert.assertEquals(22, p1.versionCode)
     Assert.assertEquals("1.0.2", p1.versionName)
     Assert.assertEquals("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824", p1.sha256.text)
     Assert.assertEquals("http://www.example.com/2", p1.source.toASCIIString())
 
-    val p2 = repository.packages[2]
+    val p2 = repository.items[2]
     Assert.assertEquals("com.example.p2", p2.id)
     Assert.assertEquals(24, p2.versionCode)
     Assert.assertEquals("1.0.4", p2.versionName)

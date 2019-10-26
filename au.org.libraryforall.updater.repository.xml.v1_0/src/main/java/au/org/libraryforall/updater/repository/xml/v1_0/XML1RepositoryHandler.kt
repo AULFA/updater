@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.repository.xml.v1_0
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
 import org.joda.time.LocalDateTime
@@ -13,9 +13,9 @@ import java.net.URI
 import java.util.UUID
 
 class XML1RepositoryHandler(locator2: Locator2)
-  : SPIFormatXMLAbstractContentHandler<RepositoryPackage, Repository>(locator2, "repository") {
+  : SPIFormatXMLAbstractContentHandler<RepositoryItem, Repository>(locator2, "repository") {
 
-  private lateinit var packages: MutableList<RepositoryPackage>
+  private lateinit var items: MutableList<RepositoryItem>
   private lateinit var updated: LocalDateTime
   private lateinit var title: String
   private lateinit var id: UUID
@@ -24,7 +24,7 @@ class XML1RepositoryHandler(locator2: Locator2)
   override fun onWantHandlerName(): String =
     XML1RepositoryHandler::class.java.simpleName
 
-  override fun onWantChildHandlers(): Map<String, () -> SPIFormatXMLContentHandlerType<RepositoryPackage>> =
+  override fun onWantChildHandlers(): Map<String, () -> SPIFormatXMLContentHandlerType<RepositoryItem>> =
     mapOf(Pair("package", { XML1RepositoryPackageHandler(super.locator(), this.self) }))
 
   override fun onElementFinishDirectly(
@@ -35,7 +35,7 @@ class XML1RepositoryHandler(locator2: Locator2)
       id = this.id,
       title = this.title,
       updated = this.updated,
-      packages = this.packages.toList(),
+      items = this.items.toList(),
       self = this.self)
 
   override fun onElementStartDirectly(
@@ -51,14 +51,14 @@ class XML1RepositoryHandler(locator2: Locator2)
       this.updated = formatter.parseLocalDateTime(attributes.getValue("updated"))
       this.title = attributes.getValue("title")
       this.self = URI(attributes.getValue("self"))
-      this.packages = mutableListOf()
+      this.items = mutableListOf()
     } catch (e: Exception) {
       throw SAXParseException(e.message, this.locator(), e)
     }
   }
 
-  override fun onChildResultReceived(value: RepositoryPackage) {
-    this.packages.add(value)
+  override fun onChildResultReceived(value: RepositoryItem) {
+    this.items.add(value)
   }
 
 }

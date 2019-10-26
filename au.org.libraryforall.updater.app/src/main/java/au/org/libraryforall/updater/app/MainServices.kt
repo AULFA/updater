@@ -5,11 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import androidx.core.content.ContextCompat.getSystemService
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerDevice
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
-import au.org.libraryforall.updater.installed.vanilla.InstalledPackages
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
+import au.org.libraryforall.updater.installed.vanilla.InstalledItems
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
@@ -81,8 +80,8 @@ object MainServices {
       InventoryStringResources(this.context)
     }
 
-  private val installedPackagesReference: AtomicService<InstalledPackagesType> =
-    AtomicService { InstalledPackages.create(this.context) }
+  private val installedPackagesReference: AtomicService<InstalledItemsType> =
+    AtomicService { InstalledItems.create(this.context) }
 
   private var httpClient: AtomicService<HTTPClientType> =
     AtomicService {
@@ -174,7 +173,7 @@ object MainServices {
   fun inventoryDirectory(): InventoryAPKDirectoryType =
     this.inventoryDirectoryReference.get()
 
-  fun installedPackages(): InstalledPackagesType =
+  fun installedPackages(): InstalledItemsType =
     this.installedPackagesReference.get()
 
   fun inventoryStringResources(): InventoryStringResourcesType =

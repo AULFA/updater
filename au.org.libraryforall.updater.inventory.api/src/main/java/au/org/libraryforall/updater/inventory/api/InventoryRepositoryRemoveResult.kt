@@ -5,4 +5,5 @@ import java.util.UUID
 
 data class InventoryRepositoryRemoveResult(
   val id: UUID,
-  val steps: List<InventoryTaskStep>): Serializable
+  val steps: List<InventoryTaskStep>
+): Serializable

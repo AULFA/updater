@@ -9,17 +9,17 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-class InventoryTaskInstallAPK(
+class InventoryTaskAPKInstall(
   private val activity: Any,
   private val resources: InventoryStringResourcesType,
   private val packageName: String,
-  private val packageVersionCode: Int,
+  private val packageVersionCode: Long,
   private val file: File,
   private val apkInstaller: APKInstallerType,
   val cancel: AtomicBoolean
 ) {
 
-  private val logger = LoggerFactory.getLogger(InventoryTaskInstallAPK::class.java)
+  private val logger = LoggerFactory.getLogger(InventoryTaskAPKInstall::class.java)
 
   fun execute(): InventoryTaskMonad<Unit> {
     val step = InventoryTaskStep(description = this.resources.installAPKStarted)
@@ -32,7 +32,7 @@ class InventoryTaskInstallAPK(
         this.apkInstaller.createInstallTask(
           activity = this.activity,
           packageName = this.packageName,
-          packageVersionCode = this.packageVersionCode,
+          packageVersionCode = this.packageVersionCode.toInt(),
           file = this.file)
 
       this.logger.debug("waiting for install task")

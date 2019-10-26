@@ -5,11 +5,11 @@ import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackage
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItem
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState
+import au.org.libraryforall.updater.inventory.api.InventoryItemState
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
@@ -18,7 +18,7 @@ import au.org.libraryforall.updater.inventory.vanilla.InventoryAPKDirectory
 import au.org.libraryforall.updater.inventory.vanilla.InventoryRepositoryDatabase
 import au.org.libraryforall.updater.repository.api.Hash
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
@@ -48,8 +48,8 @@ import java.util.concurrent.Executors
 
 abstract class InventoryContract {
 
-  private lateinit var installedPackages: InstalledPackagesType
-  private lateinit var installedPackagesEvents: PublishSubject<InstalledPackageEvent>
+  private lateinit var installedPackages: InstalledItemsType
+  private lateinit var installedPackagesEvents: PublishSubject<InstalledItemEvent>
   private lateinit var database: InventoryRepositoryDatabaseType
   private lateinit var databaseDirectory: File
   private lateinit var apkDirectory: File
@@ -72,17 +72,17 @@ abstract class InventoryContract {
     apkDirectory: InventoryAPKDirectoryType,
     apkInstaller: APKInstallerType,
     repositoryParsers: RepositoryXMLParserProviderType,
-    packages: InstalledPackagesType): InventoryType
+    packages: InstalledItemsType): InventoryType
 
-  class EmptyInstalledPackages : InstalledPackagesType {
+  class EmptyInstalledPackages : InstalledItemsType {
 
     val eventSubject =
-      PublishSubject.create<InstalledPackageEvent>()
+      PublishSubject.create<InstalledItemEvent>()
 
-    override fun packages(): Map<String, InstalledPackage> =
+    override fun items(): Map<String, InstalledItem> =
       mapOf()
 
-    override val events: Observable<InstalledPackageEvent>
+    override val events: Observable<InstalledItemEvent>
       get() = this.eventSubject
   }
 
@@ -104,9 +104,9 @@ abstract class InventoryContract {
         this.databaseDirectory)
 
     this.installedPackagesEvents =
-      PublishSubject.create<InstalledPackageEvent>()
+      PublishSubject.create<InstalledItemEvent>()
     this.installedPackages =
-      Mockito.mock(InstalledPackagesType::class.java)
+      Mockito.mock(InstalledItemsType::class.java)
     Mockito.`when`(this.installedPackages.events)
       .thenReturn(this.installedPackagesEvents)
 
@@ -164,7 +164,7 @@ abstract class InventoryContract {
         packages = EmptyInstalledPackages())
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -177,7 +177,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -187,7 +187,7 @@ abstract class InventoryContract {
     Assert.assertEquals(
       "One package",
       1,
-      putResult.repository!!.packages.size)
+      putResult.repository!!.items.size)
   }
 
   @Test(timeout = 10_000L)
@@ -214,7 +214,7 @@ abstract class InventoryContract {
         packages = this.installedPackages)
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -227,7 +227,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -235,7 +235,7 @@ abstract class InventoryContract {
         .get()
 
     val inventoryPackage =
-      putResult.repository!!.packages[0]
+      putResult.repository!!.items[0]
 
     Mockito
       .`when`(http.get(
@@ -263,7 +263,7 @@ abstract class InventoryContract {
       .`when`(apkInstaller.createInstallTask(
         activity = activity,
         packageName = package0.id,
-        packageVersionCode = package0.versionCode,
+        packageVersionCode = package0.versionCode.toInt(),
         file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
@@ -271,14 +271,14 @@ abstract class InventoryContract {
       inventoryPackage.install(activity)
 
     val installedPackage =
-      InstalledPackage(
+      InstalledItem(
         id = package0.id,
         versionCode = package0.versionCode,
         versionName = package0.versionName,
         name = package0.name,
         lastUpdated = Instant.now())
 
-    Mockito.`when`(this.installedPackages.packages())
+    Mockito.`when`(this.installedPackages.items())
       .thenReturn(mapOf(Pair(package0.id, installedPackage)))
 
     val result =
@@ -293,7 +293,7 @@ abstract class InventoryContract {
 
     Assert.assertTrue(
       "Package is installed",
-      inventoryPackage.state is InventoryPackageState.Installed)
+      inventoryPackage.state is InventoryItemState.Installed)
   }
 
   @Test(timeout = 10_000L)
@@ -320,7 +320,7 @@ abstract class InventoryContract {
         packages = EmptyInstalledPackages())
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -333,7 +333,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -341,7 +341,7 @@ abstract class InventoryContract {
         .get()
 
     val inventoryPackage =
-      putResult.repository!!.packages[0]
+      putResult.repository!!.items[0]
 
     Mockito
       .`when`(http.get(
@@ -369,7 +369,7 @@ abstract class InventoryContract {
 
     Assert.assertTrue(
       "Package install failed",
-      inventoryPackage.state is InventoryPackageState.InstallFailed)
+      inventoryPackage.state is InventoryItemState.InstallFailed)
   }
 
   @Test(timeout = 10_000L)
@@ -396,7 +396,7 @@ abstract class InventoryContract {
         packages = EmptyInstalledPackages())
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -409,7 +409,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -417,7 +417,7 @@ abstract class InventoryContract {
         .get()
 
     val inventoryPackage =
-      putResult.repository!!.packages[0]
+      putResult.repository!!.items[0]
 
     Mockito
       .`when`(http.get(
@@ -441,7 +441,7 @@ abstract class InventoryContract {
 
     Assert.assertTrue(
       "Package install failed",
-      inventoryPackage.state is InventoryPackageState.InstallFailed)
+      inventoryPackage.state is InventoryItemState.InstallFailed)
   }
 
   @Test(timeout = 10_000L)
@@ -468,7 +468,7 @@ abstract class InventoryContract {
         packages = EmptyInstalledPackages())
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -481,7 +481,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -489,7 +489,7 @@ abstract class InventoryContract {
         .get()
 
     val inventoryPackage =
-      putResult.repository!!.packages[0]
+      putResult.repository!!.items[0]
 
     Mockito
       .`when`(http.get(
@@ -517,7 +517,7 @@ abstract class InventoryContract {
       .`when`(apkInstaller.createInstallTask(
         activity = activity,
         packageName = package0.id,
-        packageVersionCode = package0.versionCode,
+        packageVersionCode = package0.versionCode.toInt(),
         file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
@@ -534,7 +534,7 @@ abstract class InventoryContract {
 
     Assert.assertTrue(
       "Package install failed",
-      inventoryPackage.state is InventoryPackageState.InstallFailed)
+      inventoryPackage.state is InventoryItemState.InstallFailed)
   }
 
   @Test(timeout = 10_000L)
@@ -561,7 +561,7 @@ abstract class InventoryContract {
         packages = EmptyInstalledPackages())
 
     val package0 =
-      RepositoryPackage(
+      RepositoryItem.RepositoryAndroidPackage(
         id = "one.lfa.app0",
         versionCode = 23,
         versionName = "1.0.2",
@@ -574,7 +574,7 @@ abstract class InventoryContract {
         id = UUID.randomUUID(),
         title = "LFA",
         updated = LocalDateTime(),
-        packages = listOf(package0),
+        items = listOf(package0),
         self = URI.create("http://example.com"))
 
     val putResult =
@@ -582,7 +582,7 @@ abstract class InventoryContract {
         .get()
 
     val inventoryPackage =
-      putResult.repository!!.packages[0]
+      putResult.repository!!.items[0]
 
     Mockito
       .`when`(http.get(
@@ -610,7 +610,7 @@ abstract class InventoryContract {
       .`when`(apkInstaller.createInstallTask(
         activity = activity,
         packageName = package0.id,
-        packageVersionCode = package0.versionCode,
+        packageVersionCode = package0.versionCode.toInt(),
         file = File(this.apkDirectory, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.apk")))
       .thenReturn(installTask)
 
@@ -627,7 +627,7 @@ abstract class InventoryContract {
 
     Assert.assertTrue(
       "Package install failed",
-      inventoryPackage.state is InventoryPackageState.InstallFailed)
+      inventoryPackage.state is InventoryItemState.InstallFailed)
   }
 }
 

@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.repository.xml.v1_0
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLSerializerType
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -57,14 +57,24 @@ class XML1Serializer(private val outputStream: OutputStream) : SPIFormatXMLSeria
     root.setAttribute("title", repository.title)
     root.setAttribute("self", repository.self.toString())
 
-    for (pack in repository.packages) {
-      root.appendChild(ofPackage(document, pack))
+    for (pack in repository.items) {
+      when (pack) {
+        is RepositoryItem.RepositoryAndroidPackage -> {
+          root.appendChild(ofPackage(document, pack))
+        }
+        is RepositoryItem.RepositoryOPDSPackage -> {
+
+        }
+      }
     }
 
     return root
   }
 
-  private fun ofPackage(document: Document, pack: RepositoryPackage): Element {
+  private fun ofPackage(
+    document: Document,
+    pack: RepositoryItem.RepositoryAndroidPackage
+  ): Element {
     val root =
       document.createElementNS(RepositoryXML1Format.NAMESPACE.toString(), "r:package");
 

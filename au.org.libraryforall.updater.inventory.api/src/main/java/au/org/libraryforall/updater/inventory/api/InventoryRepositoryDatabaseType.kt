@@ -9,8 +9,8 @@ interface InventoryRepositoryDatabaseType {
   val events: Observable<InventoryRepositoryDatabaseEvent>
 
   fun createOrUpdate(
-    repository: Repository)
-    : InventoryRepositoryDatabaseEntryType
+    repository: Repository
+  ): InventoryRepositoryDatabaseEntryType
 
   fun delete(id: UUID)
 

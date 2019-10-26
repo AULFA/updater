@@ -20,7 +20,7 @@ interface InventoryRepositoryType {
 
   val updateURI: URI
 
-  val packages: List<InventoryRepositoryPackageType>
+  val items: List<InventoryRepositoryItemType>
 
   val state: InventoryRepositoryState
 

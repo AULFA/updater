@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.tests.local
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
@@ -30,7 +30,7 @@ class InventoryTest : InventoryContract() {
     apkDirectory: InventoryAPKDirectoryType,
     apkInstaller: APKInstallerType,
     repositoryParsers: RepositoryXMLParserProviderType,
-    packages: InstalledPackagesType
+    packages: InstalledItemsType
   ): InventoryType {
     return Inventory.open(
       resources = resources,

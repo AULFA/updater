@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
-import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
+import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryItemState
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
@@ -39,7 +39,7 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     this.setHasOptionsMenu(true)
   }
 
-  private lateinit var listPackages: MutableList<InventoryRepositoryPackageType>
+  private lateinit var listPackages: MutableList<InventoryRepositoryItemType>
   private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: InventoryListAdapter
 
@@ -85,10 +85,10 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun fetchUpdates() {
     val updates =
-      mutableMapOf<String, InventoryRepositoryPackageType>()
+      mutableMapOf<String, InventoryRepositoryItemType>()
 
     for (repository in this.inventory.inventoryRepositories()) {
-      for (packageCurrent in repository.packages) {
+      for (packageCurrent in repository.items) {
         if (this.packageIsSuitableForOverview(packageCurrent)) {
           val existing = updates[packageCurrent.id]
           if (existing == null || packageCurrent.versionCode > existing.versionCode) {
@@ -108,17 +108,17 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     }
   }
 
-  private fun packageIsSuitableForOverview(packageCurrent: InventoryRepositoryPackageType) =
+  private fun packageIsSuitableForOverview(packageCurrent: InventoryRepositoryItemType) =
     packageCurrent.isUpdateAvailable || when (packageCurrent.state) {
-      is InventoryPackageState.NotInstalled -> false
-      is InventoryPackageState.Installed -> false
-      is InventoryPackageState.InstallFailed -> true
-      is InventoryPackageState.Installing -> true
+      is InventoryItemState.NotInstalled -> false
+      is InventoryItemState.Installed -> false
+      is InventoryItemState.InstallFailed -> true
+      is InventoryItemState.Installing -> true
     }
 
   private fun showRepositoryPackageFailure(
-    repositoryPackage: InventoryRepositoryPackageType,
-    result: InventoryPackageInstallResult
+    repositoryPackage: InventoryRepositoryItemType,
+    result: InventoryItemInstallResult
   ) {
     this.router.pushController(
       RouterTransaction.with(InventoryFailureViewController(
@@ -128,8 +128,8 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun bundleRepositoryPackageFailure(
-    repositoryPackage: InventoryRepositoryPackageType,
-    result: InventoryPackageInstallResult): InventoryFailureReport {
+    repositoryPackage: InventoryRepositoryItemType,
+    result: InventoryItemInstallResult): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()

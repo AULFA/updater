@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAddException
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
@@ -36,7 +36,7 @@ import java.util.concurrent.Callable
 class Inventory private constructor(
   private val resources: InventoryStringResourcesType,
   private val executor: ListeningExecutorService,
-  private val installedPackages: InstalledPackagesType,
+  private val installedPackages: InstalledItemsType,
   private val inventoryDatabase: InventoryRepositoryDatabaseType,
   private val apkDirectory: InventoryAPKDirectoryType,
   private val apkInstaller: APKInstallerType,
@@ -55,7 +55,7 @@ class Inventory private constructor(
     fun open(
       resources: InventoryStringResourcesType,
       executor: ListeningExecutorService,
-      installedPackages: InstalledPackagesType,
+      installedPackages: InstalledItemsType,
       inventoryDatabase: InventoryRepositoryDatabaseType,
       apkDirectory: InventoryAPKDirectoryType,
       apkInstaller: APKInstallerType,

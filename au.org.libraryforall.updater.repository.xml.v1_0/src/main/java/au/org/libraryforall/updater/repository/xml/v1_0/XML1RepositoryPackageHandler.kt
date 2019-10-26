@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.repository.xml.v1_0
 
 import au.org.libraryforall.updater.repository.api.Hash
-import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
 import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
 import org.slf4j.LoggerFactory
@@ -13,7 +13,7 @@ import java.net.URI
 class XML1RepositoryPackageHandler(
   locator2: Locator2,
   private val baseURI: URI)
-  : SPIFormatXMLAbstractContentHandler<Unit, RepositoryPackage>(locator2, "package") {
+  : SPIFormatXMLAbstractContentHandler<Unit, RepositoryItem>(locator2, "package") {
 
   private val logger =
     LoggerFactory.getLogger(XML1RepositoryPackageHandler::class.java)
@@ -23,7 +23,7 @@ class XML1RepositoryPackageHandler(
   private lateinit var name: String
   private lateinit var versionName: String
   private lateinit var id: String
-  private var versionCode: Int = 0
+  private var versionCode: Long = 0L
 
   override fun onWantHandlerName(): String =
     XML1RepositoryPackageHandler::class.java.simpleName
@@ -34,8 +34,8 @@ class XML1RepositoryPackageHandler(
   override fun onElementFinishDirectly(
     namespace: String,
     name: String,
-    qname: String): RepositoryPackage? {
-    return RepositoryPackage(
+    qname: String): RepositoryItem? {
+    return RepositoryItem.RepositoryAndroidPackage(
       id = this.id,
       versionName = this.versionName,
       versionCode = this.versionCode,
@@ -50,11 +50,16 @@ class XML1RepositoryPackageHandler(
     qname: String,
     attributes: Attributes) {
     try {
-      this.id = attributes.getValue("id")
-      this.versionCode = attributes.getValue("versionCode").toInt()
-      this.versionName = attributes.getValue("versionName")
-      this.name = attributes.getValue("name")
-      this.sha256 = Hash(attributes.getValue("sha256"))
+      this.id =
+        attributes.getValue("id")
+      this.versionCode =
+        attributes.getValue("versionCode").toLong()
+      this.versionName =
+        attributes.getValue("versionName")
+      this.name =
+        attributes.getValue("name")
+      this.sha256 =
+        Hash(attributes.getValue("sha256"))
 
       val relativeSource =
         URI.create(attributes.getValue("source"))

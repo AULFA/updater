@@ -5,23 +5,23 @@ import net.jcip.annotations.ThreadSafe
 import java.net.URI
 
 @ThreadSafe
-interface InventoryRepositoryPackageType {
+interface InventoryRepositoryItemType {
 
   val isUpdateAvailable: Boolean
 
   val id: String
 
-  val versionCode: Int
+  val versionCode: Long
 
   val versionName: String
 
   val name: String
 
-  val state: InventoryPackageState
+  val state: InventoryItemState
 
   val sourceURI: URI
 
-  fun install(activity: Any): ListenableFuture<InventoryPackageInstallResult>
+  fun install(activity: Any): ListenableFuture<InventoryItemInstallResult>
 
   fun cancel()
 }

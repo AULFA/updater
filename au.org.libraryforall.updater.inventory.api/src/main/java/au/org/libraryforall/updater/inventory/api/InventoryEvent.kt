@@ -10,24 +10,24 @@ sealed class InventoryEvent {
 
     abstract val repositoryId: UUID
 
-    sealed class InventoryRepositoryPackageEvent : InventoryRepositoryEvent() {
+    sealed class InventoryRepositoryItemEvent : InventoryRepositoryEvent() {
 
-      abstract val packageId: String
+      abstract val itemId: String
 
-      data class PackageBecameVisible(
+      data class ItemBecameVisible(
         override val repositoryId: UUID,
-        override val packageId: String) :
-        InventoryRepositoryPackageEvent()
+        override val itemId: String) :
+        InventoryRepositoryItemEvent()
 
-      data class PackageChanged(
+      data class ItemChanged(
         override val repositoryId: UUID,
-        override val packageId: String) :
-        InventoryRepositoryPackageEvent()
+        override val itemId: String) :
+        InventoryRepositoryItemEvent()
 
-      data class PackageBecameInvisible(
+      data class ItemBecameInvisible(
         override val repositoryId: UUID,
-        override val packageId: String) :
-        InventoryRepositoryPackageEvent()
+        override val itemId: String) :
+        InventoryRepositoryItemEvent()
     }
 
     data class RepositoryChanged(

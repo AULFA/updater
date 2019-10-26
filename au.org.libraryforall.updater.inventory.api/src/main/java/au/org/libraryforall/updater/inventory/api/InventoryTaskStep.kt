@@ -6,5 +6,6 @@ data class InventoryTaskStep(
   val description: String,
   var resolution: String = "",
   var exception: Exception? = null,
-  var failed : Boolean = false): Serializable
+  var failed : Boolean = false
+): Serializable
 

@@ -1,19 +1,19 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameInvisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameVisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryRemoved
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryIdle
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdateFailed
@@ -42,7 +42,7 @@ import java.util.concurrent.Callable
 class InventoryRepository(
   private val resources: InventoryStringResourcesType,
   private val executor: ListeningExecutorService,
-  private val installedPackages: InstalledPackagesType,
+  private val installedPackages: InstalledItemsType,
   private val apkDirectory: InventoryAPKDirectoryType,
   private val apkInstaller: APKInstallerType,
   private val http: HTTPClientType,
@@ -58,7 +58,7 @@ class InventoryRepository(
   private var stateActual: InventoryRepositoryState =
     RepositoryIdle(this.databaseEntry.repository.id)
   private val packagesActual =
-    mutableMapOf<String, InventoryRepositoryPackageType>()
+    mutableMapOf<String, InventoryRepositoryItemType>()
 
   init {
     this.logger.debug("create: {}", this.databaseEntry.repository.id)
@@ -108,17 +108,17 @@ class InventoryRepository(
   }
 
   private fun mergeRepository(
-    viewCurrent: MutableMap<String, InventoryRepositoryPackageType>,
+    viewCurrent: MutableMap<String, InventoryRepositoryItemType>,
     repository: Repository): List<InventoryEvent> {
 
-    val installed = this.installedPackages.packages()
+    val installed = this.installedPackages.items()
     val events = mutableListOf<InventoryEvent>()
 
     /*
-     * Work out which packages are new.
+     * Work out which items are new.
      */
 
-    for (repositoryPackage in repository.packagesNewest.values) {
+    for (repositoryPackage in repository.itemsNewest.values) {
       if (!viewCurrent.containsKey(repositoryPackage.id)) {
         val installedPackage = installed[repositoryPackage.id]
         val installedVersion =
@@ -127,7 +127,7 @@ class InventoryRepository(
           }
 
         val newPackage =
-          InventoryRepositoryPackage(
+          InventoryRepositoryItem(
             repositoryId = this.id,
             events = this.eventSubject,
             http = this.http,
@@ -138,16 +138,16 @@ class InventoryRepository(
             executor = this.executor,
             installedPackages = this.installedPackages,
             initiallyInstalledVersion = installedVersion,
-            repositoryPackage = repositoryPackage)
+            repositoryItem = repositoryPackage)
 
         viewCurrent[newPackage.id] = newPackage
         this.logger.debug("[{}]: package {} now visible", repository.id, newPackage.id)
-        events.add(PackageBecameVisible(repositoryId = this.id, packageId = repositoryPackage.id))
+        events.add(ItemBecameVisible(repositoryId = this.id, itemId = repositoryPackage.id))
       }
     }
 
     /*
-     * Work out which packages are no longer visible via this repository.
+     * Work out which items are no longer visible via this repository.
      */
 
     val iter = viewCurrent.iterator()
@@ -155,18 +155,18 @@ class InventoryRepository(
       val entry = iter.next()
       val existingPackage = entry.value
 
-      if (!repository.packagesNewest.containsKey(existingPackage.id)) {
+      if (!repository.itemsNewest.containsKey(existingPackage.id)) {
         this.logger.debug("[{}]: package {} now invisible", repository.id, existingPackage.id)
         iter.remove()
-        events.add(PackageBecameInvisible(repositoryId = this.id, packageId = existingPackage.id))
+        events.add(ItemBecameInvisible(repositoryId = this.id, itemId = existingPackage.id))
       }
     }
 
     /*
-     * Work out which packages now have new versions.
+     * Work out which items now have new versions.
      */
 
-    for (repositoryPackage in repository.packagesNewest.values) {
+    for (repositoryPackage in repository.itemsNewest.values) {
       val existing = viewCurrent[repositoryPackage.id]
       if (existing != null) {
         if (repositoryPackage.versionCode > existing.versionCode) {
@@ -177,7 +177,7 @@ class InventoryRepository(
             }
 
           val newPackage =
-            InventoryRepositoryPackage(
+            InventoryRepositoryItem(
               repositoryId = this.id,
               events = this.eventSubject,
               http = this.http,
@@ -188,11 +188,11 @@ class InventoryRepository(
               executor = this.executor,
               installedPackages = this.installedPackages,
               initiallyInstalledVersion = installedVersion,
-              repositoryPackage = repositoryPackage)
+              repositoryItem = repositoryPackage)
 
           viewCurrent[newPackage.id] = newPackage
           this.logger.debug("[{}]: package {} upgrade available", repository.id, newPackage.id)
-          events.add(PackageChanged(repositoryId = this.id, packageId = repositoryPackage.id))
+          events.add(ItemChanged(repositoryId = this.id, itemId = repositoryPackage.id))
         }
       }
     }
@@ -200,12 +200,12 @@ class InventoryRepository(
     return events.toList()
   }
 
-  override val packages: List<InventoryRepositoryPackageType>
+  override val items: List<InventoryRepositoryItemType>
     get() = synchronized(this.stateLock) {
       this.packagesActual
         .values
         .toList()
-        .sortedBy(InventoryRepositoryPackageType::name)
+        .sortedBy(InventoryRepositoryItemType::name)
     }
 
   override val events: Observable<InventoryEvent>

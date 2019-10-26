@@ -29,10 +29,10 @@ data class Repository(
   val updated: LocalDateTime,
 
   /**
-   * The list of packages in the repository.
+   * The list of items in the repository.
    */
 
-  val packages: List<RepositoryPackage>,
+  val items: List<RepositoryItem>,
 
   /**
    * A link to this repository.
@@ -41,16 +41,16 @@ data class Repository(
   val self: URI) {
 
   /*
-   * A view of the repository packages such that only the highest version of each package
+   * A view of the repository items such that only the highest version of each package
    * is shown.
    */
 
-  val packagesNewest = packagesNewest(this.packages)
+  val itemsNewest = itemsNewest(this.items)
 
   companion object {
-    private fun packagesNewest(packages: List<RepositoryPackage>) : Map<String, RepositoryPackage> {
-      val results = mutableMapOf<String, RepositoryPackage>()
-      for (repositoryPackage in packages) {
+    private fun itemsNewest(items: List<RepositoryItem>) : Map<String, RepositoryItem> {
+      val results = mutableMapOf<String, RepositoryItem>()
+      for (repositoryPackage in items) {
         val existing = results[repositoryPackage.id]
         if (existing != null) {
           if (repositoryPackage.versionCode > existing.versionCode) {

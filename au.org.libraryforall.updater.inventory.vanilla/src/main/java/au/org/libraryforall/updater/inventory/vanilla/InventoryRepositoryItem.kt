@@ -1,24 +1,24 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledPackageEvent.InstalledPackagesChanged
-import au.org.libraryforall.updater.installed.api.InstalledPackagesType
+import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
+import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
-import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallFailed
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.Installed
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.Installing
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusDefinite
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusIndefinite
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.NotInstalled
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
+import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryItemState
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallFailed
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.Installed
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.Installing
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusDefinite
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusIndefinite
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.NotInstalled
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
-import au.org.libraryforall.updater.repository.api.RepositoryPackage
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -33,27 +33,27 @@ import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class InventoryRepositoryPackage(
+internal class InventoryRepositoryItem(
   private val repositoryId: UUID,
-  private val repositoryPackage: RepositoryPackage,
+  private val repositoryItem: RepositoryItem,
   private val http: HTTPClientType,
   private val httpAuthentication: (URI) -> HTTPAuthentication?,
   private val directory: InventoryAPKDirectoryType,
   private val apkInstaller: APKInstallerType,
   private val resources: InventoryStringResourcesType,
   private val events: PublishSubject<InventoryEvent>,
-  private val installedPackages: InstalledPackagesType,
+  private val installedPackages: InstalledItemsType,
   private val executor: ListeningExecutorService,
-  initiallyInstalledVersion: NamedVersion?) : InventoryRepositoryPackageType {
+  initiallyInstalledVersion: NamedVersion?) : InventoryRepositoryItemType {
 
   private val installedSubscription: Disposable
   private val installCancel = AtomicBoolean(false)
   private val stateLock = Object()
-  private var stateActual: InventoryPackageState =
+  private var stateActual: InventoryItemState =
     if (initiallyInstalledVersion != null) {
       Installed(
-        inventoryPackage = this,
-        installedVersionCode = initiallyInstalledVersion.code,
+        inventoryItem = this,
+        installedVersionCode = initiallyInstalledVersion.code.toLong(),
         installedVersionName = initiallyInstalledVersion.name)
     } else {
       NotInstalled(this)
@@ -62,48 +62,48 @@ internal class InventoryRepositoryPackage(
       synchronized(this.stateLock) {
         field = value
       }
-      this.events.onNext(PackageChanged(this.repositoryId, this.id))
+      this.events.onNext(ItemChanged(this.repositoryId, this.id))
     }
 
   private val isInstalled: Boolean
-    get() = this.installedPackages.packages().containsKey(this.id)
+    get() = this.installedPackages.items().containsKey(this.id)
 
   init {
     this.installedSubscription =
-      this.installedPackages.events.ofType(InstalledPackagesChanged::class.java)
-        .filter { event -> event.installedPackage.id == this.repositoryPackage.id }
+      this.installedPackages.events.ofType(InstalledItemsChanged::class.java)
+        .filter { event -> event.installedItem.id == this.repositoryItem.id }
         .subscribe(this::onInstalledPackageEvent)
   }
 
-  private fun onInstalledPackageEvent(event: InstalledPackagesChanged) {
+  private fun onInstalledPackageEvent(event: InstalledItemsChanged) {
     val stateCurrent = this.stateActual
     return when (event) {
-      is InstalledPackagesChanged.InstalledPackageAdded -> {
+      is InstalledItemsChanged.InstalledItemAdded -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.repositoryPackage.id)
+          this.logger.debug("package {} became installed", this.repositoryItem.id)
           this.stateActual = Installed(
-            inventoryPackage = this,
-            installedVersionCode = event.installedPackage.versionCode,
-            installedVersionName = event.installedPackage.versionName)
+            inventoryItem = this,
+            installedVersionCode = event.installedItem.versionCode,
+            installedVersionName = event.installedItem.versionName)
         } else {
 
         }
       }
-      is InstalledPackagesChanged.InstalledPackageRemoved -> {
+      is InstalledItemsChanged.InstalledItemRemoved -> {
         if (stateCurrent is Installed) {
-          this.logger.debug("package {} became uninstalled", this.repositoryPackage.id)
+          this.logger.debug("package {} became uninstalled", this.repositoryItem.id)
           this.stateActual = NotInstalled(this)
         } else {
 
         }
       }
-      is InstalledPackagesChanged.InstalledPackageUpdated -> {
+      is InstalledItemsChanged.InstalledItemUpdated -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.repositoryPackage.id)
+          this.logger.debug("package {} became installed", this.repositoryItem.id)
           this.stateActual = Installed(
-            inventoryPackage = this,
-            installedVersionCode = event.installedPackage.versionCode,
-            installedVersionName = event.installedPackage.versionName)
+            inventoryItem = this,
+            installedVersionCode = event.installedItem.versionCode,
+            installedVersionName = event.installedItem.versionName)
         } else {
 
         }
@@ -112,24 +112,24 @@ internal class InventoryRepositoryPackage(
   }
 
   override val sourceURI: URI
-    get() = this.repositoryPackage.source
+    get() = this.repositoryItem.source
 
   override val id: String
-    get() = this.repositoryPackage.id
+    get() = this.repositoryItem.id
 
-  override val versionCode: Int
-    get() = this.repositoryPackage.versionCode
+  override val versionCode: Long
+    get() = this.repositoryItem.versionCode
 
   override val versionName: String
-    get() = this.repositoryPackage.versionName
+    get() = this.repositoryItem.versionName
 
   override val name: String
-    get() = this.repositoryPackage.name
+    get() = this.repositoryItem.name
 
   private val logger =
-    LoggerFactory.getLogger(InventoryRepositoryPackage::class.java)
+    LoggerFactory.getLogger(InventoryRepositoryItem::class.java)
 
-  override fun install(activity: Any): ListenableFuture<InventoryPackageInstallResult> {
+  override fun install(activity: Any): ListenableFuture<InventoryItemInstallResult> {
     this.logger.debug("[${this.id}]: install")
 
     return synchronized(this.stateLock) {
@@ -142,12 +142,12 @@ internal class InventoryRepositoryPackage(
         }
 
         is Installing -> {
-          Futures.immediateFuture(InventoryPackageInstallResult(
+          Futures.immediateFuture(InventoryItemInstallResult(
             repositoryId = this.repositoryId,
-            packageVersionCode = this.versionCode,
-            packageVersionName = this.versionName,
-            packageName = this.name,
-            packageURI = this.repositoryPackage.source,
+            itemVersionCode = this.versionCode,
+            itemVersionName = this.versionName,
+            itemName = this.name,
+            itemURI = this.repositoryItem.source,
             steps = listOf(InventoryTaskStep(
               description = this.resources.installStarted,
               resolution = this.resources.installAlreadyInstalling))))
@@ -163,17 +163,17 @@ internal class InventoryRepositoryPackage(
     return synchronized(this.stateLock) {
       when (val state = this.stateActual) {
         is NotInstalled -> true
-        is Installed -> state.installedVersionCode < this.repositoryPackage.versionCode
+        is Installed -> state.installedVersionCode < this.repositoryItem.versionCode
         is InstallFailed -> true
         is Installing -> false
       }
     }
   }
 
-  private fun runInstall(activity: Any): ListenableFuture<InventoryPackageInstallResult> {
+  private fun runInstall(activity: Any): ListenableFuture<InventoryItemInstallResult> {
     this.installCancel.set(false)
     val step0 = InventoryTaskStep(description = this.resources.installStarted)
-    return this.executor.submit(Callable<InventoryPackageInstallResult> {
+    return this.executor.submit(Callable<InventoryItemInstallResult> {
       runInstallActual(step0, activity)
     })
   }
@@ -185,11 +185,11 @@ internal class InventoryRepositoryPackage(
   private fun runInstallActual(
     initialStep: InventoryTaskStep,
     activity: Any
-  ): InventoryPackageInstallResult {
+  ): InventoryItemInstallResult {
 
     val result =
       try {
-        this.directory.withKey(this.repositoryPackage.sha256) { reservation ->
+        this.directory.withKey(this.repositoryItem.sha256) { reservation ->
           InventoryTaskMonad.startWithStep(initialStep)
             .flatMap {
               InventoryTaskDownload(
@@ -198,7 +198,7 @@ internal class InventoryRepositoryPackage(
                 httpAuthentication = this.httpAuthentication,
                 reservation = reservation,
                 onVerificationProgress = this::onInstallVerificationProgress,
-                uri = this.repositoryPackage.source,
+                uri = this.repositoryItem.source,
                 onDownloadProgress = this::onInstallDownloadProgress,
                 cancel = this.installCancel
               ).execute()
@@ -216,7 +216,7 @@ internal class InventoryRepositoryPackage(
                   InstallingStatusIndefinite(
                     status = this.resources.installWaitingForInstaller))
 
-              InventoryTaskInstallAPK(
+              InventoryTaskAPKInstall(
                 activity,
                 resources = this.resources,
                 packageName = this.id,
@@ -236,12 +236,12 @@ internal class InventoryRepositoryPackage(
       }
 
     val installResult =
-      InventoryPackageInstallResult(
+      InventoryItemInstallResult(
         this.repositoryId,
         this.id,
         this.versionCode,
         this.versionName,
-        this.repositoryPackage.source,
+        this.repositoryItem.source,
         result.steps)
 
     return when (result) {
@@ -298,7 +298,7 @@ internal class InventoryRepositoryPackage(
           status = this.resources.installVerifying(progress.currentBytes, progress.maximumBytes)))
   }
 
-  override val state: InventoryPackageState
+  override val state: InventoryItemState
     get() = synchronized(this.stateLock) { this.stateActual }
 
 }

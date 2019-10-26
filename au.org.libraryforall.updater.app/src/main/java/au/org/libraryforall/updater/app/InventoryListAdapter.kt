@@ -9,16 +9,16 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusDefinite
-import au.org.libraryforall.updater.inventory.api.InventoryPackageState.InstallingStatus.InstallingStatusIndefinite
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
+import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryItemState
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusDefinite
+import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusIndefinite
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 
 class InventoryListAdapter(
   private val context: Activity,
-  private val packages: List<InventoryRepositoryPackageType>,
-  private val onShowFailureDetails: (InventoryRepositoryPackageType, InventoryPackageInstallResult) -> Unit)
+  private val packages: List<InventoryRepositoryItemType>,
+  private val onShowFailureDetails: (InventoryRepositoryItemType, InventoryItemInstallResult) -> Unit)
   : RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -95,7 +95,7 @@ class InventoryListAdapter(
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     val repositoryPackage = this.packages[position]
     when (val state = repositoryPackage.state) {
-      is InventoryPackageState.NotInstalled -> {
+      is InventoryItemState.NotInstalled -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
@@ -115,7 +115,7 @@ class InventoryListAdapter(
         }
       }
 
-      is InventoryPackageState.Installed -> {
+      is InventoryItemState.Installed -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.VISIBLE)
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
@@ -146,7 +146,7 @@ class InventoryListAdapter(
         }
       }
 
-      is InventoryPackageState.Installing -> {
+      is InventoryItemState.Installing -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalling.view, View.VISIBLE)
@@ -172,7 +172,7 @@ class InventoryListAdapter(
         }
       }
 
-      is InventoryPackageState.InstallFailed -> {
+      is InventoryItemState.InstallFailed -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.VISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)

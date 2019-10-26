@@ -17,13 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameInvisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageBecameVisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryPackageEvent.PackageChanged
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
+import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
 import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
-import au.org.libraryforall.updater.inventory.api.InventoryPackageInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryPackageType
+import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
+import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryIdle
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdateFailed
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdating
@@ -58,7 +58,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     this.setHasOptionsMenu(true)
   }
 
-  private lateinit var listPackages: MutableList<InventoryRepositoryPackageType>
+  private lateinit var listPackages: MutableList<InventoryRepositoryItemType>
   private lateinit var title: TextView
   private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: InventoryListAdapter
@@ -145,7 +145,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     this.title.text = this.repository.title
 
     this.listPackages = mutableListOf()
-    this.listPackages.addAll(this.repository.packages)
+    this.listPackages.addAll(this.repository.items)
     this.listAdapter =
       InventoryListAdapter(
         context = this.activity!!,
@@ -162,8 +162,8 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun showRepositoryPackageFailure(
-    repositoryPackage: InventoryRepositoryPackageType,
-    result: InventoryPackageInstallResult
+    repositoryPackage: InventoryRepositoryItemType,
+    result: InventoryItemInstallResult
   ) {
     this.router.pushController(
       RouterTransaction.with(InventoryFailureViewController(
@@ -173,8 +173,8 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   }
 
   private fun bundleRepositoryPackageFailure(
-    repositoryPackage: InventoryRepositoryPackageType,
-    result: InventoryPackageInstallResult): InventoryFailureReport {
+    repositoryPackage: InventoryRepositoryItemType,
+    result: InventoryItemInstallResult): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()
@@ -199,12 +199,12 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
       is InventoryRepositoryEvent ->
         if (event.repositoryId == this.repositoryUUID) {
           when (event) {
-            is PackageBecameVisible,
-            is PackageChanged,
-            is PackageBecameInvisible -> {
+            is ItemBecameVisible,
+            is ItemChanged,
+            is ItemBecameInvisible -> {
               UIThread.execute {
                 this.listPackages.clear()
-                this.listPackages.addAll(this.repository.packages)
+                this.listPackages.addAll(this.repository.items)
                 this.listAdapter.notifyDataSetChanged()
               }
             }
