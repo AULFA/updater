@@ -1,16 +1,17 @@
 dependencies {
   api project(":au.org.libraryforall.updater.apkinstaller.api")
-  api project(":au.org.libraryforall.updater.repository.api")
-  api project(":au.org.libraryforall.updater.repository.xml.api")
   api project(":au.org.libraryforall.updater.installed.api")
   api project(":au.org.libraryforall.updater.inventory.api")
+  api project(":au.org.libraryforall.updater.repository.api")
+  api project(":au.org.libraryforall.updater.repository.xml.api")
+  api project(":au.org.libraryforall.updater.services.api")
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jodaTime
-  implementation libraries.rxjava
-  implementation libraries.slf4j
   implementation libraries.googleGuava
   implementation libraries.irradiaHTTPAPI
+  implementation libraries.jodaTime
+  implementation libraries.kotlinStdlib
+  implementation libraries.rxjava
+  implementation libraries.slf4j
 
   compileOnly libraries.jcip
   compileOnly libraries.OSGiBundleAnnotation

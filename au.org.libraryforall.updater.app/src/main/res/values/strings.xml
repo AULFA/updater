@@ -52,6 +52,7 @@ File: %1$s</string>
 Expected: %1$s\n
 Received: %2$s</string>
   <string name="install_download_needed_exception">An exception occurred whilst trying to verify local data: %1$s (%2$s). Downloading is required.</string>
+  <string name="install_verifying_status">Verifying (%1$.2fM / %2$.2fM @ %3$.2fM/s)</string>
   <string name="install_verifying">Verifying (%1$.2fM / %2$.2fM)</string>
   <string name="install_verified_file">Attempted to verify local file.\n
 \n
@@ -148,4 +149,6 @@ Received: %2$s
   <!-- Developer settings strings -->
   <string name="devTargetOverview">Launch Overview Activity</string>
   <string name="devSettingsTitle">Developer Settings</string>
+  <string name="downloadingHTTPServerError">Server returned an error: %1$d %2$s (%3$s, %4$d)</string>
+  <string name="installReservingFile">Reserving a file...</string>
 </resources>

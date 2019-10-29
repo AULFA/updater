@@ -4,14 +4,26 @@ import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
 import one.irradia.mime.api.MIMEType
-import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.lang.IllegalStateException
 import java.net.URI
 
 class MockHTTP : HTTPClientType {
 
+  val responsesByURI =
+    mutableMapOf<URI, MutableList<HTTPResult<InputStream>>>()
+
   override fun close() {
 
+  }
+
+  fun addResponse(
+    uri: URI,
+    response: HTTPResult<InputStream>
+  ) {
+    val responses = this.responsesByURI[uri] ?: mutableListOf()
+    responses.add(response)
+    this.responsesByURI[uri] = responses
   }
 
   override fun request(
@@ -22,13 +34,8 @@ class MockHTTP : HTTPClientType {
     contentType: MIMEType?,
     body: ByteArray?
   ): HTTPResult<InputStream> {
-    return HTTPResult.HTTPOK(
-      uri = uri,
-      contentLength = 0L,
-      headers = mapOf(),
-      message = "OK",
-      statusCode = 200,
-      result = ByteArrayInputStream(ByteArray(0))
-    )
+    val responses =
+      this.responsesByURI[uri] ?: throw IllegalStateException("No responses for ${uri}")
+    return responses.removeAt(0)
   }
 }

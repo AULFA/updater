@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+
+  <string name="verificationFailed">Verification failed: Expected hash %1$s but received hash %2$s</string>
+  <string name="verifyCheckSuccess">Checking verification was successful...</string>
+  <string name="verificationSucceeded">Verified file successfully.</string>
+  <string name="verificationCancelled">Verification cancelled.</string>
+  <string name="verifyingLocalFile">Verifying the local file content.</string>
+</resources>

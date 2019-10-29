@@ -57,8 +57,9 @@ class NotificationWorker(
       PendingIntent.getActivity(this.applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
     val resources = this.applicationContext.resources
+    val channelId = MainServices.notificationChannel().channelId
     val notification =
-      NotificationCompat.Builder(this.applicationContext, MainServices.notificationChannel())
+      NotificationCompat.Builder(this.applicationContext, channelId)
         .setSmallIcon(R.drawable.lfa_updater)
         .setContentTitle(resources.getString(R.string.notificationUpdatesTitle))
         .setContentText(resources.getString(R.string.notificationUpdatesText))

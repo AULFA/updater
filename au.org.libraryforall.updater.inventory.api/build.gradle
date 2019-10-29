@@ -2,10 +2,11 @@ dependencies {
   api project(":au.org.libraryforall.updater.repository.api")
   api project(":au.org.libraryforall.updater.installed.api")
 
-  api libraries.kotlinStdlib
-  api libraries.jodaTime
-  api libraries.rxjava
   api libraries.googleGuava
+  api libraries.irradiaHTTPAPI
+  api libraries.jodaTime
+  api libraries.kotlinStdlib
+  api libraries.rxjava
 
   compileOnly libraries.jcip
   compileOnly libraries.OSGiBundleAnnotation

@@ -73,5 +73,5 @@ interface InventoryType {
    */
 
   fun inventoryDeleteCachedData()
-    : ListenableFuture<List<InventoryAPKDirectoryType.Deleted>>
+    : ListenableFuture<List<InventoryHashIndexedDirectoryType.Deleted>>
 }

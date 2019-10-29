@@ -1,13 +1,12 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledItemsType
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
+import au.org.libraryforall.updater.inventory.api.InventoryProgress
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEntryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryAdded
@@ -20,10 +19,11 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.Repos
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdating
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
-import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskFailed
-import au.org.libraryforall.updater.inventory.vanilla.InventoryTaskMonad.InventoryTaskSuccess
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTask
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskRepositoryAdd
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -31,29 +31,25 @@ import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import one.irradia.http.api.HTTPAuthentication
-import one.irradia.http.api.HTTPClientType
+import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import org.joda.time.LocalDateTime
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
-import java.util.concurrent.Callable
 
-class InventoryRepository(
-  private val resources: InventoryStringResourcesType,
+class InventoryRepository internal constructor(
+  private val services: ServiceDirectoryType,
   private val executor: ListeningExecutorService,
-  private val installedPackages: InstalledItemsType,
-  private val apkDirectory: InventoryAPKDirectoryType,
-  private val apkInstaller: APKInstallerType,
-  private val http: HTTPClientType,
-  private val httpAuthentication: (URI) -> HTTPAuthentication?,
-  private val repositoryParsers: RepositoryXMLParserProviderType,
   private val databaseEntry: InventoryRepositoryDatabaseEntryType,
-  private val eventSubject: PublishSubject<InventoryEvent>) : InventoryRepositoryType {
+  private val eventSubject: PublishSubject<InventoryEvent>
+) : InventoryRepositoryType {
 
-  private val subscription: Disposable
   private val logger = LoggerFactory.getLogger(InventoryRepository::class.java)
 
+  private val installedPackages =
+    this.services.requireService(InstalledItemsType::class.java)
+
+  private val subscription: Disposable
   private val stateLock = Object()
   private var stateActual: InventoryRepositoryState =
     RepositoryIdle(this.databaseEntry.repository.id)
@@ -98,7 +94,7 @@ class InventoryRepository(
 
     val events =
       synchronized(this.stateLock) {
-        mergeRepository(this.packagesActual, repository)
+        this.mergeRepository(this.packagesActual, repository)
       }
 
     for (event in events) {
@@ -128,17 +124,13 @@ class InventoryRepository(
 
         val newPackage =
           InventoryRepositoryItem(
-            repositoryId = this.id,
             events = this.eventSubject,
-            http = this.http,
-            httpAuthentication = this.httpAuthentication,
-            directory = this.apkDirectory,
-            apkInstaller = this.apkInstaller,
-            resources = this.resources,
             executor = this.executor,
-            installedPackages = this.installedPackages,
             initiallyInstalledVersion = installedVersion,
-            repositoryItem = repositoryPackage)
+            repositoryId = this.id,
+            repositoryItem = repositoryPackage,
+            services = this.services
+          )
 
         viewCurrent[newPackage.id] = newPackage
         this.logger.debug("[{}]: package {} now visible", repository.id, newPackage.id)
@@ -178,17 +170,13 @@ class InventoryRepository(
 
           val newPackage =
             InventoryRepositoryItem(
-              repositoryId = this.id,
               events = this.eventSubject,
-              http = this.http,
-              httpAuthentication = this.httpAuthentication,
-              directory = this.apkDirectory,
-              apkInstaller = this.apkInstaller,
-              resources = this.resources,
               executor = this.executor,
-              installedPackages = this.installedPackages,
               initiallyInstalledVersion = installedVersion,
-              repositoryItem = repositoryPackage)
+              repositoryId = this.id,
+              repositoryItem = repositoryPackage,
+              services = this.services
+            )
 
           viewCurrent[newPackage.id] = newPackage
           this.logger.debug("[{}]: package {} upgrade available", repository.id, newPackage.id)
@@ -238,37 +226,56 @@ class InventoryRepository(
       }
     }
 
-    return this.executor.submit(Callable {
+    val future = SettableFuture.create<Unit>()
+
+    val executionContext = object: InventoryTaskExecutionType {
+      override val services: ServiceDirectoryType
+        get() = this@InventoryRepository.services
+      override val onProgress: (InventoryProgress) -> Unit
+        get() = this@InventoryRepository::receiveProgressUpdate
+      override val isCancelRequested: Boolean
+        get() = future.isCancelled
+    }
+
+    this.executor.execute {
       this.logger.debug("starting update")
 
-      when (val result = updateTask()) {
-        is InventoryTaskSuccess -> {
+      val task = this.updateTask()
+      when (val result = task.evaluate(executionContext)) {
+        is InventoryTaskResult.InventoryTaskSucceeded -> {
           this.logger.debug("update succeeded")
           synchronized(this.stateLock) {
             this.stateActual = RepositoryIdle(this.id)
             this.eventSubject.onNext(RepositoryChanged(this.id))
           }
         }
-        is InventoryTaskFailed -> {
+        is InventoryTaskResult.InventoryTaskCancelled -> {
+          this.logger.debug("update cancelled")
+          synchronized(this.stateLock) {
+            this.stateActual = RepositoryIdle(this.id)
+            this.eventSubject.onNext(RepositoryChanged(this.id))
+          }
+        }
+        is InventoryTaskResult.InventoryTaskFailed -> {
           this.logger.debug("update failed")
           this.stateActual = RepositoryUpdateFailed(this.id, result.steps)
           this.eventSubject.onNext(RepositoryChanged(this.id))
         }
       }
-    })
+    }
+
+    return future
   }
 
-  private fun updateTask(): InventoryTaskMonad<Unit> {
-    return InventoryTaskRepositoryAdd(
-      resources = this.resources,
-      http = this.http,
-      httpAuthentication = this.httpAuthentication,
-      repositoryParsers = this.repositoryParsers,
-      database = this.databaseEntry.database,
+  private fun receiveProgressUpdate(progress: InventoryProgress) {
+
+  }
+
+  private fun updateTask(): InventoryTask<InventoryRepositoryDatabaseEntryType> {
+    return InventoryTaskRepositoryAdd.create(
       uri = this.databaseEntry.repository.self,
-      requiredUUID = this.id)
-      .execute()
-      .flatMap { InventoryTaskSuccess(Unit) }
+      requiredUUID = this.id
+    )
   }
 
   override val state: InventoryRepositoryState

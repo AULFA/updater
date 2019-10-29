@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.tests
 
+import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.repository.api.Hash
 import org.joda.time.Duration
@@ -8,16 +9,102 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
-  
-  override val inventoryRepositoryRequiredUUIDChecking: String
-    get() = "inventoryRepositoryRequiredUUIDChecking"
 
-  override fun inventoryRepositoryRequiredUUIDCheckingFailed(requiredUUID: UUID, receivedUUID: UUID): String {
-    return "inventoryRepositoryRequiredUUIDCheckingFailed"
+  override val installReservingFile: String
+    get() = "installReservingFile"
+
+  override val installVerifyingLocalFile: String
+    get() = "installVerifyingLocalFile"
+
+  override fun installVerifyingLocalFileProgress(
+    bytesCurrent: Long,
+    bytesExpected: Long,
+    bytesPerSecond: Long
+  ): String {
+    return "installVerifyingLocalFileProgress $bytesCurrent $bytesExpected $bytesPerSecond"
   }
 
-  override fun inventoryRepositoryRequiredUUIDCheckingOK(requiredUUID: UUID?, receivedUUID: UUID): String {
-    return "inventoryRepositoryRequiredUUIDCheckingOK"
+
+  override val downloadingHTTPSkipping: String
+    get() = "downloadingHTTPSkipping"
+
+  override val downloadingHTTPWaitingBeforeRetrying: String
+    get() = "downloadingHTTPWaitingBeforeRetrying"
+
+  override val downloadingHTTPSucceeded: String
+    get() = "downloadingHTTPSucceeded"
+
+  override val downloadingHTTPWritingFile: String
+    get() = "downloadingHTTPWritingFile"
+
+  override val downloadingHTTPOpeningFile: String
+    get() = "downloadingHTTPOpeningFile"
+
+  override fun downloadingHTTPOK(duration: Duration): String {
+    return "downloadingHTTPOK $duration"
+  }
+
+  override fun downloadingHTTPServerError(
+    statusCode: Int,
+    message: String,
+    contentType: String,
+    contentLength: Long?
+  ): String {
+    return "downloadingHTTPServerError $statusCode $message $contentType $contentLength"
+  }
+
+  override fun downloadingHTTPConnectionFailed(exception: Exception): String {
+    return "downloadingHTTPConnectionFailed"
+  }
+
+  override fun downloadingHTTPRequest(
+    uri: URI,
+    attemptCurrent: Int,
+    attemptMax: Int
+  ): String {
+    return "downloadingHTTPRequest $uri $attemptCurrent $attemptMax"
+  }
+
+  override fun downloadingHTTPOpeningFileFailed(exception: Exception): String {
+    return "downloadingHTTPOpeningFileFailed"
+  }
+
+  override fun downloadingHTTPProgress(
+    majorProgress: InventoryProgressValue?,
+    minorProgress: InventoryProgressValue
+  ): String {
+    return "downloadingHTTPProgress"
+  }
+
+  override fun downloadingHTTPRetryingInSeconds(time: Long): String {
+    return "downloadingHTTPRetryingInSeconds $time"
+  }
+
+  override fun verificationFailed(
+    expectedHash: Hash,
+    receivedHash: String
+  ): String {
+    return "verificationFailed ${expectedHash.text} $receivedHash"
+  }
+
+  override val verifyCheckSuccess: String
+    get() = "verifyCheckSuccess"
+  override val verificationSucceeded: String
+    get() = "verificationSucceeded"
+  override val verificationCancelled: String
+    get() = "verificationCancelled"
+  override val verifyingLocalFile: String
+    get() = "verifyingLocalFile"
+
+  override val repositoryRequiredUUIDChecking: String
+    get() = "repositoryRequiredUUIDChecking"
+
+  override fun repositoryRequiredUUIDCheckingFailed(requiredUUID: UUID, receivedUUID: UUID): String {
+    return "repositoryRequiredUUIDCheckingFailed"
+  }
+
+  override fun repositoryRequiredUUIDCheckingOK(requiredUUID: UUID?, receivedUUID: UUID): String {
+    return "repositoryRequiredUUIDCheckingOK"
   }
 
   override val installVerificationCancelled: String
@@ -54,74 +141,70 @@ class InventoryStringResources : InventoryStringResourcesType {
   override val installWaitingForInstaller: String =
     "installWaitingForInstaller"
 
-  override val inventoryRepositoryRemovingFailed: String =
-    "inventoryRepositoryRemovingFailed"
+  override val repositoryRemovingFailed: String =
+    "repositoryRemovingFailed"
 
-  override val inventoryRepositoryRemovingSucceeded: String =
-    "inventoryRepositoryRemovingSucceeded"
+  override val repositoryRemovingSucceeded: String =
+    "repositoryRemovingSucceeded"
 
-  override val inventoryRepositoryRemoveNonexistent: String =
-    "inventoryRepositoryRemoveNonexistent"
+  override val repositoryRemoveNonexistent: String =
+    "repositoryRemoveNonexistent"
 
-  override val inventoryRepositoryRemoving: String =
-    "inventoryRepositoryRemoving"
+  override val repositoryRemoving: String =
+    "repositoryRemoving"
 
-  override val inventoryRepositoryAddInProgress: String =
-    "inventoryRepositoryAddInProgress"
+  override val repositoryAddInProgress: String =
+    "repositoryAddInProgress"
 
-  override val inventoryRepositoryAddParseFailed: String =
-    "inventoryRepositoryAddParseFailed"
+  override val repositoryAddParseFailed: String =
+    "repositoryAddParseFailed"
 
-  override val inventoryRepositoryAddAlreadyExists: String =
-    "inventoryRepositoryAddAlreadyExists"
+  override val repositoryAddAlreadyExists: String =
+    "repositoryAddAlreadyExists"
 
-  override fun inventoryRepositoryAddFetching(uri: URI): String {
-    return "inventoryRepositoryAddFetching"
+  override fun repositoryAddFetching(uri: URI): String {
+    return "repositoryAddFetching"
   }
 
-  override fun inventoryRepositoryAddFetched(duration: Duration): String {
-    return "inventoryRepositoryAddFetched"
+  override fun repositoryAddFetched(duration: Duration): String {
+    return "repositoryAddFetched"
   }
 
-  override fun inventoryRepositoryAddServerError(
+  override fun repositoryAddServerError(
     statusCode: Int,
     message: String,
     contentType: String,
-    contentLength: Long
+    contentLength: Long?
   ): String {
-    return "inventoryRepositoryAddServerError"
+    return "repositoryAddServerError"
   }
 
-  override fun inventoryRepositoryAddConnectionFailed(exception: Exception): String {
-    return "inventoryRepositoryAddConnectionFailed"
+  override fun repositoryAddConnectionFailed(exception: Exception): String {
+    return "repositoryAddConnectionFailed"
   }
 
-  override fun inventoryRepositoryAddParsed(duration: Duration): String {
-    return "inventoryRepositoryAddParsed"
+  override fun repositoryAddParsed(duration: Duration): String {
+    return "repositoryAddParsed"
   }
 
-  override fun inventoryRepositorySaving(id: UUID): String {
-    return "inventoryRepositorySaving"
+  override fun repositorySaving(id: UUID): String {
+    return "repositorySaving"
   }
 
-  override fun inventoryRepositorySavingSucceeded(id: UUID): String {
-    return "inventoryRepositorySavingSucceeded"
+  override fun repositorySavingSucceeded(id: UUID): String {
+    return "repositorySavingSucceeded"
   }
 
-  override fun inventoryRepositorySavingFailed(id: UUID): String {
-    return "inventoryRepositorySavingFailed"
+  override fun repositorySavingFailed(id: UUID): String {
+    return "repositorySavingFailed"
   }
 
-  override val inventoryRepositoryAddParsing: String =
-    "inventoryRepositoryAddParsing"
+  override val repositoryAddParsing: String =
+    "repositoryAddParsing"
 
 
   override fun installVerifying(currentBytes: Long, maximumBytes: Long): String {
     return "installVerifying"
-  }
-
-  override fun installVerifiedFile(file: File): String {
-    return "installVerifiedFile"
   }
 
   override fun installVerificationFailed(expected: Hash, received: String): String {

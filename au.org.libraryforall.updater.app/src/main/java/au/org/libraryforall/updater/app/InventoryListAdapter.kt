@@ -11,8 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryItemState
-import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusDefinite
-import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusIndefinite
+import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 
 class InventoryListAdapter(
@@ -65,8 +64,10 @@ class InventoryListAdapter(
       view.findViewById<Button>(R.id.installingPackageButton)
     val packageName =
       view.findViewById<TextView>(R.id.installingPackageName)
-    val progressBar =
-      view.findViewById<ProgressBar>(R.id.installingProgress)
+    val progressBarMajor =
+      view.findViewById<ProgressBar>(R.id.installingProgressMajor)
+    val progressBarMinor =
+      view.findViewById<ProgressBar>(R.id.installingProgressMinor)
     val progressState =
       view.findViewById<TextView>(R.id.installingProgressState)
   }
@@ -158,16 +159,31 @@ class InventoryListAdapter(
           repositoryPackage.cancel()
         }
 
-        val progressState = state.state
-        holder.viewHolderInstalling.progressState.text = progressState.status
+        holder.viewHolderInstalling.progressState.text = state.status
         holder.viewHolderInstalling.packageName.text = repositoryPackage.name
-        when (progressState) {
-          is InstallingStatusIndefinite -> {
-            holder.viewHolderInstalling.progressBar.isIndeterminate = true
+
+        when (val majorState = state.major) {
+          is InventoryProgressValue.InventoryProgressValueIndefinite -> {
+            holder.viewHolderInstalling.progressBarMajor.visibility = View.VISIBLE
+            holder.viewHolderInstalling.progressBarMajor.isIndeterminate = true
           }
-          is InstallingStatusDefinite -> {
-            holder.viewHolderInstalling.progressBar.isIndeterminate = false
-            holder.viewHolderInstalling.progressBar.progress = progressState.percent.toInt()
+          is InventoryProgressValue.InventoryProgressValueDefinite -> {
+            holder.viewHolderInstalling.progressBarMajor.visibility = View.VISIBLE
+            holder.viewHolderInstalling.progressBarMajor.isIndeterminate = false
+            holder.viewHolderInstalling.progressBarMajor.progress = majorState.percent.toInt()
+          }
+          null -> {
+            holder.viewHolderInstalling.progressBarMajor.visibility = View.INVISIBLE
+          }
+        }
+
+        when (val minorState = state.minor) {
+          is InventoryProgressValue.InventoryProgressValueIndefinite -> {
+            holder.viewHolderInstalling.progressBarMinor.isIndeterminate = true
+          }
+          is InventoryProgressValue.InventoryProgressValueDefinite -> {
+            holder.viewHolderInstalling.progressBarMinor.isIndeterminate = false
+            holder.viewHolderInstalling.progressBarMinor.progress = minorState.percent.toInt()
           }
         }
       }

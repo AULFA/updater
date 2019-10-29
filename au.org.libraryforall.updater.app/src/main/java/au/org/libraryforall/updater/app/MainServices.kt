@@ -1,6 +1,5 @@
 package au.org.libraryforall.updater.app
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -9,183 +8,255 @@ import au.org.libraryforall.updater.apkinstaller.api.APKInstallerDevice
 import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.installed.vanilla.InstalledItems
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryClock
+import au.org.libraryforall.updater.inventory.api.InventoryClockType
+import au.org.libraryforall.updater.inventory.api.InventoryHTTPAuthenticationType
+import au.org.libraryforall.updater.inventory.api.InventoryHTTPConfigurationType
+import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
+import au.org.libraryforall.updater.inventory.api.InventoryStringDownloadResourcesType
+import au.org.libraryforall.updater.inventory.api.InventoryStringRepositoryResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
+import au.org.libraryforall.updater.inventory.api.InventoryStringVerificationResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryType
 import au.org.libraryforall.updater.inventory.vanilla.Inventory
-import au.org.libraryforall.updater.inventory.vanilla.InventoryAPKDirectory
+import au.org.libraryforall.updater.inventory.vanilla.InventoryHashIndexedDirectory
 import au.org.libraryforall.updater.inventory.vanilla.InventoryRepositoryDatabase
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
+import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.common.util.concurrent.SettableFuture
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.vanilla.HTTPClientsOkHTTP
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 
-@SuppressLint("StaticFieldLeak")
 object MainServices {
 
   private val logger = LoggerFactory.getLogger(MainServices::class.java)
 
-  private class AtomicService<T>(private val init: () -> (T)) {
-    private val initialized = AtomicBoolean(false)
+  private val servicesFuture =
+    SettableFuture.create<ServiceDirectoryType>()
 
-    @Volatile
-    private var service: T? = null
+  val services: ServiceDirectoryType
+    get() = this.servicesFuture.get()
 
-    fun get(): T {
-      return if (this.initialized.compareAndSet(false, true)) {
-        try {
-          this.service = this.init.invoke()
-          this.service!!
-        } catch (e: Exception) {
-          this.initialized.set(false)
-          throw e
-        }
-      } else {
-        this.service!!
-      }
-    }
-  }
-
-  private lateinit var context: Context
-
-  private val backgroundExecutor =
-    MoreExecutors.listeningDecorator(
-      Executors.newFixedThreadPool(1) { runnable ->
-        val th = Thread(runnable)
-        th.name = "au.org.libraryforall.updater.app.bundled[${th.id}]"
-        android.os.Process.setThreadPriority(19)
-        th
-      })
-
-  private val inventoryExecutor =
-    MoreExecutors.listeningDecorator(
-      Executors.newFixedThreadPool(4) { runnable ->
-        val th = Thread(runnable)
-        th.name = "au.org.libraryforall.updater.app.inventory[${th.id}]"
-        android.os.Process.setThreadPriority(19)
-        th
-      })
-
-  private val inventoryStringResources =
-    AtomicService {
-      InventoryStringResources(this.context)
-    }
-
-  private val installedPackagesReference: AtomicService<InstalledItemsType> =
-    AtomicService { InstalledItems.create(this.context) }
-
-  private var httpClient: AtomicService<HTTPClientType> =
-    AtomicService {
-      HTTPClientsOkHTTP().createClient("LFA Updater 0.0.1")
-    }
-
-  private var repositoryParsers : AtomicService<RepositoryXMLParserProviderType> =
-    AtomicService {
-      RepositoryXMLParsers.createFromServiceLoader()
-    }
-
-  private var repositorySerializers : AtomicService<RepositoryXMLSerializerProviderType> =
-    AtomicService {
-      RepositoryXMLSerializers.createFromServiceLoader()
-    }
-
-  private var inventoryDatabase : AtomicService<InventoryRepositoryDatabaseType> =
-    AtomicService {
-      InventoryRepositoryDatabase.create(
-        parsers = this.repositoryParsers.get(),
-        serializers = this.repositorySerializers.get(),
-        directory = this.inventoryDatabaseDirectory())
-    }
-
-  private fun inventoryDatabaseDirectory(): File {
-    val dir = File(this.context.filesDir, "Repositories").absoluteFile
+  private fun inventoryDatabaseDirectory(context: Context): File {
+    val dir = File(context.filesDir, "Repositories").absoluteFile
     this.logger.debug("using inventory directory: {}", dir)
     return dir
   }
 
-  private var inventory: AtomicService<InventoryType> =
-    AtomicService {
-      Inventory.open(
-        resources = this.inventoryStringResources(),
-        executor = this.inventoryExecutor,
-        httpAuthentication = { uri -> null },
-        http = this.http(),
-        apkDirectory = this.inventoryDirectory(),
-        apkInstaller = this.apkInstaller(),
-        repositoryParsers = this.repositoryParsers.get(),
-        inventoryDatabase = this.inventoryDatabase.get(),
-        installedPackages = this.installedPackages())
+  private val bootExecutor =
+    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1) { runnable ->
+      val thread = Thread(runnable)
+      thread.name = "one.lfa.boot[${thread.id}"
+      thread
+    })
+
+  private val inventoryExecutor =
+    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(4) { runnable ->
+      val thread = Thread(runnable)
+      thread.name = "one.lfa.inventory[${thread.id}"
+      thread
+    })
+
+  private val backgroundExecutor =
+    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1) { runnable ->
+      val thread = Thread(runnable)
+      thread.name = "one.lfa.background[${thread.id}"
+      thread
+    })
+
+  fun backgroundExecutor(): ListeningExecutorService =
+    this.backgroundExecutor
+
+  fun apkInstaller(): APKInstallerType =
+    this.services.requireService(APKInstallerType::class.java)
+
+  fun inventory(): InventoryType =
+    this.services.requireService(InventoryType::class.java)
+
+  fun notificationChannel(): InventoryNotificationChannelReferenceType =
+    this.services.requireService(InventoryNotificationChannelReferenceType::class.java)
+
+  fun initialize(context: Context) {
+    this.logger.debug("initializing services")
+
+    this.bootExecutor.execute {
+      try {
+        val directory = ServiceDirectory()
+
+        val httpClient = this.httpClient()
+
+        directory.register(
+          serviceClass = HTTPClientType::class.java,
+          service = httpClient
+        )
+        directory.register(
+          serviceClass = InventoryHTTPAuthenticationType::class.java,
+          service = InventoryHTTPAuthentication
+        )
+        directory.register(
+          serviceClass = InventoryHTTPConfigurationType::class.java,
+          service = InventoryHTTPConfiguration
+        )
+
+        val clock = InventoryClock
+        directory.register(
+          serviceClass = InventoryClockType::class.java,
+          service = clock
+        )
+
+        val stringResources = this.stringResources(context)
+        directory.registerAll(
+          stringResources,
+          InventoryStringResourcesType::class.java,
+          InventoryStringDownloadResourcesType::class.java,
+          InventoryStringRepositoryResourcesType::class.java,
+          InventoryStringVerificationResourcesType::class.java
+        )
+
+        directory.register(
+          serviceClass = RepositoryXMLSerializerProviderType::class.java,
+          service = RepositoryXMLSerializers.createFromServiceLoader()
+        )
+        directory.register(
+          serviceClass = RepositoryXMLParserProviderType::class.java,
+          service = RepositoryXMLParsers.createFromServiceLoader()
+        )
+
+        val installedItems = InstalledItems.create(context)
+        directory.register(
+          serviceClass = InstalledItemsType::class.java,
+          service = installedItems
+        )
+        directory.register(
+          serviceClass = APKInstallerType::class.java,
+          service = APKInstallerDevice.create(installedItems)
+        )
+
+        directory.register(
+          serviceClass = InventoryNotificationChannelReferenceType::class.java,
+          service = this.notificationChannelReference(context)
+        )
+
+        directory.register(
+          serviceClass = InventoryHashIndexedDirectoryType::class.java,
+          service = InventoryHashIndexedDirectory.create(
+            base = this.apkDirectory(context),
+            strings = stringResources,
+            clock = clock
+          )
+        )
+
+        directory.register(
+          serviceClass = InventoryRepositoryDatabaseType::class.java,
+          service = InventoryRepositoryDatabase.create(
+            parsers = directory.requireService(RepositoryXMLParserProviderType::class.java),
+            serializers = directory.requireService(RepositoryXMLSerializerProviderType::class.java),
+            directory = this.inventoryDatabaseDirectory(context)
+          )
+        )
+
+        directory.register(
+          serviceClass = InventoryType::class.java,
+          service = Inventory.open(directory, this.inventoryExecutor)
+        )
+
+        this.logger.debug("initialized services")
+        this.servicesFuture.set(directory)
+      } catch (e: Exception) {
+        this.logger.error("startup failed: ", e)
+        this.servicesFuture.setException(e)
+      }
+    }
+  }
+
+  private class ServiceDirectory : ServiceDirectoryType {
+
+    private val logger = LoggerFactory.getLogger(ServiceDirectory::class.java)
+    private val services = ConcurrentHashMap<Class<*>, List<Any>>()
+
+    fun <T : Any> register(
+      serviceClass: Class<T>,
+      service: T
+    ) {
+      this.logger.debug("registering service {}: {}", serviceClass.canonicalName, service)
+      val existing = (this.services[serviceClass] ?: listOf()).plus(service)
+      this.services[serviceClass] = existing
     }
 
-  private val inventoryDirectoryReference: AtomicService<InventoryAPKDirectoryType> =
-    AtomicService { InventoryAPKDirectory.create(apkDirectory()) }
+    fun <T : Any> registerAll(
+      service: T,
+      vararg serviceClasses: Class<in T>
+    ) {
+      for (serviceClass in serviceClasses) {
+        this.register(serviceClass as Class<T>, service)
+      }
+    }
 
-  private fun apkDirectory(): File {
-    val dir0 = this.context.getExternalFilesDir("APKs")?.absoluteFile
+    override fun <T : Any> optionalServices(serviceClass: Class<T>): List<T> {
+      return (this.services[serviceClass] as List<T>?) ?: listOf()
+    }
+  }
+
+  private fun notificationChannelReference(
+    context: Context
+  ): InventoryNotificationChannelReferenceType {
+    val channelId = "au.org.libraryforall.updater.app"
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val name = "Updater Notifications"
+      val descriptionText = "Updater Notifications"
+      val importance = NotificationManager.IMPORTANCE_DEFAULT
+      val channel = NotificationChannel(channelId, name, importance).apply {
+        this.description = descriptionText
+      }
+      val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.createNotificationChannel(channel)
+    }
+
+    return object : InventoryNotificationChannelReferenceType {
+      override val channelId: String
+        get() = channelId
+    }
+  }
+
+  private fun apkDirectory(context: Context): File {
+    val dir0 = context.getExternalFilesDir("APKs")?.absoluteFile
     if (dir0 != null) {
       this.logger.debug("using external files dir: {}", dir0)
       return dir0
     }
 
-    val dir1 = File(this.context.filesDir, "APKs").absoluteFile
+    val dir1 = File(context.filesDir, "APKs").absoluteFile
     this.logger.debug("using internal files dir: {}", dir1)
     return dir1
   }
 
-  private val apkInstaller: AtomicService<APKInstallerType> =
-    AtomicService { APKInstallerDevice.create(this.installedPackages()) }
+  private fun httpClient(): HTTPClientType {
+    return HTTPClientsOkHTTP().createClient("LFA Updater 0.0.1")
+  }
 
-  private val notificationChannelReference : AtomicService<String> =
-    AtomicService {
-      val channelId = "au.org.libraryforall.updater.app"
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val name = "Updater Notifications"
-        val descriptionText = "Updater Notifications"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(channelId, name, importance).apply {
-          description = descriptionText
-        }
-        val notificationManager: NotificationManager =
-          this.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-      }
-      channelId
-    }
-
-  fun notificationChannel(): String =
-    this.notificationChannelReference.get()
-
-  fun apkInstaller(): APKInstallerType =
-    this.apkInstaller.get()
-
-  fun http(): HTTPClientType =
-    this.httpClient.get()
-
-  fun inventoryDirectory(): InventoryAPKDirectoryType =
-    this.inventoryDirectoryReference.get()
-
-  fun installedPackages(): InstalledItemsType =
-    this.installedPackagesReference.get()
-
-  fun inventoryStringResources(): InventoryStringResourcesType =
-    this.inventoryStringResources.get()
-
-  fun inventory(): InventoryType =
-    this.inventory.get()
-
-  fun backgroundExecutor(): ListeningExecutorService =
-    this.backgroundExecutor
-
-  fun initialize(context: Context) {
-    this.context = context
+  private fun stringResources(context: Context): InventoryStringResourcesType {
+    val verificationStrings =
+      InventoryStringVerificationResources(context.resources)
+    val downloadStrings =
+      InventoryStringDownloadResources(context.resources)
+    val repositoryStrings =
+      InventoryStringRepositoryResources(context.resources)
+    return InventoryStringResources(
+      context = context,
+      verificationStrings = verificationStrings,
+      downloadStrings = downloadStrings,
+      repositoryStrings = repositoryStrings
+    )
   }
 }

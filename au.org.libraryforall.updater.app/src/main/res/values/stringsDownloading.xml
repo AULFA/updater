@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+  <string name="downloadingHTTPConnectionFailed">Failed to open a connection to the server (%1$s)</string>
+  <string name="downloadingHTTPOK">Server responded in %1$s.</string>
+  <string name="downloadingHTTPOpeningFile">Attempted to open an output file.</string>
+  <string name="downloadingHTTPOpeningFileFailed">Opening an output file failed (%1$s)</string>
+  <string name="downloadingHTTPProgressMajor">Downloading (%1$d of %2$d) (%3$.2fM / %4$.2fM: %5$.2fM/s)</string>
+  <string name="downloadingHTTPProgressMajorIndefiniteMinor">Downloading (%1$d of %2$d) (%3$.2fM: %4$.2fM/s)</string>
+  <string name="downloadingHTTPProgressMinorDefinite">Downloading (%1$.2fM / %2$.2fM: %3$.2fM/s)</string>
+  <string name="downloadingHTTPProgressMinorIndefinite">Downloading (%1$.2fM: %2$.2fM/s)</string>
+  <string name="downloadingHTTPRequest">Opening a connection to %1$s (attempt %2$d of %3$d)</string>
+  <string name="downloadingHTTPRetryingInSeconds">Retrying request in %1$d seconds…</string>
+  <string name="downloadingHTTPSucceeded">Downloading a file succeeded.</string>
+  <string name="downloadingHTTPWaitingBeforeRetrying">Pausing before retrying HTTP request…</string>
+  <string name="downloadingHTTPWritingFile">Downloading and saving data…</string>
+  <string name="downloadingHTTPSkipping">Skipping download due to the presence of local content.</string>
+</resources>

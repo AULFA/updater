@@ -6,7 +6,10 @@ import java.io.File
 import java.net.URI
 import java.util.UUID
 
-interface InventoryStringResourcesType {
+interface InventoryStringResourcesType
+  : InventoryStringDownloadResourcesType,
+  InventoryStringVerificationResourcesType,
+  InventoryStringRepositoryResourcesType {
 
   fun installOpeningConnectionTo(uri: URI): String
 
@@ -62,8 +65,6 @@ interface InventoryStringResourcesType {
     maximumBytes: Long
   ): String
 
-  fun installVerifiedFile(file: File): String
-
   fun installVerificationFailed(
     expected: Hash,
     received: String
@@ -72,6 +73,10 @@ interface InventoryStringResourcesType {
   fun installVerificationFailedMissing(file: File): String
 
   fun installVerificationFailedException(e: Exception): String
+
+  val installReservingFile: String
+
+  val installVerifyingLocalFile: String
 
   val installVerificationCancelled: String
 
@@ -84,14 +89,6 @@ interface InventoryStringResourcesType {
   fun installAPKFailedWithCode(errorCode: Int): String
 
   val installWaitingForInstaller: String
-
-  val inventoryRepositoryRemovingFailed: String
-
-  val inventoryRepositoryRemovingSucceeded: String
-
-  val inventoryRepositoryRemoveNonexistent: String
-
-  val inventoryRepositoryRemoving: String
 
   val installAPKStarted: String
 
@@ -109,42 +106,11 @@ interface InventoryStringResourcesType {
 
   val installStarted: String
 
-  val inventoryRepositoryAddAlreadyExists: String
-
-  fun inventoryRepositoryAddFetching(uri: URI): String
-
-  fun inventoryRepositoryAddFetched(duration: Duration): String
-
-  val inventoryRepositoryRequiredUUIDChecking: String
-
-  fun inventoryRepositoryAddServerError(
-    statusCode: Int,
-    message: String,
-    contentType: String,
-    contentLength: Long
+  fun installVerifyingLocalFileProgress(
+    bytesCurrent: Long,
+    bytesExpected: Long,
+    bytesPerSecond: Long
   ): String
 
-  val inventoryRepositoryAddInProgress: String
 
-  fun inventoryRepositoryAddConnectionFailed(exception: Exception): String
-
-  fun inventoryRepositoryAddParsed(duration: Duration): String
-
-  fun inventoryRepositorySaving(id: UUID): String
-
-  fun inventoryRepositorySavingSucceeded(id: UUID): String
-
-  fun inventoryRepositorySavingFailed(id: UUID): String
-
-  fun inventoryRepositoryRequiredUUIDCheckingFailed(
-    requiredUUID: UUID,
-    receivedUUID: UUID): String
-
-  fun inventoryRepositoryRequiredUUIDCheckingOK(
-    requiredUUID: UUID?,
-    receivedUUID: UUID): String
-
-  val inventoryRepositoryAddParseFailed: String
-
-  val inventoryRepositoryAddParsing: String
 }

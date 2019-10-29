@@ -1,0 +1,7 @@
+dependencies {
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}

@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
+import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import com.bluelinelabs.conductor.Controller
@@ -114,7 +114,7 @@ class RepositoriesViewController : Controller() {
       .show()
   }
 
-  private fun onDeletedCachedData(deletedFiles: List<InventoryAPKDirectoryType.Deleted>) {
+  private fun onDeletedCachedData(deletedFiles: List<InventoryHashIndexedDirectoryType.Deleted>) {
 
     UIThread.execute {
       val deletedSize =

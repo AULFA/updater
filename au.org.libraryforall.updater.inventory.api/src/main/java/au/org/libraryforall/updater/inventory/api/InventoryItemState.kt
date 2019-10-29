@@ -1,12 +1,24 @@
 package au.org.libraryforall.updater.inventory.api
 
+/**
+ * The state of a particular inventory item.
+ */
+
 sealed class InventoryItemState {
 
-  abstract val inventoryItem : InventoryRepositoryItemType
+  abstract val inventoryItem: InventoryRepositoryItemType
+
+  /**
+   * The inventory item is not installed.
+   */
 
   data class NotInstalled(
     override val inventoryItem: InventoryRepositoryItemType
   ) : InventoryItemState()
+
+  /**
+   * The given version of the item is installed.
+   */
 
   data class Installed(
     override val inventoryItem: InventoryRepositoryItemType,
@@ -14,32 +26,24 @@ sealed class InventoryItemState {
     val installedVersionName: String
   ) : InventoryItemState()
 
+  /**
+   * Installation failed for the given item.
+   */
+
   data class InstallFailed(
     override val inventoryItem: InventoryRepositoryItemType,
     val result: InventoryItemInstallResult
   ) : InventoryItemState()
 
-  sealed class InstallingStatus {
-    abstract val status: String
-
-    data class InstallingStatusIndefinite(
-      override val status: String
-    ) : InstallingStatus()
-
-    data class InstallingStatusDefinite(
-      val currentBytes: Long,
-      val maximumBytes: Long,
-      override val status: String
-    ) : InstallingStatus() {
-
-      val percent: Double
-        get() = (this.currentBytes.toDouble() / Math.max(1.0, this.maximumBytes.toDouble())) * 100.0
-    }
-  }
+  /**
+   * The item is currently installing.
+   */
 
   data class Installing(
     override val inventoryItem: InventoryRepositoryItemType,
-    val state: InstallingStatus
+    val major: InventoryProgressValue?,
+    val minor: InventoryProgressValue,
+    val status: String
   ) : InventoryItemState()
 
 }

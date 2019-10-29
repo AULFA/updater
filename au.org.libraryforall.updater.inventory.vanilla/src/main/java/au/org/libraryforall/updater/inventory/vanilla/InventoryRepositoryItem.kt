@@ -1,59 +1,63 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
 import au.org.libraryforall.updater.installed.api.InstalledItemsType
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryAPKDirectoryType.VerificationProgressType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
+import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
 import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryItemState
 import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallFailed
 import au.org.libraryforall.updater.inventory.api.InventoryItemState.Installed
 import au.org.libraryforall.updater.inventory.api.InventoryItemState.Installing
-import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusDefinite
-import au.org.libraryforall.updater.inventory.api.InventoryItemState.InstallingStatus.InstallingStatusIndefinite
 import au.org.libraryforall.updater.inventory.api.InventoryItemState.NotInstalled
+import au.org.libraryforall.updater.inventory.api.InventoryProgress
+import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
 import au.org.libraryforall.updater.repository.api.RepositoryItem
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
+import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import one.irradia.http.api.HTTPAuthentication
-import one.irradia.http.api.HTTPClientType
+import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.net.URI
 import java.util.UUID
-import java.util.concurrent.Callable
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal class InventoryRepositoryItem(
+  private val services: ServiceDirectoryType,
   private val repositoryId: UUID,
   private val repositoryItem: RepositoryItem,
-  private val http: HTTPClientType,
-  private val httpAuthentication: (URI) -> HTTPAuthentication?,
-  private val directory: InventoryAPKDirectoryType,
-  private val apkInstaller: APKInstallerType,
-  private val resources: InventoryStringResourcesType,
   private val events: PublishSubject<InventoryEvent>,
-  private val installedPackages: InstalledItemsType,
   private val executor: ListeningExecutorService,
-  initiallyInstalledVersion: NamedVersion?) : InventoryRepositoryItemType {
+  initiallyInstalledVersion: NamedVersion?
+) : InventoryRepositoryItemType {
+
+  private val logger =
+    LoggerFactory.getLogger(InventoryRepositoryItem::class.java)
+
+  private val stringResources =
+    this.services.requireService(InventoryStringResourcesType::class.java)
+  private val installedPackages =
+    this.services.requireService(InstalledItemsType::class.java)
+  private val apkDirectory =
+    this.services.requireService(InventoryHashIndexedDirectoryType::class.java)
 
   private val installedSubscription: Disposable
-  private val installCancel = AtomicBoolean(false)
   private val stateLock = Object()
   private var stateActual: InventoryItemState =
     if (initiallyInstalledVersion != null) {
       Installed(
         inventoryItem = this,
-        installedVersionCode = initiallyInstalledVersion.code.toLong(),
+        installedVersionCode = initiallyInstalledVersion.code,
         installedVersionName = initiallyInstalledVersion.name)
     } else {
       NotInstalled(this)
@@ -64,6 +68,9 @@ internal class InventoryRepositoryItem(
       }
       this.events.onNext(ItemChanged(this.repositoryId, this.id))
     }
+
+  @Volatile
+  private var installing: ListenableFuture<InventoryItemInstallResult>? = null
 
   private val isInstalled: Boolean
     get() = this.installedPackages.items().containsKey(this.id)
@@ -126,9 +133,6 @@ internal class InventoryRepositoryItem(
   override val name: String
     get() = this.repositoryItem.name
 
-  private val logger =
-    LoggerFactory.getLogger(InventoryRepositoryItem::class.java)
-
   override fun install(activity: Any): ListenableFuture<InventoryItemInstallResult> {
     this.logger.debug("[${this.id}]: install")
 
@@ -137,8 +141,13 @@ internal class InventoryRepositoryItem(
         is NotInstalled,
         is Installed,
         is InstallFailed -> {
-          this.stateActual = Installing(this, InstallingStatusIndefinite(""))
-          return this.runInstall(activity)
+          this.stateActual =
+            Installing(
+              inventoryItem = this,
+              major = null,
+              minor = InventoryProgressValue.InventoryProgressValueIndefinite(0L, 0L),
+              status = "")
+          this.runInstall(activity)
         }
 
         is Installing -> {
@@ -149,8 +158,8 @@ internal class InventoryRepositoryItem(
             itemName = this.name,
             itemURI = this.repositoryItem.source,
             steps = listOf(InventoryTaskStep(
-              description = this.resources.installStarted,
-              resolution = this.resources.installAlreadyInstalling))))
+              description = this.stringResources.installStarted,
+              resolution = this.stringResources.installAlreadyInstalling))))
         }
       }
     }
@@ -171,68 +180,57 @@ internal class InventoryRepositoryItem(
   }
 
   private fun runInstall(activity: Any): ListenableFuture<InventoryItemInstallResult> {
-    this.installCancel.set(false)
-    val step0 = InventoryTaskStep(description = this.resources.installStarted)
-    return this.executor.submit(Callable<InventoryItemInstallResult> {
-      runInstallActual(step0, activity)
-    })
+    val settableFuture = SettableFuture.create<InventoryItemInstallResult>()
+    this.installing = settableFuture
+
+    this.executor.execute {
+      runInstallActual(activity, settableFuture)
+    }
+
+    return settableFuture
   }
 
   override fun cancel() {
-    this.installCancel.set(true)
+    this.installing?.cancel(true)
   }
 
   private fun runInstallActual(
-    initialStep: InventoryTaskStep,
-    activity: Any
+    activity: Any,
+    future: SettableFuture<InventoryItemInstallResult>
   ): InventoryItemInstallResult {
+
+    val executionContext = object: InventoryTaskExecutionType {
+      override val services: ServiceDirectoryType
+        get() = this@InventoryRepositoryItem.services
+      override val isCancelRequested: Boolean
+        get() = future.isCancelled
+      override val onProgress: (InventoryProgress) -> Unit
+        get() = this@InventoryRepositoryItem::onInstallProgress
+    }
 
     val result =
       try {
-        this.directory.withKey(this.repositoryItem.sha256) { reservation ->
-          InventoryTaskMonad.startWithStep(initialStep)
-            .flatMap {
-              InventoryTaskDownload(
-                resources = this.resources,
-                http = this.http,
-                httpAuthentication = this.httpAuthentication,
-                reservation = reservation,
-                onVerificationProgress = this::onInstallVerificationProgress,
-                uri = this.repositoryItem.source,
-                onDownloadProgress = this::onInstallDownloadProgress,
-                cancel = this.installCancel
-              ).execute()
-            }.flatMap {
-              InventoryTaskVerify(
-                resources = this.resources,
-                reservation = reservation,
-                onVerificationProgress = this::onInstallVerificationProgress,
-                cancel = this.installCancel
-              ).execute()
-            }.flatMap {
-              this.stateActual =
-                Installing(
-                  this,
-                  InstallingStatusIndefinite(
-                    status = this.resources.installWaitingForInstaller))
-
-              InventoryTaskAPKInstall(
-                activity,
-                resources = this.resources,
-                packageName = this.id,
-                packageVersionCode = this.versionCode,
-                file = reservation.file,
-                apkInstaller = this.apkInstaller,
-                cancel = this.installCancel
-              ).execute()
-            }
+        this.apkDirectory.withKey(this.repositoryItem.sha256) { reservation ->
+          InventoryTaskAPKFetchInstall.create(
+            InventoryTaskAPKFetchInstallRequest(
+              activity = activity,
+              packageName = this.id,
+              packageVersionCode = this.versionCode.toInt(),
+              downloadURI = this.sourceURI,
+              downloadRetries = 10,
+              apkFile = reservation.file,
+              hash = reservation.hash
+            )
+          ).evaluate(executionContext)
         }
       } catch (e: Exception) {
-        this.installCancel.set(false)
-        initialStep.resolution = this.resources.installDownloadReservationFailed(e)
-        initialStep.failed = true
-        initialStep.exception = e
-        InventoryTaskMonad.InventoryTaskFailed<File>(listOf(initialStep))
+        future.setException(e)
+        val step = InventoryTaskStep(
+          description = this.stringResources.installReservingFile,
+          resolution = this.stringResources.installDownloadReservationFailed(e),
+          exception = e,
+          failed = true)
+        InventoryTaskResult.failed<Unit>(step)
       }
 
     val installResult =
@@ -245,12 +243,12 @@ internal class InventoryRepositoryItem(
         result.steps)
 
     return when (result) {
-      is InventoryTaskMonad.InventoryTaskFailed -> {
+      is InventoryTaskResult.InventoryTaskFailed -> {
         this.stateActual = InstallFailed(this, installResult)
         installResult
       }
-      is InventoryTaskMonad.InventoryTaskSuccess,
-      is InventoryTaskMonad.InventoryTaskCancelled -> {
+      is InventoryTaskResult.InventoryTaskSucceeded,
+      is InventoryTaskResult.InventoryTaskCancelled -> {
         this.stateActual =
           if (this.isInstalled) {
             Installed(this, this.versionCode, this.versionName)
@@ -262,40 +260,13 @@ internal class InventoryRepositoryItem(
     }
   }
 
-  private fun onInstallDownloadProgress(progress: InventoryTaskDownloadProgressType) {
-    val total = progress.expectedBytesTotal
-    if (total != null) {
-      this.stateActual =
-        Installing(
-          this,
-          InstallingStatusDefinite(
-            currentBytes = progress.receivedBytesTotal,
-            maximumBytes = total,
-            status = this.resources.installDownloading(
-              receivedBytesTotal = progress.receivedBytesTotal,
-              expectedBytesTotal = total,
-              bytesPerSecond = progress.receivedBytesPerSecond
-            )))
-    } else {
-      this.stateActual =
-        Installing(
-          this,
-          InstallingStatusIndefinite(
-            status = this.resources.installDownloadingIndefinite(
-              receivedBytesTotal = progress.receivedBytesTotal,
-              bytesPerSecond = progress.receivedBytesPerSecond
-            )))
-    }
-  }
-
-  private fun onInstallVerificationProgress(progress: VerificationProgressType) {
+  private fun onInstallProgress(progress: InventoryProgress) {
     this.stateActual =
       Installing(
-        this,
-        InstallingStatusDefinite(
-          currentBytes = progress.currentBytes,
-          maximumBytes = progress.maximumBytes,
-          status = this.resources.installVerifying(progress.currentBytes, progress.maximumBytes)))
+        inventoryItem = this,
+        major = progress.major,
+        minor = progress.minor,
+        status = progress.status)
   }
 
   override val state: InventoryItemState
