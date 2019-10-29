@@ -72,7 +72,7 @@ object InventoryTaskFileVerify {
     deleteOnFailure: Boolean = false
   ): InventoryTask<Verification> {
     return InventoryTask { execution ->
-      this.verify(execution, progressMajor, file, hash)
+      this.verify(execution, progressMajor, file, hash, deleteOnFailure)
     }
   }
 
@@ -88,7 +88,7 @@ object InventoryTaskFileVerify {
     hash: Hash,
     deleteOnFailure: Boolean = false
   ): InventoryTask<Verification> {
-    return this.create(progressMajor, file, hash)
+    return this.create(progressMajor, file, hash, deleteOnFailure)
       .flatMap(this::verifyFailTask)
   }
 
