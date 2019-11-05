@@ -252,11 +252,15 @@ object MainServices {
       InventoryStringDownloadResources(context.resources)
     val repositoryStrings =
       InventoryStringRepositoryResources(context.resources)
+    val fileStrings =
+      InventoryStringFileResources(context.resources)
+    
     return InventoryStringResources(
       context = context,
       verificationStrings = verificationStrings,
       downloadStrings = downloadStrings,
-      repositoryStrings = repositoryStrings
+      repositoryStrings = repositoryStrings,
+      fileStrings = fileStrings
     )
   }
 }

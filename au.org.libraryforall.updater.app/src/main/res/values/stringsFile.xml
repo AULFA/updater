@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+
+  <string name="fileDeleting">Deleting the local file...</string>
+  <string name="fileDoesNotExist">The local file does not exist!</string>
+  <string name="fileCouldNotDelete">Could not delete the local file.</string>
+</resources>

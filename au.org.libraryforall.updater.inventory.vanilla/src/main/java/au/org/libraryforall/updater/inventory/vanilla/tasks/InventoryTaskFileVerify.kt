@@ -15,7 +15,7 @@ import java.io.FileInputStream
 import java.security.MessageDigest
 
 /**
- * A task that verify that a file has a given hash.
+ * A task that verifies that a file has a given hash.
  */
 
 object InventoryTaskFileVerify {

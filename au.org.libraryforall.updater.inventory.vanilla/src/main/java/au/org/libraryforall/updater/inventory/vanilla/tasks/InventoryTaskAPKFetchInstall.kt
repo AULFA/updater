@@ -34,7 +34,12 @@ object InventoryTaskAPKFetchInstall {
         packageVersionCode = request.packageVersionCode,
         apkFile = request.apkFile)
 
-    return downloadTaskRetrying.flatMap { installTask }
+    val deleteTask =
+      InventoryTaskFileDelete.create(request.apkFile)
+
+    return downloadTaskRetrying
+      .flatMap { installTask }
+      .flatMap { deleteTask }
   }
 
   private fun pauseProvider(

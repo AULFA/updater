@@ -9,7 +9,8 @@ import java.util.UUID
 interface InventoryStringResourcesType
   : InventoryStringDownloadResourcesType,
   InventoryStringVerificationResourcesType,
-  InventoryStringRepositoryResourcesType {
+  InventoryStringRepositoryResourcesType,
+  InventoryStringFileResourcesType{
 
   fun installOpeningConnectionTo(uri: URI): String
 
