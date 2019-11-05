@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<r:repository xmlns:r="urn:au.org.libraryforall.updater.repository.xml:1.0"
+  self="any"
+  id="79b82d4a-02d1-4dd4-81e3-37dc37b8a5d0"
+  title="Example Repository"
+  updated="2019-01-01T00:00:00Z">
+
+  <r:package name="Package 0"
+    id="com.example.p0"
+    sha256="87298cc2f31fba73181ea2a9e6ef10dce21ed95e98bdac9c4e1504ea16f486e4"
+    source="this is not a URI"
+    versionCode="23"
+    versionName="1.0.0" />
+
+</r:repository>

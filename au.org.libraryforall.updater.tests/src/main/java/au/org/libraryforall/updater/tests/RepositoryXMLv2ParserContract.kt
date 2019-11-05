@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
 
-abstract class RepositoryXMLParserContract {
+abstract class RepositoryXMLv2ParserContract {
 
   abstract fun logger(): Logger
 
@@ -249,8 +249,8 @@ abstract class RepositoryXMLParserContract {
   }
 
   private fun stream(name: String): InputStream {
-    return RepositoryXMLParserContract::class.java.getResourceAsStream(
-      "/au/org/libraryforall/updater/tests/${name}")!!
+    return RepositoryXMLv2ParserContract::class.java.getResourceAsStream(
+      "/au/org/libraryforall/updater/tests/v2/${name}")!!
   }
 
 }

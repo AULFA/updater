@@ -10,6 +10,15 @@ import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
 
+  override val fileDeleting: String
+    get() = "fileDeleting"
+
+  override val fileDoesNotExist: String
+    get() = "fileDoesNotExist"
+
+  override val fileCouldNotDelete: String
+    get() = "fileCouldNotDelete"
+
   override val installReservingFile: String
     get() = "installReservingFile"
 

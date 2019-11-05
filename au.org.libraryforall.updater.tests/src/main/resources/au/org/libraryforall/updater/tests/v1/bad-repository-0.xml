@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<r:repository xmlns:r="urn:au.org.libraryforall.updater.repository.xml:1.0"
-  id="79b82d4a-02d1-4dd4-81e3-37dc37b8a5d0"
-  title="Example Repository"
-  updated="bad date">
+<r:repository xmlns:r="urn:au.org.libraryforall.updater.repository.xml:1.0"   self="any">
 
   <r:package name="Package 0"
     id="com.example.p0"

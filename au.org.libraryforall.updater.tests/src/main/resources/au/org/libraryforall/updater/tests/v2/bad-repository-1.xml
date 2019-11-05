@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<repository
-  id="79b82d4a-02d1-4dd4-81e3-37dc37b8a5d0"
+<r:Repository xmlns:r="urn:au.org.libraryforall.updater.repository.xml:2.0"
+  self="any"
+  id="23"
   title="Example Repository"
   updated="2019-01-01T00:00:00Z">
 
-  <package name="Package 0"
+  <r:AndroidPackage name="Package 0"
     id="com.example.p0"
     sha256="87298cc2f31fba73181ea2a9e6ef10dce21ed95e98bdac9c4e1504ea16f486e4"
     source="http://www.example.com/1"
     versionCode="23"
     versionName="1.0.0" />
 
-  <package name="Package 1"
+  <r:AndroidPackage name="Package 1"
     id="com.example.p1"
     sha256="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     source="http://www.example.com/2"
     versionCode="22"
     versionName="1.0.2" />
 
-  <package name="Package 2"
+  <r:AndroidPackage name="Package 2"
     id="com.example.p2"
     sha256="47ea70cf08872bdb4afad3432b01d963ac7d165f6b575cd72ef47498f4459a90"
     source="http://www.example.com/3"
     versionCode="24"
     versionName="1.0.4" />
 
-</repository>
+</r:Repository>

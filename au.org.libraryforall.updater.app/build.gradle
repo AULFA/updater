@@ -9,6 +9,7 @@ dependencies {
   implementation project(":au.org.libraryforall.updater.repository.xml.api")
   implementation project(":au.org.libraryforall.updater.repository.xml.spi")
   implementation project(":au.org.libraryforall.updater.repository.xml.v1_0")
+  implementation project(":au.org.libraryforall.updater.repository.xml.v2_0")
 
   implementation libraries.androidMaterial
   implementation libraries.androidXActivity
