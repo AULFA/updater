@@ -16,8 +16,17 @@ class InventoryStringDownloadResources(
   override val downloadingHTTPWaitingBeforeRetrying: String
     get() = this.resources.getString(R.string.downloadingHTTPWaitingBeforeRetrying)
 
-  override fun downloadingHTTPRetryingInSeconds(time: Long): String {
-    return this.resources.getString(R.string.downloadingHTTPRetryingInSeconds, time)
+  override fun downloadingHTTPRetryingInSeconds(
+    time: Long,
+    attemptCurrent: Int,
+    attemptMax: Int
+  ): String {
+    return this.resources.getString(
+      R.string.downloadingHTTPRetryingInSeconds,
+      attemptCurrent,
+      attemptMax,
+      time
+    )
   }
 
   override val downloadingHTTPSucceeded: String

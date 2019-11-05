@@ -128,12 +128,12 @@ class InventoryRepository internal constructor(
             executor = this.executor,
             initiallyInstalledVersion = installedVersion,
             repositoryId = this.id,
-            repositoryItem = repositoryPackage,
+            item = repositoryPackage,
             services = this.services
           )
 
-        viewCurrent[newPackage.id] = newPackage
-        this.logger.debug("[{}]: package {} now visible", repository.id, newPackage.id)
+        viewCurrent[newPackage.item.id] = newPackage
+        this.logger.debug("[{}]: package {} now visible", repository.id, newPackage.item.id)
         events.add(ItemBecameVisible(repositoryId = this.id, itemId = repositoryPackage.id))
       }
     }
@@ -147,10 +147,10 @@ class InventoryRepository internal constructor(
       val entry = iter.next()
       val existingPackage = entry.value
 
-      if (!repository.itemsNewest.containsKey(existingPackage.id)) {
-        this.logger.debug("[{}]: package {} now invisible", repository.id, existingPackage.id)
+      if (!repository.itemsNewest.containsKey(existingPackage.item.id)) {
+        this.logger.debug("[{}]: package {} now invisible", repository.id, existingPackage.item.id)
         iter.remove()
-        events.add(ItemBecameInvisible(repositoryId = this.id, itemId = existingPackage.id))
+        events.add(ItemBecameInvisible(repositoryId = this.id, itemId = existingPackage.item.id))
       }
     }
 
@@ -161,7 +161,7 @@ class InventoryRepository internal constructor(
     for (repositoryPackage in repository.itemsNewest.values) {
       val existing = viewCurrent[repositoryPackage.id]
       if (existing != null) {
-        if (repositoryPackage.versionCode > existing.versionCode) {
+        if (repositoryPackage.versionCode > existing.item.versionCode) {
           val installedPackage = installed[repositoryPackage.id]
           val installedVersion =
             installedPackage?.let { pack ->
@@ -174,12 +174,12 @@ class InventoryRepository internal constructor(
               executor = this.executor,
               initiallyInstalledVersion = installedVersion,
               repositoryId = this.id,
-              repositoryItem = repositoryPackage,
+              item = repositoryPackage,
               services = this.services
             )
 
-          viewCurrent[newPackage.id] = newPackage
-          this.logger.debug("[{}]: package {} upgrade available", repository.id, newPackage.id)
+          viewCurrent[newPackage.item.id] = newPackage
+          this.logger.debug("[{}]: package {} upgrade available", repository.id, newPackage.item.id)
           events.add(ItemChanged(repositoryId = this.id, itemId = repositoryPackage.id))
         }
       }
@@ -193,7 +193,9 @@ class InventoryRepository internal constructor(
       this.packagesActual
         .values
         .toList()
-        .sortedBy(InventoryRepositoryItemType::name)
+        .sortedBy { item ->
+          item.item.name
+        }
     }
 
   override val events: Observable<InventoryEvent>

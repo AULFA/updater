@@ -85,8 +85,12 @@ class InventoryStringResources : InventoryStringResourcesType {
     return "downloadingHTTPProgress"
   }
 
-  override fun downloadingHTTPRetryingInSeconds(time: Long): String {
-    return "downloadingHTTPRetryingInSeconds $time"
+  override fun downloadingHTTPRetryingInSeconds(
+    time: Long,
+    attemptCurrent: Int,
+    attemptMax: Int
+  ): String {
+    return "downloadingHTTPRetryingInSeconds $time $attemptCurrent $attemptMax"
   }
 
   override fun verificationFailed(

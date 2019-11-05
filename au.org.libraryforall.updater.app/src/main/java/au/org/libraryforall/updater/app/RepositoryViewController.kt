@@ -182,9 +182,9 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     attributes[resources.getString(R.string.install_failure_repository)] =
       result.repositoryId.toString()
     attributes[resources.getString(R.string.install_failure_package)] =
-      "${repositoryPackage.id} ${repositoryPackage.versionName} (${repositoryPackage.versionCode})"
+      "${repositoryPackage.item.id} ${repositoryPackage.item.versionName} (${repositoryPackage.item.versionCode})"
     attributes[resources.getString(R.string.install_failure_package_uri)] =
-      repositoryPackage.sourceURI.toString()
+      repositoryPackage.item.source.toString()
 
     return InventoryFailureReport(
       title = resources.getString(R.string.install_failure_title),

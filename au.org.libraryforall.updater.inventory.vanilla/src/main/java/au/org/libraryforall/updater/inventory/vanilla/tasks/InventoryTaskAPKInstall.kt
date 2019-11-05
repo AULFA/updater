@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/**
+ * A task that, when evaluated, installs an APK file.
+ */
+
 object InventoryTaskAPKInstall {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskAPKInstall.javaClass)

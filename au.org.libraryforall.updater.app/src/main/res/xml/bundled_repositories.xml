@@ -2,6 +2,10 @@
 
 <bundled-repositories>
   <bundled-repository
+    source="https://builds.lfa.one/apk2/releases.xml"
+    title="LFA Releases (v2)"
+    uuid="c84dc6b2-05d7-427e-b720-f5135d77d54e" />
+  <bundled-repository
     source="https://builds.lfa.one/apk/releases.xml"
     title="LFA Releases"
     uuid="378142a2-23ff-44c9-964f-b621fe45ed0c" />

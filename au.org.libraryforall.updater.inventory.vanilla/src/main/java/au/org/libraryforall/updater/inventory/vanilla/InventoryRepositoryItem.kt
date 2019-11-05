@@ -19,15 +19,16 @@ import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
+import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetchInstall
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
 import au.org.libraryforall.updater.repository.api.RepositoryItem
+import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -35,7 +36,7 @@ import java.util.UUID
 internal class InventoryRepositoryItem(
   private val services: ServiceDirectoryType,
   private val repositoryId: UUID,
-  private val repositoryItem: RepositoryItem,
+  override val item: RepositoryItem,
   private val events: PublishSubject<InventoryEvent>,
   private val executor: ListeningExecutorService,
   initiallyInstalledVersion: NamedVersion?
@@ -78,7 +79,7 @@ internal class InventoryRepositoryItem(
   init {
     this.installedSubscription =
       this.installedPackages.events.ofType(InstalledItemsChanged::class.java)
-        .filter { event -> event.installedItem.id == this.repositoryItem.id }
+        .filter { event -> event.installedItem.id == this.item.id }
         .subscribe(this::onInstalledPackageEvent)
   }
 
@@ -87,7 +88,7 @@ internal class InventoryRepositoryItem(
     return when (event) {
       is InstalledItemsChanged.InstalledItemAdded -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.repositoryItem.id)
+          this.logger.debug("package {} became installed", this.item.id)
           this.stateActual = Installed(
             inventoryItem = this,
             installedVersionCode = event.installedItem.versionCode,
@@ -98,7 +99,7 @@ internal class InventoryRepositoryItem(
       }
       is InstalledItemsChanged.InstalledItemRemoved -> {
         if (stateCurrent is Installed) {
-          this.logger.debug("package {} became uninstalled", this.repositoryItem.id)
+          this.logger.debug("package {} became uninstalled", this.item.id)
           this.stateActual = NotInstalled(this)
         } else {
 
@@ -106,7 +107,7 @@ internal class InventoryRepositoryItem(
       }
       is InstalledItemsChanged.InstalledItemUpdated -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.repositoryItem.id)
+          this.logger.debug("package {} became installed", this.item.id)
           this.stateActual = Installed(
             inventoryItem = this,
             installedVersionCode = event.installedItem.versionCode,
@@ -118,20 +119,20 @@ internal class InventoryRepositoryItem(
     }
   }
 
-  override val sourceURI: URI
-    get() = this.repositoryItem.source
+  private val sourceURI: URI
+    get() = this.item.source
 
-  override val id: String
-    get() = this.repositoryItem.id
+  private val id: String
+    get() = this.item.id
 
-  override val versionCode: Long
-    get() = this.repositoryItem.versionCode
+  private val versionCode: Long
+    get() = this.item.versionCode
 
-  override val versionName: String
-    get() = this.repositoryItem.versionName
+  private val versionName: String
+    get() = this.item.versionName
 
-  override val name: String
-    get() = this.repositoryItem.name
+  private val name: String
+    get() = this.item.name
 
   override fun install(activity: Any): ListenableFuture<InventoryItemInstallResult> {
     this.logger.debug("[${this.id}]: install")
@@ -156,7 +157,7 @@ internal class InventoryRepositoryItem(
             itemVersionCode = this.versionCode,
             itemVersionName = this.versionName,
             itemName = this.name,
-            itemURI = this.repositoryItem.source,
+            itemURI = this.item.source,
             steps = listOf(InventoryTaskStep(
               description = this.stringResources.installStarted,
               resolution = this.stringResources.installAlreadyInstalling))))
@@ -172,7 +173,7 @@ internal class InventoryRepositoryItem(
     return synchronized(this.stateLock) {
       when (val state = this.stateActual) {
         is NotInstalled -> true
-        is Installed -> state.installedVersionCode < this.repositoryItem.versionCode
+        is Installed -> state.installedVersionCode < this.item.versionCode
         is InstallFailed -> true
         is Installing -> false
       }
@@ -184,7 +185,7 @@ internal class InventoryRepositoryItem(
     this.installing = settableFuture
 
     this.executor.execute {
-      runInstallActual(activity, settableFuture)
+      this.runInstallActual(activity, settableFuture)
     }
 
     return settableFuture
@@ -199,7 +200,7 @@ internal class InventoryRepositoryItem(
     future: SettableFuture<InventoryItemInstallResult>
   ): InventoryItemInstallResult {
 
-    val executionContext = object: InventoryTaskExecutionType {
+    val executionContext = object : InventoryTaskExecutionType {
       override val services: ServiceDirectoryType
         get() = this@InventoryRepositoryItem.services
       override val isCancelRequested: Boolean
@@ -209,28 +210,11 @@ internal class InventoryRepositoryItem(
     }
 
     val result =
-      try {
-        this.apkDirectory.withKey(this.repositoryItem.sha256) { reservation ->
-          InventoryTaskAPKFetchInstall.create(
-            InventoryTaskAPKFetchInstallRequest(
-              activity = activity,
-              packageName = this.id,
-              packageVersionCode = this.versionCode.toInt(),
-              downloadURI = this.sourceURI,
-              downloadRetries = 10,
-              apkFile = reservation.file,
-              hash = reservation.hash
-            )
-          ).evaluate(executionContext)
-        }
-      } catch (e: Exception) {
-        future.setException(e)
-        val step = InventoryTaskStep(
-          description = this.stringResources.installReservingFile,
-          resolution = this.stringResources.installDownloadReservationFailed(e),
-          exception = e,
-          failed = true)
-        InventoryTaskResult.failed<Unit>(step)
+      when (this.item) {
+        is RepositoryItem.RepositoryAndroidPackage ->
+          this.runInstallActualAPK(activity, executionContext, future)
+        is RepositoryItem.RepositoryOPDSPackage ->
+          this.runInstallActualOPDS(executionContext, future)
       }
 
     val installResult =
@@ -239,7 +223,7 @@ internal class InventoryRepositoryItem(
         this.id,
         this.versionCode,
         this.versionName,
-        this.repositoryItem.source,
+        this.item.source,
         result.steps)
 
     return when (result) {
@@ -257,6 +241,48 @@ internal class InventoryRepositoryItem(
           }
         installResult
       }
+    }
+  }
+
+  private fun runInstallActualOPDS(
+    executionContext: InventoryTaskExecutionType,
+    future: SettableFuture<InventoryItemInstallResult>
+  ): InventoryTaskResult<Unit> {
+    this.logger.debug("runInstallActualOPDS: {}", this.sourceURI)
+
+    return InventoryTaskOPDSFetchInstall.create()
+      .evaluate(executionContext)
+  }
+
+  private fun runInstallActualAPK(
+    activity: Any,
+    executionContext: InventoryTaskExecutionType,
+    future: SettableFuture<InventoryItemInstallResult>
+  ): InventoryTaskResult<Unit> {
+    this.logger.debug("runInstallActualAPK: {}", this.sourceURI)
+
+    return try {
+      this.apkDirectory.withKey(this.item.sha256) { reservation ->
+        InventoryTaskAPKFetchInstall.create(
+          InventoryTaskAPKFetchInstallRequest(
+            activity = activity,
+            packageName = this.id,
+            packageVersionCode = this.versionCode.toInt(),
+            downloadURI = this.sourceURI,
+            downloadRetries = 10,
+            apkFile = reservation.file,
+            hash = reservation.hash
+          )
+        ).evaluate(executionContext)
+      }
+    } catch (e: Exception) {
+      future.setException(e)
+      val step = InventoryTaskStep(
+        description = this.stringResources.installReservingFile,
+        resolution = this.stringResources.installDownloadReservationFailed(e),
+        exception = e,
+        failed = true)
+      InventoryTaskResult.failed(step)
     }
   }
 

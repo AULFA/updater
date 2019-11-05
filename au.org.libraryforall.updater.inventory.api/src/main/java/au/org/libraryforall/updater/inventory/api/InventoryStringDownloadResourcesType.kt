@@ -46,6 +46,8 @@ interface InventoryStringDownloadResourcesType {
   ): String
 
   fun downloadingHTTPRetryingInSeconds(
-    time: Long
+    time: Long,
+    attemptCurrent: Int,
+    attemptMax: Int
   ): String
 }

@@ -2,6 +2,11 @@ package au.org.libraryforall.updater.inventory.vanilla.tasks
 
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 
+/**
+ * A task that, when evaluated, downloads an APK file, installs it, and then deletes the APK
+ * file on successful installation.
+ */
+
 object InventoryTaskAPKFetchInstall {
 
   fun create(
@@ -51,7 +56,11 @@ object InventoryTaskAPKFetchInstall {
     return InventoryTaskPause.create(
       seconds = 5L,
       description = strings.downloadingHTTPWaitingBeforeRetrying,
-      status = strings::downloadingHTTPRetryingInSeconds)
+      status = { time -> strings.downloadingHTTPRetryingInSeconds(
+        time,
+        retry.attemptCurrent,
+        retry.attemptMaximum
+      )})
   }
 
 }

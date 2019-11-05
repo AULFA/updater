@@ -39,6 +39,7 @@ object InventoryTaskFileDownload {
 
   private fun pauses(
     progressMajor: InventoryProgressValue?,
+    retryAttempt: InventoryTaskRetryAttempt,
     execution: InventoryTaskExecutionType
   ): InventoryTask<Unit> {
     val strings =
@@ -50,7 +51,11 @@ object InventoryTaskFileDownload {
       progressMajor = progressMajor,
       seconds = httpConfiguration.retryDelaySeconds,
       description = strings.downloadingHTTPWaitingBeforeRetrying,
-      status = { time -> strings.downloadingHTTPRetryingInSeconds(time) })
+      status = { time -> strings.downloadingHTTPRetryingInSeconds(
+        time,
+        retryAttempt.attemptCurrent,
+        retryAttempt.attemptMaximum
+      ) })
   }
 
   private data class HTTPInputStream(
@@ -80,7 +85,7 @@ object InventoryTaskFileDownload {
     this.logger.debug(
       "performing HEAD request for {} (attempt {}/{})",
       uri,
-      attempt.attemptCurrent + 1,
+      attempt.attemptCurrent,
       attempt.attemptMaximum)
 
     val strings =
@@ -96,7 +101,7 @@ object InventoryTaskFileDownload {
       InventoryTaskStep(
         description = strings.downloadingHTTPRequest(
           uri = uri,
-          attemptCurrent = attempt.attemptCurrent + 1,
+          attemptCurrent = attempt.attemptCurrent,
           attemptMax = attempt.attemptMaximum
         ),
         resolution = "",
@@ -158,7 +163,7 @@ object InventoryTaskFileDownload {
       "performing GET request for {} offset {} (attempt {}/{})",
       uri,
       offset,
-      attempt.attemptCurrent + 1,
+      attempt.attemptCurrent,
       attempt.attemptMaximum)
 
     val strings =
@@ -174,7 +179,7 @@ object InventoryTaskFileDownload {
       InventoryTaskStep(
         description = strings.downloadingHTTPRequest(
           uri = uri,
-          attemptCurrent = attempt.attemptCurrent + 1,
+          attemptCurrent = attempt.attemptCurrent,
           attemptMax = attempt.attemptMaximum
         ),
         resolution = "",
@@ -234,8 +239,8 @@ object InventoryTaskFileDownload {
   ): InventoryTask<File> {
     return InventoryTaskRetry.retrying(
       retries = request.retries,
-      pauses = { execution, _ ->
-        this.pauses(request.progressMajor, execution)
+      pauses = { execution, retry ->
+        this.pauses(request.progressMajor, retry, execution)
       },
       one = { attempt ->
         this.downloadOneAttemptTask(request, attempt)
@@ -354,7 +359,7 @@ object InventoryTaskFileDownload {
 
     this.logger.debug(
       "transferring (attempt {}/{})",
-      attempt.attemptCurrent + 1,
+      attempt.attemptCurrent,
       attempt.attemptMaximum)
 
     val currentlyHave = outputFile.length()

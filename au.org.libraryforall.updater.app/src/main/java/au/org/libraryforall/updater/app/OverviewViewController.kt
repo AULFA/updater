@@ -90,16 +90,16 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     for (repository in this.inventory.inventoryRepositories()) {
       for (packageCurrent in repository.items) {
         if (this.packageIsSuitableForOverview(packageCurrent)) {
-          val existing = updates[packageCurrent.id]
-          if (existing == null || packageCurrent.versionCode > existing.versionCode) {
-            updates[packageCurrent.id] = packageCurrent
+          val existing = updates[packageCurrent.item.id]
+          if (existing == null || packageCurrent.item.versionCode > existing.item.versionCode) {
+            updates[packageCurrent.item.id] = packageCurrent
           }
         }
       }
     }
 
     val resultUpdates =
-      updates.values.sortedBy { p -> p.name }
+      updates.values.sortedBy { p -> p.item.name }
 
     UIThread.execute {
       this.listPackages.clear()
@@ -137,9 +137,9 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     attributes[resources.getString(R.string.install_failure_repository)] =
       result.repositoryId.toString()
     attributes[resources.getString(R.string.install_failure_package)] =
-      "${repositoryPackage.id} ${repositoryPackage.versionName} (${repositoryPackage.versionCode})"
+      "${repositoryPackage.item.id} ${repositoryPackage.item.versionName} (${repositoryPackage.item.versionCode})"
     attributes[resources.getString(R.string.install_failure_package_uri)] =
-      repositoryPackage.sourceURI.toString()
+      repositoryPackage.item.source.toString()
 
     return InventoryFailureReport(
       title = resources.getString(R.string.install_failure_title),

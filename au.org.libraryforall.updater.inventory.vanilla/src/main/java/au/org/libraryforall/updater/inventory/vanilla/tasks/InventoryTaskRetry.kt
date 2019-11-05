@@ -38,7 +38,7 @@ object InventoryTaskRetry {
   ): InventoryTaskResult<A> {
     val steps = mutableListOf<InventoryTaskStep>()
 
-    retryLoop@ for (attempt in 0 .. retries) {
+    retryLoop@ for (attempt in 1 .. retries) {
       val retryAttempt = InventoryTaskRetryAttempt(attempt, retries)
       val task = one.invoke(retryAttempt)
       val result = task.evaluate(execution)

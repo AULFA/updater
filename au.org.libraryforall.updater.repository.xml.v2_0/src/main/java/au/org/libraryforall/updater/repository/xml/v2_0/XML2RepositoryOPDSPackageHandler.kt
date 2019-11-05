@@ -35,7 +35,7 @@ class XML2RepositoryOPDSPackageHandler(
     namespace: String,
     name: String,
     qname: String): RepositoryItem? {
-    return RepositoryItem.RepositoryAndroidPackage(
+    return RepositoryItem.RepositoryOPDSPackage(
       id = this.id,
       versionName = this.versionName,
       versionCode = this.versionCode,
@@ -71,7 +71,7 @@ class XML2RepositoryOPDSPackageHandler(
           relativeSource
         }
 
-      this.logger.debug("resolved android package source: {}", resolvedSource)
+      this.logger.debug("resolved OPDS package source: {}", resolvedSource)
       this.source = resolvedSource
     } catch (e: Exception) {
       throw SAXParseException(e.message, this.locator(), e)

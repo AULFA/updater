@@ -54,7 +54,7 @@ object InventoryTaskPause {
             perSecond = 1,
             maximum = seconds
           ),
-          status = status.invoke(time)
+          status = status.invoke(seconds - time)
         )
       execution.onProgress.invoke(progress)
 

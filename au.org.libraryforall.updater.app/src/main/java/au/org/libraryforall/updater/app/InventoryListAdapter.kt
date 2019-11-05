@@ -13,6 +13,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryItemState
 import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
+import au.org.libraryforall.updater.repository.api.RepositoryItem
 
 class InventoryListAdapter(
   private val context: Activity,
@@ -102,18 +103,21 @@ class InventoryListAdapter(
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.VISIBLE)
 
-        holder.viewHolderNotInstalled.packageName.text = repositoryPackage.name
+        holder.viewHolderNotInstalled.packageName.text = repositoryPackage.item.name
         holder.viewHolderNotInstalled.packageAvailable.text =
           this.context.resources.getString(
             R.string.package_state_available,
-            repositoryPackage.versionName,
-            repositoryPackage.versionCode)
+            repositoryPackage.item.versionName,
+            repositoryPackage.item.versionCode)
 
         holder.viewHolderNotInstalled.packageButton.isEnabled = true
         holder.viewHolderNotInstalled.packageButton.setOnClickListener {
           holder.viewHolderNotInstalled.packageButton.isEnabled = false
           repositoryPackage.install(this.context)
         }
+
+        holder.viewHolderNotInstalled.packageIcon.setImageResource(
+          iconFor(repositoryPackage.state.inventoryItem))
       }
 
       is InventoryItemState.Installed -> {
@@ -122,12 +126,12 @@ class InventoryListAdapter(
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
-        holder.viewHolderInstalled.packageName.text = repositoryPackage.name
+        holder.viewHolderInstalled.packageName.text = repositoryPackage.item.name
         holder.viewHolderInstalled.packageAvailable.text =
           this.context.resources.getString(
             R.string.package_state_available,
-            repositoryPackage.versionName,
-            repositoryPackage.versionCode)
+            repositoryPackage.item.versionName,
+            repositoryPackage.item.versionCode)
 
         holder.viewHolderInstalled.packageInstalled.text =
           this.context.resources.getString(
@@ -145,6 +149,9 @@ class InventoryListAdapter(
         } else {
           setVisibility(holder.viewHolderInstalled.packageButton, View.INVISIBLE)
         }
+
+        holder.viewHolderInstalled.packageIcon.setImageResource(
+          iconFor(repositoryPackage.state.inventoryItem))
       }
 
       is InventoryItemState.Installing -> {
@@ -160,7 +167,7 @@ class InventoryListAdapter(
         }
 
         holder.viewHolderInstalling.progressState.text = state.status
-        holder.viewHolderInstalling.packageName.text = repositoryPackage.name
+        holder.viewHolderInstalling.packageName.text = repositoryPackage.item.name
 
         when (val majorState = state.major) {
           is InventoryProgressValue.InventoryProgressValueIndefinite -> {
@@ -194,7 +201,7 @@ class InventoryListAdapter(
         setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
-        holder.viewHolderInstallFailed.packageName.text = repositoryPackage.name
+        holder.viewHolderInstallFailed.packageName.text = repositoryPackage.item.name
 
         holder.viewHolderInstallFailed.retry.isEnabled = true
         holder.viewHolderInstallFailed.retry.setOnClickListener {
@@ -208,6 +215,13 @@ class InventoryListAdapter(
           this.onShowFailureDetails.invoke(repositoryPackage, state.result)
         }
       }
+    }
+  }
+
+  private fun iconFor(inventoryItem: InventoryRepositoryItemType): Int {
+    return when (inventoryItem.item) {
+      is RepositoryItem.RepositoryAndroidPackage -> R.drawable.apk
+      is RepositoryItem.RepositoryOPDSPackage -> R.drawable.opds
     }
   }
 
