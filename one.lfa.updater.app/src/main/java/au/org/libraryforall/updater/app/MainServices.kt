@@ -22,10 +22,10 @@ import au.org.libraryforall.updater.inventory.api.InventoryType
 import au.org.libraryforall.updater.inventory.vanilla.Inventory
 import au.org.libraryforall.updater.inventory.vanilla.InventoryHashIndexedDirectory
 import au.org.libraryforall.updater.inventory.vanilla.InventoryRepositoryDatabase
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParsers
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializers
+import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLParsers
+import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLSerializers
 import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors

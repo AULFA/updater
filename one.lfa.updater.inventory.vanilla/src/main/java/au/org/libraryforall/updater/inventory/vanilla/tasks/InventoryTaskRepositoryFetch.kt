@@ -4,7 +4,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryHTTPAuthenticationTyp
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
 import one.lfa.updater.xml.spi.ParseError

@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.repository.xml.api
+package one.lfa.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
 import io.reactivex.Observable
@@ -86,7 +86,8 @@ class RepositoryXMLParsers private constructor(
 
         return handler.result()
       } catch (e: SAXException) {
-        throw RepositoryParserFailureException(e.message ?: "No available exception message", e)
+        throw RepositoryParserFailureException(e.message
+          ?: "No available exception message", e)
       }
     }
   }
@@ -120,7 +121,7 @@ class RepositoryXMLParsers private constructor(
           .filter { provider -> provider.contentClass == Repository::class.java }
           .map { provider -> provider as (SPIFormatVersionedHandlerProviderType<Repository>) }
 
-      return this.create(providers)
+      return create(providers)
     }
   }
 }

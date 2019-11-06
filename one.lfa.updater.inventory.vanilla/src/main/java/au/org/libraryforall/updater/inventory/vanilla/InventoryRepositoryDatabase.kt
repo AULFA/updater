@@ -7,8 +7,8 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEve
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEvent.DatabaseRepositoryUpdated
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject

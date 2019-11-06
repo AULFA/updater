@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.repository.xml.api
+package one.lfa.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
 import one.lfa.updater.xml.spi.SPIFormatVersionedHandlerProviderType
@@ -46,7 +46,7 @@ class RepositoryXMLSerializers private constructor(
         ServiceLoader.load(SPIFormatVersionedHandlerProviderType::class.java)
           .filter { provider -> provider.contentClass == Repository::class.java }
           .map { provider -> provider as (SPIFormatVersionedHandlerProviderType<Repository>) }
-      return this.create(providers)
+      return create(providers)
     }
   }
 }

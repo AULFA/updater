@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.repository.xml.api.RepositoryParserFailureException
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
-import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
+import one.lfa.updater.repository.xml.api.RepositoryParserFailureException
+import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
+import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import one.lfa.updater.xml.spi.ParseError
 import org.junit.Assert
 import org.junit.Before
