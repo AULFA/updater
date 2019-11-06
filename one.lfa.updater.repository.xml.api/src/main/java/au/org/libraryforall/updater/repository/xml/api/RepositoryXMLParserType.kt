@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.spi.ParseError
 import io.reactivex.Observable
+import one.lfa.updater.xml.spi.ParseError
 import java.io.Closeable
 
 /**

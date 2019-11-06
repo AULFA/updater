@@ -9,10 +9,10 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseTyp
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLSerializerProviderType
-import au.org.libraryforall.updater.repository.xml.spi.ParseError
 import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import one.lfa.updater.xml.spi.ParseError
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream

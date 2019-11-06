@@ -1,10 +1,10 @@
 package au.org.libraryforall.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.spi.ParseError
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatVersionedHandlerProviderType
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
 import io.reactivex.subjects.PublishSubject
+import one.lfa.updater.xml.spi.ParseError
+import one.lfa.updater.xml.spi.SPIFormatVersionedHandlerProviderType
+import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
 import org.slf4j.Logger
 import org.xml.sax.Attributes
 import org.xml.sax.Locator
@@ -16,7 +16,7 @@ import java.net.URI
 
 internal class RepositoryXMLVersionedHandlerDispatcher(
   private val logger: Logger,
-  private val formats: List<SPIFormatVersionedHandlerProviderType>,
+  private val formats: List<SPIFormatVersionedHandlerProviderType<Repository>>,
   private val file: URI,
   private val errors: PublishSubject<ParseError>) : DefaultHandler2() {
 

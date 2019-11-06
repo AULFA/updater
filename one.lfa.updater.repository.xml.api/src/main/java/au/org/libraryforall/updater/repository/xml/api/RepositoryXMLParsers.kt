@@ -1,13 +1,13 @@
 package au.org.libraryforall.updater.repository.xml.api
 
 import au.org.libraryforall.updater.repository.api.Repository
-import au.org.libraryforall.updater.repository.xml.spi.ParseError
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatVersionedHandlerProviderType
-import au.org.libraryforall.updater.repository.xml.spi.SPIHardenedSAXParsers
-import au.org.libraryforall.updater.repository.xml.spi.SPISchemaResolutionMappings
-import au.org.libraryforall.updater.repository.xml.spi.XInclude
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import one.lfa.updater.xml.spi.ParseError
+import one.lfa.updater.xml.spi.SPIFormatVersionedHandlerProviderType
+import one.lfa.updater.xml.spi.SPIHardenedSAXParsers
+import one.lfa.updater.xml.spi.SPISchemaResolutionMappings
+import one.lfa.updater.xml.spi.XInclude
 import org.slf4j.LoggerFactory
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 
 class RepositoryXMLParsers private constructor(
-  private val formats: List<SPIFormatVersionedHandlerProviderType>) : RepositoryXMLParserProviderType {
+  private val formats: List<SPIFormatVersionedHandlerProviderType<Repository>>
+) : RepositoryXMLParserProviderType {
 
   private var mappings: SPISchemaResolutionMappings
   private val parsers = SPIHardenedSAXParsers()
@@ -54,8 +55,8 @@ class RepositoryXMLParsers private constructor(
 
     override fun close() {
       if (this.closed.compareAndSet(false, true)) {
-        this.inputStream.close();
-        this.events.onComplete();
+        this.inputStream.close()
+        this.events.onComplete()
       }
     }
 
@@ -106,14 +107,20 @@ class RepositoryXMLParsers private constructor(
      * Create a new parser provider using the given list of formats.
      */
 
-    fun create(formats: List<SPIFormatVersionedHandlerProviderType>): RepositoryXMLParserProviderType =
+    fun create(formats: List<SPIFormatVersionedHandlerProviderType<Repository>>): RepositoryXMLParserProviderType =
       RepositoryXMLParsers(formats)
 
     /**
      * Create a new parser provider using [java.util.ServiceLoader] to find formats.
      */
 
-    fun createFromServiceLoader(): RepositoryXMLParserProviderType =
-      this.create(ServiceLoader.load(SPIFormatVersionedHandlerProviderType::class.java).toList())
+    fun createFromServiceLoader(): RepositoryXMLParserProviderType {
+      val providers =
+        ServiceLoader.load(SPIFormatVersionedHandlerProviderType::class.java)
+          .filter { provider -> provider.contentClass == Repository::class.java }
+          .map { provider -> provider as (SPIFormatVersionedHandlerProviderType<Repository>) }
+
+      return this.create(providers)
+    }
   }
 }

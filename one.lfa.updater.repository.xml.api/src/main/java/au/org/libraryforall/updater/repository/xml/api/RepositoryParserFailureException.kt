@@ -6,4 +6,5 @@ package au.org.libraryforall.updater.repository.xml.api
 
 class RepositoryParserFailureException(
   message: String,
-  cause: Exception? = null) : Exception(message, cause)
+  cause: Exception? = null
+) : Exception(message, cause)

@@ -2,8 +2,8 @@ package au.org.libraryforall.updater.repository.xml.v2_0
 
 import au.org.libraryforall.updater.repository.api.Hash
 import au.org.libraryforall.updater.repository.api.RepositoryItem
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
+import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
+import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.SAXParseException

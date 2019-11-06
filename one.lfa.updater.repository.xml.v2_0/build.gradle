@@ -1,5 +1,6 @@
 dependencies {
-  api project(":one.lfa.updater.repository.xml.spi")
+  api project(":one.lfa.updater.repository.api")
+  api project(":one.lfa.updater.xml.spi")
 
   api libraries.xerces
 

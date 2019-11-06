@@ -2,7 +2,7 @@ package au.org.libraryforall.updater.repository.xml.v2_0
 
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.api.RepositoryItem
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLSerializerType
+import one.lfa.updater.xml.spi.SPIFormatXMLSerializerType
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.OutputStream
@@ -13,7 +13,12 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-class XML2Serializer(private val outputStream: OutputStream) : SPIFormatXMLSerializerType {
+class XML2Serializer(
+  private val outputStream: OutputStream
+) : SPIFormatXMLSerializerType<Repository> {
+
+  override val contentClass: Class<Repository>
+    get() = Repository::class.java
 
   private val documentBuilders: DocumentBuilderFactory =
     DocumentBuilderFactory.newInstance()

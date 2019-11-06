@@ -122,7 +122,7 @@ class InventoryTaskFileDownloadTest {
       InventoryTaskFileDownloadRequest(
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
-        retries = 0,
+        retries = 1,
         outputFile = outputFile)
 
     val result =
@@ -249,7 +249,7 @@ class InventoryTaskFileDownloadTest {
         InventoryProgressValue.InventoryProgressValueDefinite(0, 1L, 1L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "downloadingHTTPRetryingInSeconds 0",
+        "downloadingHTTPRetryingInSeconds 1 1 3",
         inventoryProgress.status)
     }
 
@@ -262,7 +262,7 @@ class InventoryTaskFileDownloadTest {
         InventoryProgressValue.InventoryProgressValueDefinite(0, 1L, 1L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "downloadingHTTPRetryingInSeconds 0",
+        "downloadingHTTPRetryingInSeconds 1 2 3",
         inventoryProgress.status)
     }
 
@@ -372,7 +372,7 @@ class InventoryTaskFileDownloadTest {
         InventoryProgressValue.InventoryProgressValueDefinite(0, 1L, 1L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "downloadingHTTPRetryingInSeconds 0",
+        "downloadingHTTPRetryingInSeconds 1 1 3",
         inventoryProgress.status)
     }
 
@@ -385,7 +385,7 @@ class InventoryTaskFileDownloadTest {
         InventoryProgressValue.InventoryProgressValueDefinite(0, 1L, 1L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "downloadingHTTPRetryingInSeconds 0",
+        "downloadingHTTPRetryingInSeconds 1 2 3",
         inventoryProgress.status)
     }
 
@@ -469,7 +469,7 @@ class InventoryTaskFileDownloadTest {
         InventoryProgressValue.InventoryProgressValueDefinite(0, 1L, 1L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "downloadingHTTPRetryingInSeconds 0",
+        "downloadingHTTPRetryingInSeconds 1 1 3",
         inventoryProgress.status)
     }
 
@@ -523,7 +523,7 @@ class InventoryTaskFileDownloadTest {
       InventoryTaskFileDownloadRequest(
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
-        retries = 0,
+        retries = 1,
         outputFile = outputFile)
 
     this.cancelled.set(true)

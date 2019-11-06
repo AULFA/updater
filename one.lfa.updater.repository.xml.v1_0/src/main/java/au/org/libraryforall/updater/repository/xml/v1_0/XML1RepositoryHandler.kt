@@ -2,8 +2,8 @@ package au.org.libraryforall.updater.repository.xml.v1_0
 
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.api.RepositoryItem
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
+import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
+import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
 import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.xml.sax.Attributes

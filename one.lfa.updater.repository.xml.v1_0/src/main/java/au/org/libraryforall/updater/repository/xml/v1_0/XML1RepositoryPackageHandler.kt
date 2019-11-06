@@ -2,8 +2,8 @@ package au.org.libraryforall.updater.repository.xml.v1_0
 
 import au.org.libraryforall.updater.repository.api.Hash
 import au.org.libraryforall.updater.repository.api.RepositoryItem
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLAbstractContentHandler
-import au.org.libraryforall.updater.repository.xml.spi.SPIFormatXMLContentHandlerType
+import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
+import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.SAXParseException
@@ -12,8 +12,8 @@ import java.net.URI
 
 class XML1RepositoryPackageHandler(
   locator2: Locator2,
-  private val baseURI: URI)
-  : SPIFormatXMLAbstractContentHandler<Unit, RepositoryItem>(locator2, "package") {
+  private val baseURI: URI
+): SPIFormatXMLAbstractContentHandler<Unit, RepositoryItem>(locator2, "package") {
 
   private val logger =
     LoggerFactory.getLogger(XML1RepositoryPackageHandler::class.java)

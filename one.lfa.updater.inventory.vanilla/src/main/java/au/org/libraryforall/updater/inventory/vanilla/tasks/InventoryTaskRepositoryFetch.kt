@@ -5,9 +5,9 @@ import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.repository.api.Repository
 import au.org.libraryforall.updater.repository.xml.api.RepositoryXMLParserProviderType
-import au.org.libraryforall.updater.repository.xml.spi.ParseError
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
+import one.lfa.updater.xml.spi.ParseError
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.slf4j.LoggerFactory
