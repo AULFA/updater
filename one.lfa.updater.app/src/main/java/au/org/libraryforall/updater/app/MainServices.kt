@@ -28,6 +28,10 @@ import one.lfa.updater.inventory.api.InventoryType
 import one.lfa.updater.inventory.vanilla.Inventory
 import one.lfa.updater.inventory.vanilla.InventoryHashIndexedDirectory
 import one.lfa.updater.inventory.vanilla.InventoryRepositoryDatabase
+import one.lfa.updater.opds.xml.api.OPDSXMLParserProviderType
+import one.lfa.updater.opds.xml.api.OPDSXMLParsers
+import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
+import one.lfa.updater.opds.xml.api.OPDSXMLSerializers
 import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
 import one.lfa.updater.repository.xml.api.RepositoryXMLParsers
 import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
@@ -130,6 +134,15 @@ object MainServices {
         directory.register(
           serviceClass = RepositoryXMLParserProviderType::class.java,
           service = RepositoryXMLParsers.createFromServiceLoader()
+        )
+
+        directory.register(
+          serviceClass = OPDSXMLSerializerProviderType::class.java,
+          service = OPDSXMLSerializers.createFromServiceLoader()
+        )
+        directory.register(
+          serviceClass = OPDSXMLParserProviderType::class.java,
+          service = OPDSXMLParsers.createFromServiceLoader()
         )
 
         val installedItems = InstalledItems.create(context)
