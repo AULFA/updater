@@ -15,7 +15,8 @@ import java.util.Objects
 
 abstract class SPIFormatXMLAbstractContentHandler<A, B> protected constructor(
   private val locator: Locator2,
-  private val direct: String?) : SPIFormatXMLContentHandlerType<B> {
+  private val direct: String?
+) : SPIFormatXMLContentHandlerType<B> {
 
   private var handler: SPIFormatXMLContentHandlerType<A>? = null
   private var result: B? = null
