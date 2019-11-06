@@ -1,0 +1,19 @@
+dependencies {
+  implementation project(":one.lfa.updater.installed.api")
+  implementation project(":one.lfa.updater.inventory.api")
+  implementation project(":one.lfa.updater.inventory.vanilla")
+  implementation project(":one.lfa.updater.repository.api")
+  implementation project(":one.lfa.updater.repository.xml.api")
+  implementation project(":one.lfa.updater.repository.xml.spi")
+  implementation project(":one.lfa.updater.repository.xml.v1_0")
+  implementation project(":one.lfa.updater.repository.xml.v2_0")
+
+  implementation libraries.irradiaHTTPAPI
+  implementation libraries.irradiaHTTPVanilla
+  implementation libraries.junit
+  implementation libraries.mockito
+  implementation libraries.nanohttpd
+  implementation libraries.slf4j
+
+  testImplementation libraries.logbackClassic
+}

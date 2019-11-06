@@ -1,0 +1,14 @@
+dependencies {
+  api project(":one.lfa.updater.repository.api")
+  api project(":one.lfa.updater.installed.api")
+
+  api libraries.googleGuava
+  api libraries.irradiaHTTPAPI
+  api libraries.jodaTime
+  api libraries.kotlinStdlib
+  api libraries.rxjava
+
+  compileOnly libraries.jcip
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}

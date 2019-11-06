@@ -1,0 +1,13 @@
+dependencies {
+  api project(":one.lfa.updater.repository.xml.spi")
+
+  api libraries.xerces
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.jodaTime
+  implementation libraries.rxjava
+  implementation libraries.slf4j
+
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}
