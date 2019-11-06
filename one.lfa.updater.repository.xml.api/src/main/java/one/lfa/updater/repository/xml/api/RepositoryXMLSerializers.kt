@@ -1,6 +1,6 @@
 package one.lfa.updater.repository.xml.api
 
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import one.lfa.updater.xml.spi.SPIFormatVersionedHandlerProviderType
 import one.lfa.updater.xml.spi.SPIFormatXMLSerializerType
 import java.io.OutputStream

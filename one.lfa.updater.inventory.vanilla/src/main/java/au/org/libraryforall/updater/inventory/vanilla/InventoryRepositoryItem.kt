@@ -21,7 +21,7 @@ import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskAPKFetc
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetchInstall
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
-import au.org.libraryforall.updater.repository.api.RepositoryItem
+import one.lfa.updater.repository.api.RepositoryItem
 import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture

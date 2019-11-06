@@ -19,7 +19,7 @@ import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecuti
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskRepositoryAdd
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskRepositorySave
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService

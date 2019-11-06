@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.repository.api
+package one.lfa.updater.repository.api
 
 import com.google.common.base.Preconditions
 import java.util.regex.Pattern

@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.inventory.api
 
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 
 interface InventoryStringVerificationResourcesType {
 

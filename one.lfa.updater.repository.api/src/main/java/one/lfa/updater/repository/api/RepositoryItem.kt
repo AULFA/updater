@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.repository.api
+package one.lfa.updater.repository.api
 
 import java.net.URI
 

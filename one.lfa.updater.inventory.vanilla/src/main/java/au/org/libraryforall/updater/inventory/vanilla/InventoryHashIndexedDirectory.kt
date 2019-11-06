@@ -11,9 +11,8 @@ import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryT
 import au.org.libraryforall.updater.inventory.api.InventoryProgress
 import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 import net.jcip.annotations.ThreadSafe
-import org.joda.time.Instant
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream

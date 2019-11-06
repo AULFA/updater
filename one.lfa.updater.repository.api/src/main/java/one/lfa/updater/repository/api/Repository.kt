@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.repository.api
+package one.lfa.updater.repository.api
 
 import org.joda.time.LocalDateTime
 import java.net.URI
@@ -48,7 +48,7 @@ data class Repository(
   val itemsNewest = itemsNewest(this.items)
 
   companion object {
-    private fun itemsNewest(items: List<RepositoryItem>) : Map<String, RepositoryItem> {
+    private fun itemsNewest(items: List<RepositoryItem>): Map<String, RepositoryItem> {
       val results = mutableMapOf<String, RepositoryItem>()
       for (repositoryPackage in items) {
         val existing = results[repositoryPackage.id]

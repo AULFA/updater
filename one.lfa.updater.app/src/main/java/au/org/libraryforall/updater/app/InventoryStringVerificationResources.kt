@@ -2,7 +2,7 @@ package au.org.libraryforall.updater.app
 
 import android.content.res.Resources
 import au.org.libraryforall.updater.inventory.api.InventoryStringVerificationResourcesType
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 
 class InventoryStringVerificationResources(
   private val resources: Resources

@@ -18,12 +18,11 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.Repos
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdateFailed
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdating
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
-import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTask
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskRepositoryAdd
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService

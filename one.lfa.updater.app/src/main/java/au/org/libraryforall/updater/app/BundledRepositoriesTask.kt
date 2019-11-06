@@ -2,7 +2,7 @@ package au.org.libraryforall.updater.app
 
 import android.content.Context
 import au.org.libraryforall.updater.inventory.api.InventoryType
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import com.google.common.util.concurrent.MoreExecutors
 import org.joda.time.LocalDateTime
 import org.slf4j.LoggerFactory

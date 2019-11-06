@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.repository.xml.spi
 
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import org.xml.sax.ext.Locator2
 import java.io.OutputStream
 import java.net.URI

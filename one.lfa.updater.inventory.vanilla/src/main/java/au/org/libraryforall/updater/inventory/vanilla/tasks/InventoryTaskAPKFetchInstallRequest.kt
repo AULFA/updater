@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.inventory.vanilla.tasks
 
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 import java.io.File
 import java.net.URI
 

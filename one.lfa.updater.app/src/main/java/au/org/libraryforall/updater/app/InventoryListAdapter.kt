@@ -13,7 +13,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
 import au.org.libraryforall.updater.inventory.api.InventoryItemState
 import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
-import au.org.libraryforall.updater.repository.api.RepositoryItem
+import one.lfa.updater.repository.api.RepositoryItem
 
 class InventoryListAdapter(
   private val context: Activity,

@@ -4,7 +4,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseEnt
 import au.org.libraryforall.updater.inventory.api.InventoryRepositoryDatabaseType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import org.slf4j.LoggerFactory
 
 /**

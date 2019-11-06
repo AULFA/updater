@@ -9,7 +9,7 @@ import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskFileVer
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.FileHashDidNotMatch
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.FileHashMatched
 import au.org.libraryforall.updater.inventory.vanilla.tasks.InventoryTaskResult
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 import au.org.libraryforall.updater.services.api.ServiceDirectoryType
 import au.org.libraryforall.updater.tests.InventoryStringResources
 import au.org.libraryforall.updater.tests.MockClock

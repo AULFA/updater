@@ -3,7 +3,7 @@ package au.org.libraryforall.updater.inventory.vanilla.tasks
 import au.org.libraryforall.updater.inventory.api.InventoryHTTPAuthenticationType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult

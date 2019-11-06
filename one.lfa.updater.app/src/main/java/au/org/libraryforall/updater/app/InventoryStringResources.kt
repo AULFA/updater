@@ -6,7 +6,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryStringFileResourcesTy
 import au.org.libraryforall.updater.inventory.api.InventoryStringRepositoryResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryStringVerificationResourcesType
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 import java.io.File
 import java.net.URI
 

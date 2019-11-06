@@ -1,6 +1,6 @@
 package one.lfa.updater.repository.xml.api
 
-import au.org.libraryforall.updater.repository.api.Repository
+import one.lfa.updater.repository.api.Repository
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import one.lfa.updater.xml.spi.ParseError

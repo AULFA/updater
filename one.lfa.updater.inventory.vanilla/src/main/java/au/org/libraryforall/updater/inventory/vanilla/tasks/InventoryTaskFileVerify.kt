@@ -7,7 +7,7 @@ import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
 import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import au.org.libraryforall.updater.inventory.vanilla.Hex
 import au.org.libraryforall.updater.inventory.vanilla.UnitsPerSecond
-import au.org.libraryforall.updater.repository.api.Hash
+import one.lfa.updater.repository.api.Hash
 import com.google.common.base.Preconditions
 import org.slf4j.LoggerFactory
 import java.io.File

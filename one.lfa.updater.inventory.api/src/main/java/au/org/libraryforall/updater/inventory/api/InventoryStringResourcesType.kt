@@ -1,10 +1,8 @@
 package au.org.libraryforall.updater.inventory.api
 
-import au.org.libraryforall.updater.repository.api.Hash
-import org.joda.time.Duration
+import one.lfa.updater.repository.api.Hash
 import java.io.File
 import java.net.URI
-import java.util.UUID
 
 interface InventoryStringResourcesType
   : InventoryStringDownloadResourcesType,
