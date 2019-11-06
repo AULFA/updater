@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.installed.api
+package one.lfa.updater.installed.api
 
 import io.reactivex.Observable
 

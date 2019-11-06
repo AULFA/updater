@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent
-import au.org.libraryforall.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledItemEvent
+import one.lfa.updater.installed.api.InstalledItemsType
 import com.google.common.util.concurrent.SettableFuture
 import one.lfa.updater.apkinstaller.api.APKInstallTaskType
 import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status

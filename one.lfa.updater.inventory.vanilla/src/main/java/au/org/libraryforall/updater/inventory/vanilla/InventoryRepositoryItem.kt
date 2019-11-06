@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
-import au.org.libraryforall.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
+import one.lfa.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.inventory.api.InventoryEvent
 import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType

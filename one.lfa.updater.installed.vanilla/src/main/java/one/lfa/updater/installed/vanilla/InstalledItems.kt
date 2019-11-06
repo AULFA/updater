@@ -1,12 +1,12 @@
-package au.org.libraryforall.updater.installed.vanilla
+package one.lfa.updater.installed.vanilla
 
 import android.content.Context
-import au.org.libraryforall.updater.installed.api.InstalledItem
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemAdded
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemRemoved
-import au.org.libraryforall.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemUpdated
-import au.org.libraryforall.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledItem
+import one.lfa.updater.installed.api.InstalledItemEvent
+import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemAdded
+import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemRemoved
+import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemUpdated
+import one.lfa.updater.installed.api.InstalledItemsType
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -30,7 +30,7 @@ class InstalledItems private constructor(
     MoreExecutors.listeningDecorator(
       Executors.newFixedThreadPool(1) { runnable ->
         val th = Thread(runnable)
-        th.name = "au.org.libraryforall.updater.installed.vanilla.InstalledItems.poll[${th.id}]"
+        th.name = "one.lfa.updater.installed.vanilla.InstalledItems.poll[${th.id}]"
         android.os.Process.setThreadPriority(19)
         th
       })

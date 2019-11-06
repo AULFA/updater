@@ -6,8 +6,8 @@ import android.content.Context
 import android.os.Build
 import one.lfa.updater.apkinstaller.device.APKInstallerDevice
 import one.lfa.updater.apkinstaller.api.APKInstallerType
-import au.org.libraryforall.updater.installed.api.InstalledItemsType
-import au.org.libraryforall.updater.installed.vanilla.InstalledItems
+import one.lfa.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.vanilla.InstalledItems
 import au.org.libraryforall.updater.inventory.api.InventoryClock
 import au.org.libraryforall.updater.inventory.api.InventoryClockType
 import au.org.libraryforall.updater.inventory.api.InventoryHTTPAuthenticationType
