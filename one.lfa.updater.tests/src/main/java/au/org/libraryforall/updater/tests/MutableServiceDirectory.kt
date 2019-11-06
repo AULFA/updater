@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.services.api.ServiceDirectoryType
+import one.lfa.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 

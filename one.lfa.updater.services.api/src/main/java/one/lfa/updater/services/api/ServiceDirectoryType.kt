@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.services.api
+package one.lfa.updater.services.api
 
 interface ServiceDirectoryType {
 

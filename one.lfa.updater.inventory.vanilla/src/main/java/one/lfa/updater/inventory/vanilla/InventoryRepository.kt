@@ -1,6 +1,6 @@
 package one.lfa.updater.inventory.vanilla
 
-import au.org.libraryforall.updater.services.api.ServiceDirectoryType
+import one.lfa.updater.services.api.ServiceDirectoryType
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService

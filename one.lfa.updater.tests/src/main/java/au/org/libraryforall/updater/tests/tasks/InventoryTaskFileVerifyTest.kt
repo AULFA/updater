@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.tests.tasks
 
-import au.org.libraryforall.updater.services.api.ServiceDirectoryType
+import one.lfa.updater.services.api.ServiceDirectoryType
 import au.org.libraryforall.updater.tests.InventoryStringResources
 import au.org.libraryforall.updater.tests.MockClock
 import au.org.libraryforall.updater.tests.MutableServiceDirectory
