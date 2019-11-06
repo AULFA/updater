@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        targetNamespace="urn:one.lfa.updater.repository.xml:2.0"
+        xmlns:u="urn:one.lfa.updater.repository.xml:2.0">
+
+  <simpleType name="uuid">
+    <annotation>
+      <documentation>
+        A UUID string.
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="sha256">
+    <annotation>
+      <documentation>
+        A SHA-256 hash.
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-f0-9]{64}"/>
+    </restriction>
+  </simpleType>
+
+  <element name="Repository">
+    <annotation>
+      <documentation>
+        A repository containing various items.
+      </documentation>
+    </annotation>
+
+    <complexType>
+      <sequence minOccurs="0"
+                maxOccurs="unbounded">
+        <choice>
+          <element ref="u:AndroidPackage"/>
+          <element ref="u:OPDSPackage"/>
+        </choice>
+      </sequence>
+
+      <attribute name="updated"
+                 type="dateTime"
+                 use="required"/>
+      <attribute name="id"
+                 type="u:uuid"
+                 use="required"/>
+      <attribute name="title"
+                 type="string"
+                 use="required"/>
+      <attribute name="self"
+                 type="anyURI"
+                 use="required"/>
+    </complexType>
+  </element>
+
+  <element name="AndroidPackage">
+    <annotation>
+      <documentation>
+        An Android package.
+      </documentation>
+    </annotation>
+
+    <complexType>
+      <attribute name="versionCode"
+                 type="nonNegativeInteger"
+                 use="required"/>
+      <attribute name="versionName"
+                 type="string"
+                 use="required"/>
+      <attribute name="id"
+                 type="string"
+                 use="required"/>
+      <attribute name="name"
+                 type="string"
+                 use="required"/>
+      <attribute name="source"
+                 type="anyURI"
+                 use="required"/>
+      <attribute name="sha256"
+                 type="u:sha256"
+                 use="required"/>
+    </complexType>
+  </element>
+
+  <element name="OPDSPackage">
+    <annotation>
+      <documentation>
+        An OPDS package.
+      </documentation>
+    </annotation>
+
+    <complexType>
+      <attribute name="versionCode"
+                 type="nonNegativeInteger"
+                 use="required"/>
+      <attribute name="versionName"
+                 type="string"
+                 use="required"/>
+      <attribute name="id"
+                 type="string"
+                 use="required"/>
+      <attribute name="name"
+                 type="string"
+                 use="required"/>
+      <attribute name="source"
+                 type="anyURI"
+                 use="required"/>
+      <attribute name="sha256"
+                 type="u:sha256"
+                 use="required"/>
+    </complexType>
+  </element>
+
+</schema>
