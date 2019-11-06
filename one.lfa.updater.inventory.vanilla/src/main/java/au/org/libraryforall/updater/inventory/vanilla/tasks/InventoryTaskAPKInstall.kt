@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.inventory.vanilla.tasks
 
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType
+import one.lfa.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.inventory.api.InventoryProgress
 import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
 import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType

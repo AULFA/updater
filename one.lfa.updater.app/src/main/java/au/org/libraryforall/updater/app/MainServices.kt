@@ -4,8 +4,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallerDevice
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallerType
+import one.lfa.updater.apkinstaller.device.APKInstallerDevice
+import one.lfa.updater.apkinstaller.api.APKInstallerType
 import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import au.org.libraryforall.updater.installed.vanilla.InstalledItems
 import au.org.libraryforall.updater.inventory.api.InventoryClock

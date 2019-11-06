@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.apkinstaller.api
+package one.lfa.updater.apkinstaller.api
 
 import com.google.common.util.concurrent.ListenableFuture
 import java.io.File

@@ -1,17 +1,19 @@
-package au.org.libraryforall.updater.apkinstaller.api
+package one.lfa.updater.apkinstaller.device
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Cancelled
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
-import au.org.libraryforall.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
 import au.org.libraryforall.updater.installed.api.InstalledItemEvent
 import au.org.libraryforall.updater.installed.api.InstalledItemsType
 import com.google.common.util.concurrent.SettableFuture
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Cancelled
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
+import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
+import one.lfa.updater.apkinstaller.api.APKInstallerType
 import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.random.Random
@@ -136,17 +138,17 @@ class APKInstallerDevice private constructor(
     }
 
     val targetFile =
-    if (Build.VERSION.SDK_INT < 24) {
-      this.logger.debug("running on Android ${Build.VERSION.SDK_INT}: can only use file:// URIs")
-      // https://code.google.com/p/android/issues/detail?id=205827
-      file.toUri()
-    } else {
-      this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI")
-      FileProvider.getUriForFile(
-        activity,
-        activity.applicationContext.packageName + ".provider",
-        file)
-    }
+      if (Build.VERSION.SDK_INT < 24) {
+        this.logger.debug("running on Android ${Build.VERSION.SDK_INT}: can only use file:// URIs")
+        // https://code.google.com/p/android/issues/detail?id=205827
+        file.toUri()
+      } else {
+        this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI")
+        FileProvider.getUriForFile(
+          activity,
+          activity.applicationContext.packageName + ".provider",
+          file)
+      }
 
     this.logger.debug("resolved content URI: {}", targetFile)
 

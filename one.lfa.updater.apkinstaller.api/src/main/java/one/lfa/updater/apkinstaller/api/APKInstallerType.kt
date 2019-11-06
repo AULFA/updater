@@ -1,4 +1,4 @@
-package au.org.libraryforall.updater.apkinstaller.api
+package one.lfa.updater.apkinstaller.api
 
 import java.io.File
 
