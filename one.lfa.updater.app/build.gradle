@@ -7,9 +7,9 @@ dependencies {
   implementation project(":one.lfa.updater.inventory.vanilla")
   implementation project(":one.lfa.updater.repository.api")
   implementation project(":one.lfa.updater.repository.xml.api")
-  implementation project(":one.lfa.updater.repository.xml.spi")
   implementation project(":one.lfa.updater.repository.xml.v1_0")
   implementation project(":one.lfa.updater.repository.xml.v2_0")
+  implementation project(":one.lfa.updater.xml.spi")
 
   implementation libraries.androidMaterial
   implementation libraries.androidXActivity
