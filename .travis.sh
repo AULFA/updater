@@ -49,4 +49,4 @@ EOF
 #------------------------------------------------------------------------
 # Publish APKs
 
-scp -P 1022 -v -v ./au.org.libraryforall.updater.app/build/outputs/apk/release/*.apk travis-ci@builds.lfa.one:/sites/builds.lfa.one/apk/ || exit 1
+scp -P 1022 -v -v ./one.lfa.updater.app/build/outputs/apk/release/*.apk travis-ci@builds.lfa.one:/sites/builds.lfa.one/apk/ || exit 1
