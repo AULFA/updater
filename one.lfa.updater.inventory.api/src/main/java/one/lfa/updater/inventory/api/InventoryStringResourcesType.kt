@@ -8,7 +8,8 @@ interface InventoryStringResourcesType
   : InventoryStringDownloadResourcesType,
   InventoryStringVerificationResourcesType,
   InventoryStringRepositoryResourcesType,
-  InventoryStringFileResourcesType{
+  InventoryStringFileResourcesType,
+  InventoryStringOPDSResourcesType {
 
   fun installOpeningConnectionTo(uri: URI): String
 

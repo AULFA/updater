@@ -3,6 +3,7 @@ package au.org.libraryforall.updater.app
 import android.content.Context
 import one.lfa.updater.inventory.api.InventoryStringDownloadResourcesType
 import one.lfa.updater.inventory.api.InventoryStringFileResourcesType
+import one.lfa.updater.inventory.api.InventoryStringOPDSResourcesType
 import one.lfa.updater.inventory.api.InventoryStringRepositoryResourcesType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryStringVerificationResourcesType
@@ -15,11 +16,13 @@ class InventoryStringResources(
   private val verificationStrings: InventoryStringVerificationResourcesType,
   private val downloadStrings: InventoryStringDownloadResourcesType,
   private val repositoryStrings: InventoryStringRepositoryResourcesType,
-  private val fileStrings: InventoryStringFileResourcesType
+  private val fileStrings: InventoryStringFileResourcesType,
+  private val opdsStrings: InventoryStringOPDSResourcesType
 ) : InventoryStringResourcesType,
   InventoryStringDownloadResourcesType by downloadStrings,
   InventoryStringVerificationResourcesType by verificationStrings,
   InventoryStringRepositoryResourcesType by repositoryStrings,
+  InventoryStringOPDSResourcesType by opdsStrings,
   InventoryStringFileResourcesType by fileStrings {
   override val installReservingFile: String
     get() = this.context.getString(R.string.installReservingFile)

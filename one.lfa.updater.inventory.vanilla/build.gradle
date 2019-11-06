@@ -2,6 +2,8 @@ dependencies {
   api project(":one.lfa.updater.apkinstaller.api")
   api project(":one.lfa.updater.installed.api")
   api project(":one.lfa.updater.inventory.api")
+  api project(":one.lfa.updater.opds.api")
+  api project(":one.lfa.updater.opds.xml.api")
   api project(":one.lfa.updater.repository.api")
   api project(":one.lfa.updater.repository.xml.api")
   api project(":one.lfa.updater.services.api")

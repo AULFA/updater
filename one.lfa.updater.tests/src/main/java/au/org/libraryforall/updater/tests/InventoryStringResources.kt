@@ -10,6 +10,32 @@ import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
 
+  override val opdsManifestParseFailed: String
+    get() = "opdsManifestParseFailed"
+  
+  override val opdsManifestParsing: String
+    get() = "opdsManifestParsing"
+
+  override fun opdsManifestFetching(uri: URI): String {
+    return "opdsManifestFetching"
+  }
+
+  override fun opdsManifestFetched(duration: Duration): String {
+    return "opdsManifestFetched"
+  }
+
+  override fun opdsManifestFetchServerError(statusCode: Int, message: String, contentType: String, contentLength: Long?): String {
+    return "opdsManifestFetchServerError"
+  }
+
+  override fun opdsManifestConnectionFailed(exception: Exception): String {
+    return "opdsManifestConnectionFailed"
+  }
+
+  override fun opdsManifestParsed(duration: Duration): String {
+    return "opdsManifestParsed"
+  }
+
   override val fileDeleting: String
     get() = "fileDeleting"
 

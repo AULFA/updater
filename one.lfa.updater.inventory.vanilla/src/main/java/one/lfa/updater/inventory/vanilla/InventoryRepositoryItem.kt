@@ -23,10 +23,11 @@ import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTask
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
-import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetchInstall
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSManifestFetch
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
 import one.lfa.updater.repository.api.RepositoryItem
 import org.slf4j.LoggerFactory
@@ -250,7 +251,8 @@ internal class InventoryRepositoryItem(
   ): InventoryTaskResult<Unit> {
     this.logger.debug("runInstallActualOPDS: {}", this.sourceURI)
 
-    return InventoryTaskOPDSFetchInstall.create()
+    return InventoryTaskOPDSManifestFetch.create(this.sourceURI)
+      .flatMap { InventoryTask { InventoryTaskResult.succeeded(Unit, InventoryTaskStep("")) }  }
       .evaluate(executionContext)
   }
 
