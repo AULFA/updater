@@ -19,7 +19,7 @@ class MainApplication : Application() {
   private fun configureLogging() {
     try {
       val context = LoggerFactory.getILoggerFactory() as LoggerContext
-      for (logger in context.getLoggerList()) {
+      for (logger in context.loggerList) {
         val index = logger.iteratorForAppenders()
         while (index.hasNext()) {
           val appender = index.next()

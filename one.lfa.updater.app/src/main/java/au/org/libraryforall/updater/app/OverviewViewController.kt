@@ -8,15 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
-import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryItemState
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import io.reactivex.disposables.Disposable
+import one.lfa.updater.inventory.api.InventoryEvent
+import one.lfa.updater.inventory.api.InventoryFailureReport
+import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemState
+import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import org.slf4j.LoggerFactory
 import java.util.TreeMap
 
@@ -68,7 +68,7 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
         onShowFailureDetails = this@OverviewViewController::showRepositoryPackageFailure)
 
     this.recyclerView.setHasFixedSize(true)
-    this.recyclerView.layoutManager = LinearLayoutManager(view.context);
+    this.recyclerView.layoutManager = LinearLayoutManager(view.context)
     this.recyclerView.adapter = this.listAdapter
     (this.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 

@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
-import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
+import one.lfa.updater.inventory.api.InventoryProgressValue
+import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.repository.api.Hash
 import org.joda.time.Duration
 import java.io.File

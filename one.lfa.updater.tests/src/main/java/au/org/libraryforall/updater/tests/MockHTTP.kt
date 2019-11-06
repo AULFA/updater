@@ -5,7 +5,6 @@ import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
 import one.irradia.mime.api.MIMEType
 import java.io.InputStream
-import java.lang.IllegalStateException
 import java.net.URI
 
 class MockHTTP : HTTPClientType {

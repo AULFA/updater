@@ -9,10 +9,10 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryItemState
-import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
+import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemState
+import one.lfa.updater.inventory.api.InventoryProgressValue
+import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import one.lfa.updater.repository.api.RepositoryItem
 
 class InventoryListAdapter(

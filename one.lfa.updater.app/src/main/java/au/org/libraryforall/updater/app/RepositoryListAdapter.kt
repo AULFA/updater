@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
+import one.lfa.updater.inventory.api.InventoryRepositoryType
 
 class RepositoryListAdapter(
   private val context: Activity,

@@ -1,11 +1,11 @@
 package au.org.libraryforall.updater.app
 
 import android.content.Context
-import au.org.libraryforall.updater.inventory.api.InventoryStringDownloadResourcesType
-import au.org.libraryforall.updater.inventory.api.InventoryStringFileResourcesType
-import au.org.libraryforall.updater.inventory.api.InventoryStringRepositoryResourcesType
-import au.org.libraryforall.updater.inventory.api.InventoryStringResourcesType
-import au.org.libraryforall.updater.inventory.api.InventoryStringVerificationResourcesType
+import one.lfa.updater.inventory.api.InventoryStringDownloadResourcesType
+import one.lfa.updater.inventory.api.InventoryStringFileResourcesType
+import one.lfa.updater.inventory.api.InventoryStringRepositoryResourcesType
+import one.lfa.updater.inventory.api.InventoryStringResourcesType
+import one.lfa.updater.inventory.api.InventoryStringVerificationResourcesType
 import one.lfa.updater.repository.api.Hash
 import java.io.File
 import java.net.URI
@@ -20,8 +20,7 @@ class InventoryStringResources(
   InventoryStringDownloadResourcesType by downloadStrings,
   InventoryStringVerificationResourcesType by verificationStrings,
   InventoryStringRepositoryResourcesType by repositoryStrings,
-  InventoryStringFileResourcesType by fileStrings
-{
+  InventoryStringFileResourcesType by fileStrings {
   override val installReservingFile: String
     get() = this.context.getString(R.string.installReservingFile)
 

@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.app
 
 import android.content.res.Resources
-import au.org.libraryforall.updater.inventory.api.InventoryStringFileResourcesType
+import one.lfa.updater.inventory.api.InventoryStringFileResourcesType
 
 class InventoryStringFileResources(
   val resources: Resources

@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.app
 
 import android.content.res.Resources
-import au.org.libraryforall.updater.inventory.api.InventoryStringRepositoryResourcesType
+import one.lfa.updater.inventory.api.InventoryStringRepositoryResourcesType
 import org.joda.time.Duration
 import java.net.URI
 import java.util.UUID

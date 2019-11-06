@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.app
 
-import au.org.libraryforall.updater.inventory.api.InventoryHTTPConfigurationType
+import one.lfa.updater.inventory.api.InventoryHTTPConfigurationType
 
 object InventoryHTTPConfiguration : InventoryHTTPConfigurationType {
 

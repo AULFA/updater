@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
+import one.lfa.updater.inventory.api.InventoryTaskStep
 
 class InventoryFailureListAdapter(
   private val context: Context,

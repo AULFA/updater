@@ -1,6 +1,6 @@
 package au.org.libraryforall.updater.tests
 
-import au.org.libraryforall.updater.inventory.api.InventoryClockType
+import one.lfa.updater.inventory.api.InventoryClockType
 import org.joda.time.Instant
 
 class MockClock : InventoryClockType {

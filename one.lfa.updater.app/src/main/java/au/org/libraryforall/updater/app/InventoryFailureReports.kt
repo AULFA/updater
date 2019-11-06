@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.app
 
 import android.content.Context
-import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
+import one.lfa.updater.inventory.api.InventoryFailureReport
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
 import org.joda.time.Instant
 import org.joda.time.format.DateTimeFormatterBuilder

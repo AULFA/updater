@@ -1,7 +1,7 @@
 package au.org.libraryforall.updater.app
 
-import au.org.libraryforall.updater.inventory.api.InventoryHTTPAuthenticationType
 import one.irradia.http.api.HTTPAuthentication
+import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
 import java.net.URI
 
 object InventoryHTTPAuthentication : InventoryHTTPAuthenticationType {

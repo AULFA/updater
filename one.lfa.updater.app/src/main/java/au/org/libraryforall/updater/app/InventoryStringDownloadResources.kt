@@ -1,8 +1,8 @@
 package au.org.libraryforall.updater.app
 
 import android.content.res.Resources
-import au.org.libraryforall.updater.inventory.api.InventoryProgressValue
-import au.org.libraryforall.updater.inventory.api.InventoryStringDownloadResourcesType
+import one.lfa.updater.inventory.api.InventoryProgressValue
+import one.lfa.updater.inventory.api.InventoryStringDownloadResourcesType
 import org.joda.time.Duration
 import java.net.URI
 

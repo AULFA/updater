@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
 import com.bluelinelabs.conductor.Controller
+import one.lfa.updater.inventory.api.InventoryFailureReport
 import org.joda.time.Instant
 import org.slf4j.LoggerFactory
 
@@ -89,7 +89,7 @@ class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) 
     }
 
     this.recyclerView.setHasFixedSize(false)
-    this.recyclerView.layoutManager = LinearLayoutManager(view.context);
+    this.recyclerView.layoutManager = LinearLayoutManager(view.context)
     this.recyclerView.adapter = this.adapter
     (this.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 

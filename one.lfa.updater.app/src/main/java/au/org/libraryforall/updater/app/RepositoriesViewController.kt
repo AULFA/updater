@@ -12,13 +12,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import au.org.libraryforall.updater.inventory.api.InventoryHashIndexedDirectoryType
-import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import io.reactivex.disposables.Disposable
+import one.lfa.updater.inventory.api.InventoryEvent
+import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
+import one.lfa.updater.inventory.api.InventoryRepositoryType
 import org.slf4j.LoggerFactory
 
 class RepositoriesViewController : Controller() {
@@ -150,7 +150,7 @@ class RepositoriesViewController : Controller() {
         repositories = this.listRepositories)
 
     this.recyclerView.setHasFixedSize(true)
-    this.recyclerView.layoutManager = LinearLayoutManager(view.context);
+    this.recyclerView.layoutManager = LinearLayoutManager(view.context)
     this.recyclerView.adapter = this.listAdapter
     (this.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 

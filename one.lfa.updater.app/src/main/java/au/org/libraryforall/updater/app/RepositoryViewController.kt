@@ -15,24 +15,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import au.org.libraryforall.updater.inventory.api.InventoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
-import au.org.libraryforall.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
-import au.org.libraryforall.updater.inventory.api.InventoryFailureReport
-import au.org.libraryforall.updater.inventory.api.InventoryItemInstallResult
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryItemType
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryIdle
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdateFailed
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryState.RepositoryUpdating
-import au.org.libraryforall.updater.inventory.api.InventoryRepositoryType
-import au.org.libraryforall.updater.inventory.api.InventoryTaskStep
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import io.reactivex.disposables.Disposable
+import one.lfa.updater.inventory.api.InventoryEvent
+import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
+import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
+import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
+import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
+import one.lfa.updater.inventory.api.InventoryFailureReport
+import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryRepositoryItemType
+import one.lfa.updater.inventory.api.InventoryRepositoryState
+import one.lfa.updater.inventory.api.InventoryRepositoryType
+import one.lfa.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
 import java.util.TreeMap
 import java.util.UUID
@@ -153,7 +150,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
         onShowFailureDetails = this@RepositoryViewController::showRepositoryPackageFailure)
 
     this.recyclerView.setHasFixedSize(true)
-    this.recyclerView.layoutManager = LinearLayoutManager(view.context);
+    this.recyclerView.layoutManager = LinearLayoutManager(view.context)
     this.recyclerView.adapter = this.listAdapter
     (this.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 
@@ -196,7 +193,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     this.logger.trace("event: {}", event)
 
     return when (event) {
-      is InventoryRepositoryEvent ->
+      is InventoryEvent.InventoryRepositoryEvent ->
         if (event.repositoryId == this.repositoryUUID) {
           when (event) {
             is ItemBecameVisible,
@@ -223,18 +220,18 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun onRepositoryChangedUI() {
     return when (val state = this.repository.state) {
-      is RepositoryUpdating -> {
+      is InventoryRepositoryState.RepositoryUpdating -> {
         this.progess.visibility = View.VISIBLE
         this.progressError.visibility = View.INVISIBLE
       }
-      is RepositoryUpdateFailed -> {
+      is InventoryRepositoryState.RepositoryUpdateFailed -> {
         this.progess.visibility = View.INVISIBLE
         this.progressError.visibility = View.VISIBLE
         this.progressError.setOnClickListener {
           this.showRepositoryUpdateFailure(state.steps)
         }
       }
-      is RepositoryIdle -> {
+      is InventoryRepositoryState.RepositoryIdle -> {
         this.progess.visibility = View.INVISIBLE
         this.progressError.visibility = View.INVISIBLE
       }
