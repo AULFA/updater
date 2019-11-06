@@ -60,7 +60,7 @@ class OPDSManifestXML1Serializer(
     val root =
       document.createElementNS(OPDSManifestXML1Format.NAMESPACE.toString(), "om:Manifest")
 
-    root.setAttribute("id", manifest.feedURI.toString())
+    root.setAttribute("id", manifest.id.toString())
     root.setAttribute("rootFile", manifest.rootFile.toString())
     root.setAttribute("updated", manifest.updated.toString())
     

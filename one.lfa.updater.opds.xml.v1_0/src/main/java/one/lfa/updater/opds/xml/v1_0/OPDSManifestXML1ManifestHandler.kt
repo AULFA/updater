@@ -10,13 +10,14 @@ import org.xml.sax.Attributes
 import org.xml.sax.SAXParseException
 import org.xml.sax.ext.Locator2
 import java.net.URI
+import java.util.UUID
 
 class OPDSManifestXML1ManifestHandler(
   private val baseURIDefault: URI,
   locator2: Locator2)
   : SPIFormatXMLAbstractContentHandler<OPDSFile, OPDSManifest>(locator2, "Manifest") {
 
-  private lateinit var id: URI
+  private lateinit var id: UUID
   private lateinit var items: MutableList<OPDSFile>
   private lateinit var rootFile: URI
   private lateinit var updated: LocalDateTime
@@ -42,7 +43,7 @@ class OPDSManifestXML1ManifestHandler(
       rootFile = this.rootFile,
       updated = this.updated,
       searchIndex = this.searchIndex,
-      feedURI = this.id,
+      id = this.id,
       files = this.items.toList()
     )
   }
@@ -56,7 +57,7 @@ class OPDSManifestXML1ManifestHandler(
     val formatter = ISODateTimeFormat.dateTimeParser()
 
     try {
-      this.id = URI.create(attributes.getValue("id"))
+      this.id = UUID.fromString(attributes.getValue("id"))
       this.updated = formatter.parseLocalDateTime(attributes.getValue("updated"))
 
       val baseOpt = attributes.getValue("base")

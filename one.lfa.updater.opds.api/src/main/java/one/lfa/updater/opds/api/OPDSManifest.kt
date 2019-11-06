@@ -2,6 +2,7 @@ package one.lfa.updater.opds.api
 
 import org.joda.time.LocalDateTime
 import java.net.URI
+import java.util.UUID
 
 /**
  * A manifest of all the files that need to be downloaded in order to
@@ -43,7 +44,7 @@ data class OPDSManifest(
    * described by the manifest.
    */
 
-  val feedURI: URI,
+  val id: UUID,
 
   /**
    * The list of files that must be downloaded.

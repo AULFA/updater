@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 <om:Manifest xmlns:om="urn:one.lfa.opdsget.manifest.xml:1:0"
-  id="https://example.com/1.atom"
+  id="ae32ea00-952c-40bc-a32e-7be45fc6b076"
   rootFile="feeds/EC7DD5867707ED7B2A7E3A57BCF9994E1178AEF0B8C18977FB1011AD10709FA0.atom"
   searchIndex="index.txt"
   updated="2019-11-06T13:46:44.915268Z">
