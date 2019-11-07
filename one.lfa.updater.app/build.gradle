@@ -1,6 +1,7 @@
 dependencies {
   implementation project(":one.lfa.updater.apkinstaller.api")
   implementation project(":one.lfa.updater.apkinstaller.device")
+  implementation project(":one.lfa.updater.credentials.api")
   implementation project(":one.lfa.updater.installed.api")
   implementation project(":one.lfa.updater.installed.vanilla")
   implementation project(":one.lfa.updater.inventory.api")

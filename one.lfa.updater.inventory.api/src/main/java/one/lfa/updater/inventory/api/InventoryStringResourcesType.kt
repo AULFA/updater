@@ -60,11 +60,6 @@ interface InventoryStringResourcesType
 
   fun installDownloadReservationFailed(e: Exception): String
 
-  fun installVerifying(
-    currentBytes: Long,
-    maximumBytes: Long
-  ): String
-
   fun installVerificationFailed(
     expected: Hash,
     received: String
@@ -105,12 +100,5 @@ interface InventoryStringResourcesType
   val installAlreadyInstalling: String
 
   val installStarted: String
-
-  fun installVerifyingLocalFileProgress(
-    bytesCurrent: Long,
-    bytesExpected: Long,
-    bytesPerSecond: Long
-  ): String
-
 
 }

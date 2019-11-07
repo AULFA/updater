@@ -45,6 +45,11 @@ interface InventoryStringDownloadResourcesType {
     minorProgress: InventoryProgressValue
   ): String
 
+  fun downloadingVerifyingProgress(
+    majorProgress: InventoryProgressValue?,
+    minorProgress: InventoryProgressValue
+  ): String
+
   fun downloadingHTTPRetryingInSeconds(
     time: Long,
     attemptCurrent: Int,

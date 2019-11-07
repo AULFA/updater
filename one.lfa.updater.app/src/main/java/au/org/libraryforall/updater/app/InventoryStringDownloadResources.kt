@@ -91,7 +91,7 @@ class InventoryStringDownloadResources(
     return when (majorProgress) {
       null,
       is InventoryProgressValue.InventoryProgressValueIndefinite ->
-        this.minorProgressOnly(minorProgress)
+        this.downloadMinorProgressOnly(minorProgress)
 
       is InventoryProgressValue.InventoryProgressValueDefinite -> {
         when (minorProgress) {
@@ -115,7 +115,7 @@ class InventoryStringDownloadResources(
     }
   }
 
-  private fun minorProgressOnly(minorProgress: InventoryProgressValue): String {
+  private fun downloadMinorProgressOnly(minorProgress: InventoryProgressValue): String {
     return when (minorProgress) {
       is InventoryProgressValue.InventoryProgressValueIndefinite -> {
         this.resources.getString(
@@ -132,4 +132,54 @@ class InventoryStringDownloadResources(
       }
     }
   }
+
+  override fun downloadingVerifyingProgress(
+    majorProgress: InventoryProgressValue?,
+    minorProgress: InventoryProgressValue
+  ): String {
+    return when (majorProgress) {
+      null,
+      is InventoryProgressValue.InventoryProgressValueIndefinite ->
+        this.verifyMinorProgressOnly(minorProgress)
+
+      is InventoryProgressValue.InventoryProgressValueDefinite -> {
+        when (minorProgress) {
+          is InventoryProgressValue.InventoryProgressValueIndefinite -> {
+            this.resources.getString(R.string.downloadingVerifyProgressMajorIndefiniteMinor,
+              majorProgress.current,
+              majorProgress.maximum,
+              minorProgress.current.toDouble() / 1_000_000.0,
+              minorProgress.perSecond.toDouble() / 1_000_000.0)
+          }
+          is InventoryProgressValue.InventoryProgressValueDefinite -> {
+            this.resources.getString(R.string.downloadingVerifyProgressMajor,
+              majorProgress.current,
+              majorProgress.maximum,
+              minorProgress.current.toDouble() / 1_000_000.0,
+              minorProgress.maximum.toDouble() / 1_000_000.0,
+              minorProgress.perSecond.toDouble() / 1_000_000.0)
+          }
+        }
+      }
+    }
+  }
+
+  private fun verifyMinorProgressOnly(minorProgress: InventoryProgressValue): String {
+    return when (minorProgress) {
+      is InventoryProgressValue.InventoryProgressValueIndefinite -> {
+        this.resources.getString(
+          R.string.downloadingVerifyProgressMinorIndefinite,
+          minorProgress.current.toDouble() / 1_000_000.0,
+          minorProgress.perSecond.toDouble() / 1_000_000.0)
+      }
+      is InventoryProgressValue.InventoryProgressValueDefinite -> {
+        this.resources.getString(
+          R.string.downloadingVerifyProgressMinorDefinite,
+          minorProgress.current.toDouble() / 1_000_000.0,
+          minorProgress.maximum.toDouble() / 1_000_000.0,
+          minorProgress.perSecond.toDouble() / 1_000_000.0)
+      }
+    }
+  }
+
 }

@@ -4,4 +4,6 @@ interface InventoryHTTPConfigurationType {
 
   val retryDelaySeconds: Long
 
+  val retryCount: Int
+
 }

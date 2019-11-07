@@ -11,8 +11,12 @@
   <string name="downloadingHTTPProgressMinorIndefinite">Downloading (%1$.2fM: %2$.2fM/s)</string>
   <string name="downloadingHTTPRequest">Opening a connection to %1$s (attempt %2$d of %3$d)</string>
   <string name="downloadingHTTPRetryingInSeconds">Retrying request (attempt %1$d of %2$d) in %3$d seconds…</string>
+  <string name="downloadingHTTPSkipping">Skipping download due to the presence of local content.</string>
   <string name="downloadingHTTPSucceeded">Downloading a file succeeded.</string>
   <string name="downloadingHTTPWaitingBeforeRetrying">Pausing before retrying HTTP request…</string>
   <string name="downloadingHTTPWritingFile">Downloading and saving data…</string>
-  <string name="downloadingHTTPSkipping">Skipping download due to the presence of local content.</string>
+  <string name="downloadingVerifyProgressMajor">Verifying (%1$d of %2$d) (%3$.2fM / %4$.2fM: %5$.2fM/s)</string>
+  <string name="downloadingVerifyProgressMajorIndefiniteMinor">Verifying (%1$d of %2$d) (%3$.2fM: %4$.2fM/s)</string>
+  <string name="downloadingVerifyProgressMinorDefinite">Verifying (%1$.2fM / %2$.2fM: %3$.2fM/s)</string>
+  <string name="downloadingVerifyProgressMinorIndefinite">Verifying (%1$.2fM: %2$.2fM/s)</string>
 </resources>

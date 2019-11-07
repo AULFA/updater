@@ -53,6 +53,8 @@ class InventoryTaskFileDownloadTest {
       }
     }
     this.httpConfiguration = object : InventoryHTTPConfigurationType {
+      override val retryCount: Int
+        get() = 1
       override val retryDelaySeconds: Long
         get() = 1L
     }

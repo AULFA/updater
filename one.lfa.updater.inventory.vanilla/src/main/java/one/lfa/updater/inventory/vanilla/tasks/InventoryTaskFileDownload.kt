@@ -34,7 +34,7 @@ object InventoryTaskFileDownload {
   fun create(
     request: InventoryTaskFileDownloadRequest
   ): InventoryTask<File> {
-    return downloadTask(request)
+    return this.downloadTask(request)
   }
 
   private fun pauses(
@@ -69,14 +69,14 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt,
     offset: Long
   ): InventoryTask<HTTPInputStream> {
-    return InventoryTask { execution -> get(uri, offset, attempt, execution) }
+    return InventoryTask { execution -> this.get(uri, offset, attempt, execution) }
   }
 
   private fun headTask(
     uri: URI,
     attempt: InventoryTaskRetryAttempt
   ): InventoryTask<Long?> {
-    return InventoryTask { execution -> head(uri, attempt, execution) }
+    return InventoryTask { execution -> this.head(uri, attempt, execution) }
   }
 
   private fun head(
@@ -84,7 +84,7 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt,
     execution: InventoryTaskExecutionType
   ): InventoryTaskResult<Long?> {
-    logger.debug(
+    this.logger.debug(
       "performing HEAD request for {} (attempt {}/{})",
       uri,
       attempt.attemptCurrent,
@@ -117,7 +117,7 @@ object InventoryTaskFileDownload {
       offset = 0L
     )) {
       is HTTPResult.HTTPOK -> {
-        logger.debug(
+        this.logger.debug(
           "HEAD ok: {} ({} {})",
           result.statusCode,
           result.message,
@@ -132,7 +132,7 @@ object InventoryTaskFileDownload {
       }
 
       is HTTPResult.HTTPFailed.HTTPError -> {
-        logger.error("http error: {}", result.statusCode, result.message)
+        this.logger.error("http error: {}", result.statusCode, result.message)
 
         step.failed = true
         step.resolution =
@@ -145,7 +145,7 @@ object InventoryTaskFileDownload {
       }
 
       is HTTPResult.HTTPFailed.HTTPFailure -> {
-        logger.error("http failure: ", result.exception)
+        this.logger.error("http failure: ", result.exception)
 
         step.failed = true
         step.exception = result.exception
@@ -161,7 +161,7 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt,
     execution: InventoryTaskExecutionType
   ): InventoryTaskResult<HTTPInputStream> {
-    logger.debug(
+    this.logger.debug(
       "performing GET request for {} offset {} (attempt {}/{})",
       uri,
       offset,
@@ -195,7 +195,7 @@ object InventoryTaskFileDownload {
       offset = offset
     )) {
       is HTTPResult.HTTPOK -> {
-        logger.debug(
+        this.logger.debug(
           "GET ok: {} ({} {})",
           result.statusCode,
           result.message,
@@ -213,7 +213,7 @@ object InventoryTaskFileDownload {
       }
 
       is HTTPResult.HTTPFailed.HTTPError -> {
-        logger.error("http error: {}", result.statusCode, result.message)
+        this.logger.error("http error: {}", result.statusCode, result.message)
 
         step.failed = true
         step.resolution =
@@ -226,7 +226,7 @@ object InventoryTaskFileDownload {
       }
 
       is HTTPResult.HTTPFailed.HTTPFailure -> {
-        logger.error("http failure: ", result.exception)
+        this.logger.error("http failure: ", result.exception)
 
         step.failed = true
         step.exception = result.exception
@@ -242,10 +242,10 @@ object InventoryTaskFileDownload {
     return InventoryTaskRetry.retrying(
       retries = request.retries,
       pauses = { execution, retry ->
-        pauses(request.progressMajor, retry, execution)
+        this.pauses(request.progressMajor, retry, execution)
       },
       one = { attempt ->
-        downloadOneAttemptTask(request, attempt)
+        this.downloadOneAttemptTask(request, attempt)
       })
   }
 
@@ -253,7 +253,7 @@ object InventoryTaskFileDownload {
     outputFile: File
   ): InventoryTask<FileOutputStream> {
     return InventoryTask { execution ->
-      openFile(outputFile, execution)
+      this.openFile(outputFile, execution)
     }
   }
 
@@ -261,7 +261,7 @@ object InventoryTaskFileDownload {
     outputFile: File,
     execution: InventoryTaskExecutionType
   ): InventoryTaskResult<FileOutputStream> {
-    logger.debug("opening {}", outputFile)
+    this.logger.debug("opening {}", outputFile)
 
     val strings =
       execution.services.requireService(InventoryStringResourcesType::class.java)
@@ -288,27 +288,27 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt
   ): InventoryTask<File> {
 
-    return headTask(request.uri, attempt).flatMap { expectedSize ->
+    return this.headTask(request.uri, attempt).flatMap { expectedSize ->
       var currentSize = request.outputFile.length()
-      logger.debug("file:      {}", request.outputFile)
-      logger.debug("file size: {}", currentSize)
-      logger.debug("uri:       {}", request.uri)
-      logger.debug("uri size:  {}", expectedSize)
+      this.logger.debug("file:      {}", request.outputFile)
+      this.logger.debug("file size: {}", currentSize)
+      this.logger.debug("uri:       {}", request.uri)
+      this.logger.debug("uri size:  {}", expectedSize)
 
       if (expectedSize != null) {
         if (currentSize == expectedSize) {
-          return@flatMap skipTask(request)
+          return@flatMap this.skipTask(request)
         }
         if (currentSize > expectedSize) {
-          logger.debug("deleting local content")
+          this.logger.debug("deleting local content")
           request.outputFile.delete()
         }
       }
 
       currentSize = request.outputFile.length()
-      openFileTask(request.outputFile).flatMap { outputStream ->
-        getTask(request.uri, attempt, currentSize).flatMap { httpInputStream ->
-          transferTask(
+      this.openFileTask(request.outputFile).flatMap { outputStream ->
+        this.getTask(request.uri, attempt, currentSize).flatMap { httpInputStream ->
+          this.transferTask(
             progress = request.progressMajor,
             attempt = attempt,
             expectedSize = expectedSize,
@@ -338,7 +338,7 @@ object InventoryTaskFileDownload {
     outputStream: FileOutputStream
   ): InventoryTask<File> =
     InventoryTask { execution ->
-      transfer(
+      this.transfer(
         execution = execution,
         progress = progress,
         attempt = attempt,
@@ -359,7 +359,7 @@ object InventoryTaskFileDownload {
     outputStream: FileOutputStream
   ): InventoryTaskResult<File> {
 
-    logger.debug(
+    this.logger.debug(
       "transferring (attempt {}/{})",
       attempt.attemptCurrent,
       attempt.attemptMaximum)
@@ -368,10 +368,10 @@ object InventoryTaskFileDownload {
     val expectedTotal = expectedSize ?: -1L
     val availableRemote = inputStream.contentLength ?: -1L
 
-    logger.debug("local size:     {}", currentlyHave)
-    logger.debug("expected size:  {}", expectedTotal)
-    logger.debug("available size: {}", availableRemote)
-    logger.debug("delta:          {}", expectedTotal - (currentlyHave + availableRemote))
+    this.logger.debug("local size:     {}", currentlyHave)
+    this.logger.debug("expected size:  {}", expectedTotal)
+    this.logger.debug("available size: {}", availableRemote)
+    this.logger.debug("delta:          {}", expectedTotal - (currentlyHave + availableRemote))
 
     val strings =
       execution.services.requireService(InventoryStringResourcesType::class.java)
@@ -426,8 +426,10 @@ object InventoryTaskFileDownload {
       step.resolution = strings.downloadingHTTPSucceeded
       InventoryTaskResult.succeeded(outputFile, step)
     } catch (e: java.lang.Exception) {
-      logger.error("transfer error: ", e)
-      throw e
+      this.logger.error("transfer error: ", e)
+      step.resolution = strings.downloadingHTTPConnectionFailed(e)
+      step.exception = e
+      InventoryTaskResult.failed(step)
     } finally {
       outputStream.flush()
       outputStream.close()

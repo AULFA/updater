@@ -9,6 +9,27 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType {
+  override fun downloadingVerifyingProgress(majorProgress: InventoryProgressValue?, minorProgress: InventoryProgressValue): String {
+    return "downloadingVerifyingProgress"
+  }
+
+  override val opdsManifestSerializeFailed: String
+    get() = "opdsManifestSerializeFailed"
+
+  override val opdsManifestSerializing: String
+    get() = "opdsManifestSerializing"
+
+  override val opdsLocalFileDeletingFailed: String
+    get() = "opdsLocalFileDeletingFailed"
+
+  override val opdsLocalFileDeleting: String
+    get() = "opdsLocalFileDeleting"
+
+  override val opdsDirectoryCreatingFailed: String
+    get() = "opdsDirectoryCreatingFailed"
+
+  override val opdsDirectoryCreating: String
+    get() = "opdsDirectoryCreating"
 
   override val opdsManifestParseFailed: String
     get() = "opdsManifestParseFailed"
@@ -50,15 +71,6 @@ class InventoryStringResources : InventoryStringResourcesType {
 
   override val installVerifyingLocalFile: String
     get() = "installVerifyingLocalFile"
-
-  override fun installVerifyingLocalFileProgress(
-    bytesCurrent: Long,
-    bytesExpected: Long,
-    bytesPerSecond: Long
-  ): String {
-    return "installVerifyingLocalFileProgress $bytesCurrent $bytesExpected $bytesPerSecond"
-  }
-
 
   override val downloadingHTTPSkipping: String
     get() = "downloadingHTTPSkipping"
@@ -240,11 +252,6 @@ class InventoryStringResources : InventoryStringResourcesType {
 
   override val repositoryAddParsing: String =
     "repositoryAddParsing"
-
-
-  override fun installVerifying(currentBytes: Long, maximumBytes: Long): String {
-    return "installVerifying"
-  }
 
   override fun installVerificationFailed(expected: Hash, received: String): String {
     return "installVerificationFailed"

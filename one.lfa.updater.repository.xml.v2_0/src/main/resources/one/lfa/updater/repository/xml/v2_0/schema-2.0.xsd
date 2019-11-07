@@ -103,7 +103,7 @@
                  type="string"
                  use="required"/>
       <attribute name="id"
-                 type="string"
+                 type="u:uuid"
                  use="required"/>
       <attribute name="name"
                  type="string"

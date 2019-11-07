@@ -151,9 +151,7 @@ class InventoryHashIndexedDirectory private constructor(
             perSecond = counter.now,
             maximum = expected)
 
-        val status =
-          this.strings.installVerifyingLocalFileProgress(current, expected, counter.now)
-
+        val status = this.strings.downloadingVerifyingProgress(progressMajor, progressMinor)
         current += r
         if (counter.update(r.toLong())) {
           progress.invoke(InventoryProgress(progressMajor, progressMinor, status))

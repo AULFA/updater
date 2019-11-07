@@ -5,6 +5,18 @@ import java.net.URI
 
 interface InventoryStringOPDSResourcesType {
 
+  val opdsManifestSerializeFailed: String
+
+  val opdsManifestSerializing: String
+
+  val opdsLocalFileDeletingFailed: String
+
+  val opdsLocalFileDeleting: String
+
+  val opdsDirectoryCreatingFailed: String
+
+  val opdsDirectoryCreating: String
+
   val opdsManifestParseFailed: String
 
   val opdsManifestParsing: String

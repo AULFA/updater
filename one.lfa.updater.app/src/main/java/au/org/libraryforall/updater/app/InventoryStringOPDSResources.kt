@@ -9,6 +9,24 @@ class InventoryStringOPDSResources(
   val resources: Resources
 ) : InventoryStringOPDSResourcesType {
 
+  override val opdsManifestSerializeFailed: String
+    get() = this.resources.getString(R.string.opdsManifestSerializeFailed)
+
+  override val opdsManifestSerializing: String
+    get() = this.resources.getString(R.string.opdsManifestSerializing)
+
+  override val opdsLocalFileDeletingFailed: String
+    get() = this.resources.getString(R.string.opdsLocalFileDeletingFailed)
+
+  override val opdsLocalFileDeleting: String
+    get() = this.resources.getString(R.string.opdsLocalFileDeleting)
+
+  override val opdsDirectoryCreatingFailed: String
+    get() = this.resources.getString(R.string.opdsDirectoryCreatingFailed)
+
+  override val opdsDirectoryCreating: String
+    get() = this.resources.getString(R.string.opdsDirectoryCreating)
+
   override val opdsManifestParseFailed: String
     get() = this.resources.getString(R.string.opdsManifestParseFailed)
 

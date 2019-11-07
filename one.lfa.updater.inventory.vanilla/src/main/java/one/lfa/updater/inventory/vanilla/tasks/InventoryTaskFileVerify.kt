@@ -169,9 +169,7 @@ object InventoryTaskFileVerify {
             perSecond = counter.now,
             maximum = expected)
 
-        val status =
-          strings.installVerifyingLocalFileProgress(current, expected, counter.now)
-
+        val status = strings.downloadingVerifyingProgress(progressMajor, progressMinor)
         execution.onProgress.invoke(InventoryProgress(progressMajor, progressMinor, status))
         if (execution.isCancelRequested) {
           step.resolution = strings.verificationCancelled

@@ -1,5 +1,6 @@
 package one.lfa.updater.inventory.vanilla.tasks
 
+import one.lfa.updater.inventory.api.InventoryTaskStep
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult.InventoryTaskCancelled
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult.InventoryTaskFailed
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult.InventoryTaskSucceeded
@@ -73,6 +74,51 @@ data class InventoryTask<A>(
           is InventoryTaskCancelled ->
             InventoryTaskCancelled(result0.steps)
         }
+      }
+    }
+
+    /**
+     * Create a task that, when evaluated, evaluates all of the given actions and discards
+     * the results.
+     */
+
+    fun <A> sequenceUnit(
+      actions: List<InventoryTask<A>>
+    ): InventoryTask<Unit> {
+      return InventoryTask { execution ->
+        val steps = mutableListOf<InventoryTaskStep>()
+        actionLoop@ for (action in actions) {
+          when (val result = action.evaluate(execution)) {
+            is InventoryTaskSucceeded -> {
+              steps.addAll(result.steps)
+              continue@actionLoop
+            }
+            is InventoryTaskCancelled -> {
+              steps.addAll(result.steps)
+              return@InventoryTask InventoryTaskCancelled<Unit>(steps)
+            }
+            is InventoryTaskFailed -> {
+              steps.addAll(result.steps)
+              return@InventoryTask InventoryTaskFailed<Unit>(steps)
+            }
+          }
+        }
+        InventoryTaskSucceeded(Unit, steps.toList())
+      }
+    }
+
+    /**
+     * Create a task that, when evaluated, evaluates all of the given actions and discards
+     * the results.
+     */
+
+    fun <A, B> forAllUnit(
+      items: List<A>,
+      action: (A) -> InventoryTask<B>
+    ): InventoryTask<Unit> {
+      return InventoryTask { execution ->
+        sequenceUnit(items.map { item -> action.invoke(item) })
+          .evaluate(execution)
       }
     }
   }

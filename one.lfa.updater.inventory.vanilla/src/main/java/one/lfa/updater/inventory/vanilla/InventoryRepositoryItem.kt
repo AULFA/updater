@@ -9,6 +9,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
 import one.lfa.updater.installed.api.InstalledItemsType
+import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
@@ -27,6 +28,7 @@ import one.lfa.updater.inventory.vanilla.tasks.InventoryTask
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetch
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSManifestFetch
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
 import one.lfa.updater.repository.api.RepositoryItem
@@ -251,8 +253,11 @@ internal class InventoryRepositoryItem(
   ): InventoryTaskResult<Unit> {
     this.logger.debug("runInstallActualOPDS: {}", this.sourceURI)
 
-    return InventoryTaskOPDSManifestFetch.create(this.sourceURI)
-      .flatMap { InventoryTask { InventoryTaskResult.succeeded(Unit, InventoryTaskStep("")) }  }
+    val inventoryCatalogDirectory =
+      executionContext.services.requireService(InventoryCatalogDirectoryType::class.java)
+
+    return InventoryTaskOPDSFetch.create(this.sourceURI, inventoryCatalogDirectory.directory)
+      .map { Unit }
       .evaluate(executionContext)
   }
 

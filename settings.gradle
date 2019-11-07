@@ -1,6 +1,7 @@
 include ":one.lfa.updater.apkinstaller.api"
 include ":one.lfa.updater.apkinstaller.device"
 include ":one.lfa.updater.app"
+include ":one.lfa.updater.credentials.api"
 include ":one.lfa.updater.installed.api"
 include ":one.lfa.updater.installed.vanilla"
 include ":one.lfa.updater.inventory.api"

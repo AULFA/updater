@@ -36,8 +36,11 @@ object InventoryTaskRetry {
     pauses: (InventoryTaskExecutionType, InventoryTaskRetryAttempt) -> InventoryTask<Unit>,
     one: (InventoryTaskRetryAttempt) -> InventoryTask<A>
   ): InventoryTaskResult<A> {
-    val steps = mutableListOf<InventoryTaskStep>()
+    if (execution.isCancelRequested) {
+      return InventoryTaskResult.InventoryTaskCancelled(listOf())
+    }
 
+    val steps = mutableListOf<InventoryTaskStep>()
     val retryActual = Math.max(retries, 1)
     retryLoop@ for (attempt in 1..retryActual) {
       val retryAttempt = InventoryTaskRetryAttempt(attempt, retryActual)

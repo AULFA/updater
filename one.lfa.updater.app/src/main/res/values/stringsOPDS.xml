@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-  <string name="opdsManifestParsed">Parsed OPDS manifest data (%1$d milliseconds)</string>
+  <string name="opdsDirectoryCreating">Creating a directory…</string>
+  <string name="opdsDirectoryCreatingFailed">Creating a directory failed.</string>
+  <string name="opdsLocalFileDeleting">Deleting a local file…</string>
+  <string name="opdsLocalFileDeletingFailed">Deleting a local file failed.</string>
   <string name="opdsManifestFetched">Fetched OPDS manifest data (%1$d milliseconds)</string>
   <string name="opdsManifestFetching">Attempted to fetch OPDS manifest.</string>
-  <string name="opdsManifestParsing">Attempted to parse OPDS manifest.</string>
+  <string name="opdsManifestParsed">Parsed OPDS manifest data (%1$d milliseconds)</string>
   <string name="opdsManifestParseFailed">Failed to parse an OPDS manifest file.</string>
+  <string name="opdsManifestParsing">Attempted to parse OPDS manifest.</string>
+  <string name="opdsManifestSerializeFailed">Serializing an OPDS manifest failed</string>
+  <string name="opdsManifestSerializing">Serializing an OPDS manifest…</string>
 </resources>

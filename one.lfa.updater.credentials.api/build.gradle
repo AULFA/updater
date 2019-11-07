@@ -1,0 +1,10 @@
+dependencies {
+
+  api libraries.irradiaHTTPAPI
+  api libraries.kotlinStdlib
+  api libraries.slf4j
+
+  compileOnly libraries.jcip
+  compileOnly libraries.OSGiBundleAnnotation
+  compileOnly libraries.OSGiBundleVersionAnnotation
+}

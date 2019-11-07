@@ -30,17 +30,6 @@ class InventoryStringResources(
   override val installVerifyingLocalFile: String
     get() = this.context.getString(R.string.install_verifying)
 
-  override fun installVerifyingLocalFileProgress(
-    bytesCurrent: Long,
-    bytesExpected: Long,
-    bytesPerSecond: Long
-  ): String {
-    return this.context.getString(R.string.install_verifying_status,
-      bytesCurrent.toDouble() / 1_000_000.0,
-      bytesExpected.toDouble() / 1_000_000.0,
-      bytesPerSecond.toDouble() / 1_000_000.0)
-  }
-
   override val installVerificationCancelled: String
     get() = this.context.getString(R.string.install_verify_cancelled)
 
@@ -76,15 +65,6 @@ class InventoryStringResources(
 
   override val installVerificationSucceeded: String =
     this.context.getString(R.string.install_verification_succeeded)
-
-  override fun installVerifying(
-    currentBytes: Long,
-    maximumBytes: Long
-  ): String =
-    this.context.getString(
-      R.string.install_verifying,
-      currentBytes.toDouble() / 1_000_000.0,
-      maximumBytes.toDouble() / 1_000_000.0)
 
   override fun installDownloading(
     receivedBytesTotal: Long,

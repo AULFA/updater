@@ -92,7 +92,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(6L, 6L, 6L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 6 6 6",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 
@@ -133,7 +133,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(6L, 6L, 6L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 6 6 6",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 
@@ -174,7 +174,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(9L, 9L, 9L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 9 9 9",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 
@@ -208,7 +208,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(9L, 9L, 9L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 9 9 9",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 
@@ -244,7 +244,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(9L, 9L, 9L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 9 9 9",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 
@@ -280,7 +280,7 @@ class InventoryTaskFileVerifyTest {
         InventoryProgressValue.InventoryProgressValueDefinite(9L, 9L, 9L),
         inventoryProgress.minor)
       Assert.assertEquals(
-        "installVerifyingLocalFileProgress 9 9 9",
+        "downloadingVerifyingProgress",
         inventoryProgress.status)
     }
 

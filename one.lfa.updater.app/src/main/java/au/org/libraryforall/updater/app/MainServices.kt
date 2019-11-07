@@ -3,6 +3,7 @@ package au.org.libraryforall.updater.app
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.AssetManager
 import android.os.Build
 import one.lfa.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -12,8 +13,11 @@ import one.irradia.http.api.HTTPClientType
 import one.irradia.http.vanilla.HTTPClientsOkHTTP
 import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.apkinstaller.device.APKInstallerDevice
+import one.lfa.updater.credentials.api.BundledCredentials
+import one.lfa.updater.credentials.api.Credential
 import one.lfa.updater.installed.api.InstalledItemsType
 import one.lfa.updater.installed.vanilla.InstalledItems
+import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryClock
 import one.lfa.updater.inventory.api.InventoryClockType
 import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
@@ -38,6 +42,7 @@ import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import one.lfa.updater.repository.xml.api.RepositoryXMLSerializers
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
@@ -97,7 +102,10 @@ object MainServices {
       try {
         val directory = ServiceDirectory()
 
-        val httpClient = this.httpClient()
+        val httpClient =
+          this.httpClient()
+        val bundledCredentials =
+          this.loadBundledCredentials(context.assets)
 
         directory.register(
           serviceClass = HTTPClientType::class.java,
@@ -105,7 +113,7 @@ object MainServices {
         )
         directory.register(
           serviceClass = InventoryHTTPAuthenticationType::class.java,
-          service = InventoryHTTPAuthentication
+          service = InventoryHTTPAuthentication(bundledCredentials)
         )
         directory.register(
           serviceClass = InventoryHTTPConfigurationType::class.java,
@@ -143,6 +151,11 @@ object MainServices {
         directory.register(
           serviceClass = OPDSXMLParserProviderType::class.java,
           service = OPDSXMLParsers.createFromServiceLoader()
+        )
+
+        directory.register(
+          serviceClass = InventoryCatalogDirectoryType::class.java,
+          service = this.createCatalogDirectory(context)
         )
 
         val installedItems = InstalledItems.create(context)
@@ -189,6 +202,25 @@ object MainServices {
         this.logger.error("startup failed: ", e)
         this.servicesFuture.setException(e)
       }
+    }
+  }
+
+  private fun loadBundledCredentials(assets: AssetManager): List<Credential> {
+    return try {
+      val fileName = "bundled_credentials.xml"
+      assets.open(fileName).use { stream ->
+        BundledCredentials.parse(URI.create(fileName), stream)
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not load bundled credentials: ", e)
+      listOf<Credential>()
+    }
+  }
+
+  private fun createCatalogDirectory(context: Context): InventoryCatalogDirectoryType {
+    return object:  InventoryCatalogDirectoryType {
+      override val directory: File
+        get() = File(context.filesDir, "OPDS")
     }
   }
 
