@@ -36,7 +36,7 @@ object InventoryTaskOPDSFetch {
       .flatMap { opdsManifest ->
         this.planAndExecuteTask(
           opdsManifestURI = uri,
-          baseDirectory = File(catalogDirectory, opdsManifest.id.toString()),
+          baseDirectory = catalogDirectory,
           opdsManifest = opdsManifest)
       }
   }

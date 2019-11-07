@@ -150,55 +150,67 @@ object InventoryTaskFileVerify {
     var current = 0L
     val expected = file.length()
 
-    return FileInputStream(file).use { stream ->
-      val digest = MessageDigest.getInstance("SHA-256")
-      val buffer = ByteArray(4096)
-      while (true) {
-        val r = stream.read(buffer)
-        if (r == -1) {
-          break
+    return try {
+      FileInputStream(file).use { stream ->
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(4096)
+        while (true) {
+          val r = stream.read(buffer)
+          if (r == -1) {
+            break
+          }
+          digest.update(buffer, 0, r)
+
+          current += r
+          counter.update(r.toLong())
+
+          val progressMinor =
+            InventoryProgressValue.InventoryProgressValueDefinite(
+              current = current,
+              perSecond = counter.now,
+              maximum = expected)
+
+          val status = strings.downloadingVerifyingProgress(progressMajor, progressMinor)
+          execution.onProgress.invoke(InventoryProgress(progressMajor, progressMinor, status))
+          if (execution.isCancelRequested) {
+            step.resolution = strings.verificationCancelled
+            return InventoryTaskResult.cancelled(step)
+          }
         }
-        digest.update(buffer, 0, r)
 
-        current += r
-        counter.update(r.toLong())
+        val result = digest.digest()
+        val resultText = Hex.bytesToHex(result).toLowerCase()
+        logger.debug("verification: expected {} received {}", hash.text, resultText)
 
-        val progressMinor =
-          InventoryProgressValue.InventoryProgressValueDefinite(
-            current = current,
-            perSecond = counter.now,
-            maximum = expected)
-
-        val status = strings.downloadingVerifyingProgress(progressMajor, progressMinor)
-        execution.onProgress.invoke(InventoryProgress(progressMajor, progressMinor, status))
-        if (execution.isCancelRequested) {
-          step.resolution = strings.verificationCancelled
-          return InventoryTaskResult.cancelled(step)
+        if (resultText == hash.text) {
+          step.resolution = strings.verificationSucceeded
+          InventoryTaskResult.succeeded(
+            Verification.FileHashMatched(
+              hashExpected = hash,
+              hashReceived = Hash(resultText)
+            ),
+            step)
+        } else {
+          file.delete()
+          step.resolution = strings.verificationFailed(hash, resultText)
+          InventoryTaskResult.succeeded(
+            Verification.FileHashDidNotMatch(
+              hashExpected = hash,
+              hashReceived = Hash(resultText)
+            ),
+            step)
         }
       }
-
-      val result = digest.digest()
-      val resultText = Hex.bytesToHex(result).toLowerCase()
-      logger.debug("verification: expected {} received {}", hash.text, resultText)
-
-      if (resultText == hash.text) {
-        step.resolution = strings.verificationSucceeded
-        InventoryTaskResult.succeeded(
-          Verification.FileHashMatched(
-            hashExpected = hash,
-            hashReceived = Hash(resultText)
-          ),
-          step)
-      } else {
-        file.delete()
-        step.resolution = strings.verificationFailed(hash, resultText)
-        InventoryTaskResult.succeeded(
-          Verification.FileHashDidNotMatch(
-            hashExpected = hash,
-            hashReceived = Hash(resultText)
-          ),
-          step)
-      }
+    } catch (e: Exception) {
+      step.resolution = strings.verificationFailed(hash, "")
+      step.failed = true
+      step.exception = e
+      InventoryTaskResult.succeeded(
+        Verification.FileHashDidNotMatch(
+          hashExpected = hash,
+          hashReceived = Hash("".padEnd(64, '0'))
+        ),
+        step)
     }
   }
 }
