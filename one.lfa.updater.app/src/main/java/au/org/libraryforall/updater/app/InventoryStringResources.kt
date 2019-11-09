@@ -7,6 +7,7 @@ import one.lfa.updater.inventory.api.InventoryStringOPDSResourcesType
 import one.lfa.updater.inventory.api.InventoryStringRepositoryResourcesType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryStringVerificationResourcesType
+import one.lfa.updater.opds.database.api.OPDSDatabaseStringsType
 import one.lfa.updater.repository.api.Hash
 import java.io.File
 import java.net.URI
@@ -17,13 +18,16 @@ class InventoryStringResources(
   private val downloadStrings: InventoryStringDownloadResourcesType,
   private val repositoryStrings: InventoryStringRepositoryResourcesType,
   private val fileStrings: InventoryStringFileResourcesType,
-  private val opdsStrings: InventoryStringOPDSResourcesType
+  private val opdsStrings: InventoryStringOPDSResourcesType,
+  private val opdsDatabaseStrings: OPDSDatabaseStringsType
 ) : InventoryStringResourcesType,
   InventoryStringDownloadResourcesType by downloadStrings,
   InventoryStringVerificationResourcesType by verificationStrings,
   InventoryStringRepositoryResourcesType by repositoryStrings,
   InventoryStringOPDSResourcesType by opdsStrings,
-  InventoryStringFileResourcesType by fileStrings {
+  InventoryStringFileResourcesType by fileStrings,
+  OPDSDatabaseStringsType by opdsDatabaseStrings {
+
   override val installReservingFile: String
     get() = this.context.getString(R.string.installReservingFile)
 

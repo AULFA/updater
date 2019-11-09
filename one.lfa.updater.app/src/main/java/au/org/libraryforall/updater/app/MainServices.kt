@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
-import one.lfa.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
@@ -32,6 +31,9 @@ import one.lfa.updater.inventory.api.InventoryType
 import one.lfa.updater.inventory.vanilla.Inventory
 import one.lfa.updater.inventory.vanilla.InventoryHashIndexedDirectory
 import one.lfa.updater.inventory.vanilla.InventoryRepositoryDatabase
+import one.lfa.updater.opds.database.api.OPDSDatabaseStringsType
+import one.lfa.updater.opds.database.api.OPDSDatabaseType
+import one.lfa.updater.opds.database.vanilla.OPDSDatabase
 import one.lfa.updater.opds.xml.api.OPDSXMLParserProviderType
 import one.lfa.updater.opds.xml.api.OPDSXMLParsers
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
@@ -40,6 +42,7 @@ import one.lfa.updater.repository.xml.api.RepositoryXMLParserProviderType
 import one.lfa.updater.repository.xml.api.RepositoryXMLParsers
 import one.lfa.updater.repository.xml.api.RepositoryXMLSerializerProviderType
 import one.lfa.updater.repository.xml.api.RepositoryXMLSerializers
+import one.lfa.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
@@ -59,6 +62,12 @@ object MainServices {
   private fun inventoryDatabaseDirectory(context: Context): File {
     val dir = File(context.filesDir, "Repositories").absoluteFile
     this.logger.debug("using inventory directory: {}", dir)
+    return dir
+  }
+
+  private fun opdsDatabaseDirectory(context: Context): File {
+    val dir = File(context.filesDir, "OPDS").absoluteFile
+    this.logger.debug("using OPDS database directory: {}", dir)
     return dir
   }
 
@@ -132,7 +141,8 @@ object MainServices {
           InventoryStringResourcesType::class.java,
           InventoryStringDownloadResourcesType::class.java,
           InventoryStringRepositoryResourcesType::class.java,
-          InventoryStringVerificationResourcesType::class.java
+          InventoryStringVerificationResourcesType::class.java,
+          OPDSDatabaseStringsType::class.java
         )
 
         directory.register(
@@ -183,6 +193,16 @@ object MainServices {
         )
 
         directory.register(
+          serviceClass = OPDSDatabaseType::class.java,
+          service = OPDSDatabase.open(
+            strings = directory.requireService(OPDSDatabaseStringsType::class.java),
+            directory = opdsDatabaseDirectory(context),
+            parsers = directory.requireService(OPDSXMLParserProviderType::class.java),
+            serializers = directory.requireService(OPDSXMLSerializerProviderType::class.java)
+          )
+        )
+
+        directory.register(
           serviceClass = InventoryRepositoryDatabaseType::class.java,
           service = InventoryRepositoryDatabase.create(
             parsers = directory.requireService(RepositoryXMLParserProviderType::class.java),
@@ -218,7 +238,7 @@ object MainServices {
   }
 
   private fun createCatalogDirectory(context: Context): InventoryCatalogDirectoryType {
-    return object:  InventoryCatalogDirectoryType {
+    return object : InventoryCatalogDirectoryType {
       override val directory: File
         get() = File(context.filesDir, "OPDS")
     }
@@ -290,7 +310,7 @@ object MainServices {
     return HTTPClientsOkHTTP().createClient("LFA Updater 0.0.1")
   }
 
-  private fun stringResources(context: Context): InventoryStringResourcesType {
+  private fun stringResources(context: Context): InventoryStringResources {
     val verificationStrings =
       InventoryStringVerificationResources(context.resources)
     val downloadStrings =
@@ -301,6 +321,8 @@ object MainServices {
       InventoryStringFileResources(context.resources)
     val opdsStrings =
       InventoryStringOPDSResources(context.resources)
+    val opdsDatabaseStrings =
+      InventoryStringOPDSDatabaseResources(context.resources)
 
     return InventoryStringResources(
       context = context,
@@ -308,7 +330,8 @@ object MainServices {
       downloadStrings = downloadStrings,
       repositoryStrings = repositoryStrings,
       fileStrings = fileStrings,
-      opdsStrings = opdsStrings
+      opdsStrings = opdsStrings,
+      opdsDatabaseStrings = opdsDatabaseStrings
     )
   }
 }

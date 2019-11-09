@@ -35,8 +35,7 @@ sealed class InventoryOPDSOperation {
    */
 
   data class SerializeManifest(
-    val manifest: OPDSManifest,
-    val outputFile: File
+    val manifest: OPDSManifest
   ) : InventoryOPDSOperation()
 
   /**

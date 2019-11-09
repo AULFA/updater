@@ -2,13 +2,19 @@ package au.org.libraryforall.updater.tests
 
 import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
+import one.lfa.updater.opds.database.api.OPDSDatabaseStringsType
 import one.lfa.updater.repository.api.Hash
 import org.joda.time.Duration
 import java.io.File
 import java.net.URI
 import java.util.UUID
 
-class InventoryStringResources : InventoryStringResourcesType {
+class InventoryStringResources : InventoryStringResourcesType, OPDSDatabaseStringsType {
+
+  override fun opdsDatabaseErrorIdMismatch(expected: UUID, received: UUID): String {
+    return "opdsDatabaseErrorIdMismatch ${expected} ${received}"
+  }
+
   override fun downloadingVerifyingProgress(majorProgress: InventoryProgressValue?, minorProgress: InventoryProgressValue): String {
     return "downloadingVerifyingProgress"
   }

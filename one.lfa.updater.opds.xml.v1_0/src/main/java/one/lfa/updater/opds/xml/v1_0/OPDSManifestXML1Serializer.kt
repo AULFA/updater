@@ -5,7 +5,9 @@ import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.xml.spi.SPIFormatXMLSerializerType
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import java.io.IOException
 import java.io.OutputStream
+import java.util.Locale
 import java.util.Properties
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
@@ -32,6 +34,10 @@ class OPDSManifestXML1Serializer(
   }
 
   override fun serialize(value: OPDSManifest) {
+    if (value.files.isEmpty()) {
+      throw IOException("Refusing to serialize a manifest with no files.")
+    }
+
     val document = newDocument()
     val root = ofManifest(document, value)
     document.appendChild(root)
@@ -85,7 +91,7 @@ class OPDSManifestXML1Serializer(
       document.createElementNS(OPDSManifestXML1Format.NAMESPACE.toString(), "om:File")
     root.setAttribute("name", file.file.toString())
     root.setAttribute("hashAlgorithm", file.hashAlgorithm)
-    root.setAttribute("hash", file.hash)
+    root.setAttribute("hash", file.hash.toUpperCase(Locale.ROOT))
     return root
   }
 

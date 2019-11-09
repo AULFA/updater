@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+  <string name="opdsDatabaseErrorIdMismatch">OPDS catalog ID mismatch; expected \"%1$s\" but received \"%2$s\".</string>
   <string name="opdsDirectoryCreating">Creating a directory…</string>
   <string name="opdsDirectoryCreatingFailed">Creating a directory failed.</string>
   <string name="opdsLocalFileDeleting">Deleting a local file…</string>

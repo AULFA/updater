@@ -12,6 +12,7 @@ import one.lfa.updater.inventory.vanilla.InventoryOPDSOperation.SerializeManifes
 import one.lfa.updater.inventory.vanilla.InventoryOPDSPlanning
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.*
 import one.lfa.updater.opds.api.OPDSManifest
+import one.lfa.updater.opds.database.api.OPDSDatabaseType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
 import one.lfa.updater.repository.api.Hash
 import org.slf4j.LoggerFactory
@@ -111,24 +112,22 @@ object InventoryTaskOPDSFetch {
   ): InventoryTask<Unit> {
 
     return InventoryTask { execution ->
-      this.logger.debug("serializing manifest {}", operation.outputFile)
+      this.logger.debug("serializing manifest {}", operation.manifest.id)
 
       val strings =
         execution.services.requireService(InventoryStringResourcesType::class.java)
           as InventoryStringOPDSResourcesType
+      val opdsDatabase =
+        execution.services.requireService(OPDSDatabaseType::class.java)
 
-      val step = InventoryTaskStep(strings.opdsManifestSerializing)
+      val step =
+        InventoryTaskStep(strings.opdsManifestSerializing)
 
       try {
-        val serializers =
-          execution.services.requireService(OPDSXMLSerializerProviderType::class.java)
-
-        FileOutputStream(operation.outputFile).use { outputStream ->
-          val serializer = serializers.createSerializer(outputStream)
-          serializer.serialize(operation.manifest)
-        }
+        opdsDatabase.createOrUpdate(operation.manifest)
         InventoryTaskResult.succeeded(Unit, step)
       } catch (e: Exception) {
+        this.logger.error("could not update manifest: ", e)
         step.resolution = strings.opdsManifestSerializeFailed
         step.exception = e
         step.failed = true

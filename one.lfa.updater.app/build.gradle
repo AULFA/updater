@@ -7,6 +7,8 @@ dependencies {
   implementation project(":one.lfa.updater.inventory.api")
   implementation project(":one.lfa.updater.inventory.vanilla")
   implementation project(":one.lfa.updater.opds.api")
+  implementation project(":one.lfa.updater.opds.database.api")
+  implementation project(":one.lfa.updater.opds.database.vanilla")
   implementation project(":one.lfa.updater.opds.xml.api")
   implementation project(":one.lfa.updater.opds.xml.v1_0")
   implementation project(":one.lfa.updater.repository.api")

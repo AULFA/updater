@@ -40,9 +40,6 @@ object InventoryOPDSPlanning {
     existingFiles.addAll(listDirectory(feedsDirectory))
     existingFiles.addAll(listDirectory(imageDirectory))
 
-    val manifestFile = File(outputDirectory, "manifest.xml")
-    operations.add(InventoryOPDSOperation.SerializeManifest(manifest, manifestFile))
-
     val baseURI = this.determineBaseURI(
       opdsManifest = manifest,
       manifestURI = manifestURI
@@ -67,6 +64,7 @@ object InventoryOPDSPlanning {
       operations.add(InventoryOPDSOperation.DeleteLocalFile(file))
     }
 
+    operations.add(InventoryOPDSOperation.SerializeManifest(manifest))
     return operations.toList()
   }
 
