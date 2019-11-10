@@ -9,8 +9,8 @@
 
   <ImageView
     android:id="@+id/notInstalledPackageIcon"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
     app:layout_constraintStart_toStartOf="parent"
@@ -23,12 +23,13 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
-    android:layout_marginEnd="8dp"
-    android:text="Placeholder"
-    android:textSize="14sp"
-    android:textStyle="bold"
-    android:maxLines="1"
+    android:layout_marginEnd="16dp"
     android:ellipsize="end"
+    android:maxLines="1"
+    android:text="Placeholder"
+    android:textSize="12sp"
+    android:textStyle="bold"
+    android:typeface="monospace"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/notInstalledPackageIcon"
     app:layout_constraintTop_toTopOf="parent" />
@@ -39,26 +40,41 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
     android:layout_marginBottom="16dp"
     android:ellipsize="end"
     android:fontFamily="monospace"
     android:maxLines="1"
     android:text="Available: 1.0.0 (1000)"
     android:textSize="12sp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/notInstalledPackageButton"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/notInstalledPackageIcon"
+    app:layout_constraintTop_toBottomOf="@id/notInstalledPackageName"
+     />
 
-  <Button
-    android:id="@+id/notInstalledPackageButton"
+  <LinearLayout
+    android:id="@+id/notInstalledButtons"
     android:layout_width="0dp"
-    android:layout_height="40dp"
+    android:layout_height="@dimen/inventory_button_height"
+    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="16dp"
-    android:text="@string/package_install"
-    android:textSize="12sp"
+    android:gravity="right"
+    android:orientation="horizontal"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <Button
+      android:id="@+id/notInstalledPackageButton"
+      android:layout_width="@dimen/inventory_button_width"
+      android:layout_height="match_parent"
+      android:text="@string/package_install"
+      android:textSize="12sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
+
+  </LinearLayout>
 
   <View
     android:id="@+id/divider2"

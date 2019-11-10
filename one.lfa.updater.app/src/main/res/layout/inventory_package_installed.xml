@@ -9,8 +9,8 @@
 
   <ImageView
     android:id="@+id/installedPackageIcon"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
     app:layout_constraintStart_toStartOf="parent"
@@ -23,12 +23,13 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
-    android:layout_marginEnd="8dp"
-    android:text="Placeholder"
-    android:textSize="14sp"
-    android:textStyle="bold"
-    android:maxLines="1"
+    android:layout_marginEnd="16dp"
     android:ellipsize="end"
+    android:maxLines="1"
+    android:text="Placeholder"
+    android:textSize="12sp"
+    android:textStyle="bold"
+    android:typeface="monospace"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/installedPackageIcon"
     app:layout_constraintTop_toTopOf="parent" />
@@ -38,42 +39,65 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
     android:layout_marginEnd="16dp"
     android:ellipsize="end"
     android:fontFamily="monospace"
     android:maxLines="1"
     android:text="Installed: 1.0.0 (1000)"
     android:textSize="12sp"
-    app:layout_constraintBottom_toTopOf="@+id/installedPackageAvailable"
-    app:layout_constraintEnd_toStartOf="@+id/installedPackageButton"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/installedPackageIcon"
+    app:layout_constraintTop_toBottomOf="@id/installedPackageName" />
 
   <TextView
     android:id="@+id/installedPackageAvailable"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginBottom="16dp"
     android:ellipsize="end"
     android:fontFamily="monospace"
     android:maxLines="1"
     android:text="Available: 1.0.0 (1000)"
     android:textSize="12sp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/installedPackageButton"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/installedPackageIcon"
+    app:layout_constraintTop_toBottomOf="@id/installedPackageInstalled" />
 
-  <Button
-    android:id="@+id/installedPackageButton"
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/installedButtons"
     android:layout_width="0dp"
-    android:layout_height="40dp"
+    android:layout_height="@dimen/inventory_button_height"
+    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="16dp"
-    android:text="@string/package_update"
-    android:textSize="12sp"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <Button
+      android:id="@+id/installedPackageButtonRemove"
+      android:layout_width="@dimen/inventory_button_width"
+      android:layout_height="@dimen/inventory_button_height"
+      android:enabled="false"
+      android:text="@string/package_uninstall"
+      android:textSize="12sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+      android:id="@+id/installedPackageButtonUpdate"
+      android:layout_width="@dimen/inventory_button_width"
+      android:layout_height="@dimen/inventory_button_height"
+      android:text="@string/package_update"
+      android:textSize="12sp"
+      android:layout_marginLeft="16dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
 
   <View
     android:id="@+id/divider2"

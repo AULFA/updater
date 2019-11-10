@@ -10,8 +10,8 @@
 
   <ImageView
     android:id="@+id/installingIcon"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
     app:layout_constraintStart_toStartOf="parent"
@@ -21,71 +21,90 @@
   <TextView
     android:id="@+id/installingPackageName"
     android:layout_width="0dp"
-    android:layout_height="wrap_content"
+    android:layout_height="16dp"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginEnd="16dp"
     android:ellipsize="end"
     android:maxLines="1"
     android:text="Placeholder"
-    android:textSize="14sp"
+    android:textSize="12sp"
     android:textStyle="bold"
+    android:typeface="monospace"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/installingIcon"
     app:layout_constraintTop_toTopOf="parent" />
 
-  <Button
-    android:id="@+id/installingPackageButton"
-    android:layout_width="wrap_content"
-    android:layout_height="40dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="16dp"
-    android:text="@string/package_cancel"
-    android:textSize="12sp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
-
-  <ProgressBar
-    android:id="@+id/installingProgressMajor"
-    style="?android:attr/progressBarStyleHorizontal"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="16dp"
-    android:indeterminate="true"
-    app:layout_constraintEnd_toStartOf="@id/installingPackageButton"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/installingIcon" />
-
-  <ProgressBar
-    android:id="@+id/installingProgressMinor"
-    style="?android:attr/progressBarStyleHorizontal"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="16dp"
-    android:indeterminate="true"
-    app:layout_constraintEnd_toStartOf="@id/installingPackageButton"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/installingProgressMajor" />
-
   <TextView
     android:id="@+id/installingProgressState"
     android:layout_width="0dp"
-    android:layout_height="wrap_content"
+    android:layout_height="16dp"
     android:layout_marginStart="16dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
     android:ellipsize="end"
     android:fontFamily="monospace"
     android:maxLines="1"
     android:text="A very long placeholder string for progress state"
-    android:textSize="10sp"
-    app:layout_constraintBottom_toTopOf="@+id/installingPackageButton"
+    android:textSize="12sp"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/installingIcon"
-    app:layout_constraintTop_toBottomOf="@+id/installingPackageName" />
+    app:layout_constraintStart_toEndOf="@id/installingIcon"
+    app:layout_constraintTop_toBottomOf="@id/installingPackageName" />
+
+  <LinearLayout
+    android:id="@+id/installingProgress"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/inventory_progress_area_height"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:orientation="vertical"
+    app:layout_constraintBottom_toTopOf="@id/installingButtons"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <ProgressBar
+      android:id="@+id/installingProgressMajor"
+      style="?android:attr/progressBarStyleHorizontal"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/inventory_progress_height"
+      android:indeterminate="true"
+      app:layout_constraintEnd_toStartOf="@id/installingPackageButton"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/installingIcon" />
+
+    <ProgressBar
+      android:id="@+id/installingProgressMinor"
+      style="?android:attr/progressBarStyleHorizontal"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/inventory_progress_height"
+      android:indeterminate="true"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/installingPackageButton"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/installingProgressMajor" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/installingButtons"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/inventory_button_height"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:gravity="right"
+    android:orientation="horizontal"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <Button
+      android:id="@+id/installingPackageButton"
+      android:layout_width="@dimen/inventory_button_width"
+      android:layout_height="match_parent"
+      android:text="@string/package_cancel"
+      android:textSize="12sp" />
+  </LinearLayout>
 
   <View
     android:id="@+id/divider2"

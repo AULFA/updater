@@ -42,7 +42,7 @@ class InventoryListAdapter(
     val packageAvailable =
       view.findViewById<TextView>(R.id.installedPackageAvailable)
     val packageButton =
-      view.findViewById<Button>(R.id.installedPackageButton)
+      view.findViewById<Button>(R.id.installedPackageButtonUpdate)
     val packageIcon =
       view.findViewById<ImageView>(R.id.installedPackageIcon)
     val packageInstalled =
@@ -170,17 +170,13 @@ class InventoryListAdapter(
         holder.viewHolderInstalling.packageName.text = repositoryPackage.item.name
 
         when (val majorState = state.major) {
+          null,
           is InventoryProgressValue.InventoryProgressValueIndefinite -> {
-            holder.viewHolderInstalling.progressBarMajor.visibility = View.VISIBLE
             holder.viewHolderInstalling.progressBarMajor.isIndeterminate = true
           }
           is InventoryProgressValue.InventoryProgressValueDefinite -> {
-            holder.viewHolderInstalling.progressBarMajor.visibility = View.VISIBLE
             holder.viewHolderInstalling.progressBarMajor.isIndeterminate = false
             holder.viewHolderInstalling.progressBarMajor.progress = majorState.percent.toInt()
-          }
-          null -> {
-            holder.viewHolderInstalling.progressBarMajor.visibility = View.INVISIBLE
           }
         }
 

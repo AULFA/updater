@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-  <dimen name="inventory_item_height">128dp</dimen>
+  <dimen name="inventory_item_height">192dp</dimen>
+  <dimen name="inventory_button_width">96dp</dimen>
+  <dimen name="inventory_button_height">32dp</dimen>
+  <dimen name="inventory_progress_area_height">48dp</dimen>
+  <dimen name="inventory_progress_height">24dp</dimen>
 </resources>
