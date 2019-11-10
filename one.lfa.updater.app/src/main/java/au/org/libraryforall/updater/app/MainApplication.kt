@@ -19,17 +19,18 @@ class MainApplication : Application() {
   private fun configureLogging() {
     try {
       val context = LoggerFactory.getILoggerFactory() as LoggerContext
+      val outputFile = File(externalCacheDir, "log.txt").absolutePath
       for (logger in context.loggerList) {
         val index = logger.iteratorForAppenders()
         while (index.hasNext()) {
           val appender = index.next()
           if (appender is RollingFileAppender<*>) {
-            (appender as RollingFileAppender<*>).file = File(externalCacheDir, "log.txt").absolutePath
+            (appender as RollingFileAppender<*>).file = outputFile
             appender.start()
           }
         }
       }
-      this.logger.debug("logging is configured")
+      this.logger.debug("logging is configured to {}", outputFile)
     } catch (e: Exception) {
       this.logger.error("could not configure logging: ", e)
     }
