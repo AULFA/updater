@@ -31,34 +31,5 @@ interface APKInstallTaskType {
    * A future representing the installation task in progress.
    */
 
-  val future: ListenableFuture<Status>
-
-  /**
-   * The status of the task.
-   */
-
-  sealed class Status {
-
-    /**
-     * Installation failed with the given error code.
-     */
-
-    data class Failed(
-      val errorCode: Int
-    ) : Status()
-
-    /**
-     * Installation was cancelled.
-     */
-
-    object Cancelled
-      : Status()
-
-    /**
-     * Installation succeeded.
-     */
-
-    object Succeeded
-      : Status()
-  }
+  val future: ListenableFuture<APKInstallerStatus>
 }

@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.net.URI
 import java.util.UUID
 
-data class InventoryItemInstallResult(
+data class InventoryItemResult(
   val repositoryId: UUID,
   val itemName: String,
   val itemVersionCode: Long,

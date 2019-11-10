@@ -3,11 +3,36 @@ package au.org.libraryforall.updater.app
 import android.content.res.Resources
 import one.lfa.updater.inventory.api.InventoryStringOPDSResourcesType
 import org.joda.time.Duration
+import java.io.File
 import java.net.URI
 
 class InventoryStringOPDSResources(
   val resources: Resources
 ) : InventoryStringOPDSResourcesType {
+
+  override val opdsDatabaseEntryMissing: String
+    get() = this.resources.getString(R.string.opdsDatabaseEntryMissing)
+
+  override val opdsCatalogDeletingDatabaseEntry: String
+    get() = this.resources.getString(R.string.opdsCatalogDeletingDatabaseEntry)
+
+  override val opdsCatalogDeleting: String
+    get() = this.resources.getString(R.string.opdsCatalogDeleting)
+
+  override fun opdsCatalogDeletingFile(
+    index: Int,
+    size: Int
+  ): String {
+    return this.resources.getString(R.string.opdsCatalogDeletingFile, index, size)
+  }
+
+  override fun opdsCatalogDeletingFileFailed(
+    index: Int,
+    size: Int,
+    localFile: File
+  ): String {
+    return this.resources.getString(R.string.opdsCatalogDeletingFileFailed, localFile)
+  }
 
   override val opdsManifestSerializeFailed: String
     get() = this.resources.getString(R.string.opdsManifestSerializeFailed)

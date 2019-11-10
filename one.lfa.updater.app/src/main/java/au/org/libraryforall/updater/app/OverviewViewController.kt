@@ -14,7 +14,7 @@ import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import io.reactivex.disposables.Disposable
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryFailureReport
-import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryItemState
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import org.slf4j.LoggerFactory
@@ -110,15 +110,16 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun packageIsSuitableForOverview(packageCurrent: InventoryRepositoryItemType) =
     packageCurrent.isUpdateAvailable || when (packageCurrent.state) {
-      is InventoryItemState.NotInstalled -> false
       is InventoryItemState.Installed -> false
-      is InventoryItemState.InstallFailed -> true
-      is InventoryItemState.Installing -> true
+      is InventoryItemState.Failed -> true
+      is InventoryItemState.NotInstalled -> false
+      is InventoryItemState.Operating.Installing -> true
+      is InventoryItemState.Operating.Uninstalling -> true
     }
 
   private fun showRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryItemType,
-    result: InventoryItemInstallResult
+    result: InventoryItemResult
   ) {
     this.router.pushController(
       RouterTransaction.with(InventoryFailureViewController(
@@ -129,7 +130,7 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun bundleRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryItemType,
-    result: InventoryItemInstallResult): InventoryFailureReport {
+    result: InventoryItemResult): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()

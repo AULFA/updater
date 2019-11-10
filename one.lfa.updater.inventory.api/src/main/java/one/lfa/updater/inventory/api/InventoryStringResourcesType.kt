@@ -69,6 +69,12 @@ interface InventoryStringResourcesType
 
   fun installVerificationFailedException(e: Exception): String
 
+  val uninstallAPKSucceeded: String
+
+  val uninstallAPKCancelled: String
+
+  val uninstallAPKStarted: String
+
   val installReservingFile: String
 
   val installVerifyingLocalFile: String
@@ -82,6 +88,8 @@ interface InventoryStringResourcesType
   fun installAPKFailedWithException(e: Exception): String
 
   fun installAPKFailedWithCode(errorCode: Int): String
+
+  fun uninstallAPKFailedWithCode(errorCode: Int): String
 
   val installWaitingForInstaller: String
 

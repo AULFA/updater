@@ -28,6 +28,19 @@ class InventoryStringResources(
   InventoryStringFileResourcesType by fileStrings,
   OPDSDatabaseStringsType by opdsDatabaseStrings {
 
+  override val uninstallAPKSucceeded: String
+    get() = this.context.getString(R.string.uninstallAPKSucceeded)
+
+  override val uninstallAPKCancelled: String
+    get() = this.context.getString(R.string.uninstallAPKCancelled)
+
+  override val uninstallAPKStarted: String
+    get() = this.context.getString(R.string.uninstallAPKStarted)
+
+  override fun uninstallAPKFailedWithCode(errorCode: Int): String {
+    return this.context.getString(R.string.uninstallAPKFailedWithCode, errorCode)
+  }
+
   override val installReservingFile: String
     get() = this.context.getString(R.string.installReservingFile)
 

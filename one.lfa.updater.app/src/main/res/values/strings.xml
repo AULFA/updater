@@ -150,5 +150,14 @@ Received: %2$s
   <string name="devTargetOverview">Launch Overview Activity</string>
   <string name="devSettingsTitle">Developer Settings</string>
   <string name="downloadingHTTPServerError">Server returned an error: %1$d %2$s (%3$s, %4$d)</string>
-  <string name="installReservingFile">Reserving a file...</string>
+  <string name="installReservingFile">Reserving a file…</string>
+
+  <string name="uninstallConfirmTitle">Confirm uninstall</string>
+  <string name="uninstallConfirm">Are you sure you want to uninstall this package?</string>
+  <string name="uninstallAPKSucceeded">APK uninstallation succeeded.</string>
+  <string name="uninstallAPKCancelled">APK uninstallation was cancelled.</string>
+  <string name="uninstallAPKStarted">Uninstallation of an APK started…</string>
+  <string name="uninstallAPKFailedWithCode">APK uninstallation failed: Status code: %1$d</string>
+  <string name="install_operation_failed">The operation could not be completed.</string>
+
 </resources>

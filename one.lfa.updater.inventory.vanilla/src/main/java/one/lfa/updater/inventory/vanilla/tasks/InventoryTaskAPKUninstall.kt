@@ -1,6 +1,5 @@
 package one.lfa.updater.inventory.vanilla.tasks
 
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType
 import one.lfa.updater.apkinstaller.api.APKInstallerStatus
 import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.inventory.api.InventoryProgress
@@ -12,18 +11,16 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
- * A task that, when evaluated, installs an APK file.
+ * A task that, when evaluated, uninstalls an APK file.
  */
 
-object InventoryTaskAPKInstall {
+object InventoryTaskAPKUninstall {
 
-  private val logger = LoggerFactory.getLogger(InventoryTaskAPKInstall.javaClass)
+  private val logger = LoggerFactory.getLogger(InventoryTaskAPKUninstall.javaClass)
 
   fun create(
     activity: Any,
-    packageName: String,
-    packageVersionCode: Int,
-    apkFile: File
+    packageName: String
   ): InventoryTask<Unit> {
     return InventoryTask { execution ->
 
@@ -34,7 +31,7 @@ object InventoryTaskAPKInstall {
 
       val step =
         InventoryTaskStep(
-          description = strings.installAPKStarted,
+          description = strings.uninstallAPKStarted,
           resolution = "",
           exception = null,
           failed = false
@@ -47,36 +44,34 @@ object InventoryTaskAPKInstall {
           status = step.description))
 
         val task =
-          apkInstaller.createInstallTask(
+          apkInstaller.createUninstallTask(
             activity = activity,
-            packageName = packageName,
-            packageVersionCode = packageVersionCode,
-            file = apkFile
+            packageName = packageName
           )
 
-        logger.debug("waiting for install task")
+        logger.debug("waiting for uninstall task")
         val status = task.future.get(10L, TimeUnit.MINUTES)
-        logger.debug("install task returned")
+        logger.debug("uninstall task returned")
 
         when (status) {
           is APKInstallerStatus.Failed -> {
-            step.resolution = strings.installAPKFailedWithCode(status.errorCode)
+            step.resolution = strings.uninstallAPKFailedWithCode(status.errorCode)
             step.failed = true
             InventoryTaskResult.failed<Unit>(step)
           }
           APKInstallerStatus.Cancelled -> {
-            step.resolution = strings.installAPKCancelled
+            step.resolution = strings.uninstallAPKCancelled
             step.failed = false
             InventoryTaskResult.cancelled(step)
           }
           APKInstallerStatus.Succeeded -> {
-            step.resolution = strings.installAPKSucceeded
+            step.resolution = strings.uninstallAPKSucceeded
             step.failed = false
             InventoryTaskResult.succeeded(Unit, step)
           }
         }
       } catch (e: Exception) {
-        logger.error("APK install failed: ", e)
+        logger.error("APK uninstall failed: ", e)
         step.failed = true
         step.exception = e
         InventoryTaskResult.failed<Unit>(step)

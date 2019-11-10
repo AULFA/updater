@@ -12,4 +12,9 @@
   <string name="opdsManifestParsing">Attempted to parse OPDS manifest.</string>
   <string name="opdsManifestSerializeFailed">Serializing an OPDS manifest failed</string>
   <string name="opdsManifestSerializing">Serializing an OPDS manifest…</string>
+  <string name="opdsDatabaseEntryMissing">OPDS database entry missing!</string>
+  <string name="opdsCatalogDeletingDatabaseEntry">Deleting the OPDS database entry...</string>
+  <string name="opdsCatalogDeleting">Deleting an OPDS catalog...</string>
+  <string name="opdsCatalogDeletingFile">Deleting catalog file (%1$d of %2$d)</string>
+  <string name="opdsCatalogDeletingFileFailed">Deleting catalog file %1$s failed!</string>
 </resources>

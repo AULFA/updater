@@ -43,7 +43,7 @@
     android:layout_marginEnd="16dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="Downloading failed"
+    android:text="@string/install_operation_failed"
     android:textSize="12sp"
     android:typeface="monospace"
     app:layout_constraintEnd_toEndOf="parent"

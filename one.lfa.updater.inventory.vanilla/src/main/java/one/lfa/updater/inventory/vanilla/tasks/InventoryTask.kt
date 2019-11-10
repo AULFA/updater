@@ -121,6 +121,19 @@ data class InventoryTask<A>(
           .evaluate(execution)
       }
     }
+
+    /**
+     * A task that immediately succeeds.
+     */
+
+    fun <A> succeeded(
+      step: InventoryTaskStep,
+      result: A
+    ): InventoryTask<A> {
+      return InventoryTask {
+        InventoryTaskResult.succeeded(result, step)
+      }
+    }
   }
 
   /**

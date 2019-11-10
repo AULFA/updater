@@ -2,6 +2,7 @@ package one.lfa.updater.apkinstaller.device
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
@@ -9,11 +10,9 @@ import one.lfa.updater.installed.api.InstalledApplicationEvent
 import one.lfa.updater.installed.api.InstalledApplicationsType
 import com.google.common.util.concurrent.SettableFuture
 import one.lfa.updater.apkinstaller.api.APKInstallTaskType
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Cancelled
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Failed
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType.Status.Succeeded
+import one.lfa.updater.apkinstaller.api.APKInstallerStatus
 import one.lfa.updater.apkinstaller.api.APKInstallerType
+import one.lfa.updater.apkinstaller.api.APKUninstallTaskType
 import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.random.Random
@@ -30,6 +29,12 @@ class APKInstallerDevice private constructor(
     this.installedItems.events.subscribe(this::onInstalledItemEvent)
   }
 
+  private val logger =
+    LoggerFactory.getLogger(APKInstallerDevice::class.java)
+
+  private val installRequestRange = 1 until 1000
+  private val uninstallRequestRange = 1000 until 2000
+  
   private fun onInstalledItemEvent(event: InstalledApplicationEvent) =
     when (event) {
       is InstalledApplicationEvent.InstalledApplicationsChanged.InstalledApplicationAdded ->
@@ -40,16 +45,37 @@ class APKInstallerDevice private constructor(
         this.reportAPKInstalled(event.installedApplication.id, event.installedApplication.versionCode.toInt())
     }
 
-  override fun reportStatus(requestCode: Int, resultCode: Int) {
-    synchronized(this.requestCodesLock) {
-      val task = this.requests.find { r -> r.requestCode == requestCode }
-      if (task != null) {
-        task.future.set(when (resultCode) {
-          Activity.RESULT_OK -> Succeeded
-          Activity.RESULT_CANCELED -> Cancelled
-          else -> Failed(resultCode)
-        })
-        this.requests.remove(task)
+  override fun reportStatus(
+    requestCode: Int,
+    resultCode: Int
+  ) {
+    if (this.installRequestRange.contains(requestCode)) {
+      return synchronized(this.installRequestCodesLock) {
+        val task =
+          this.installRequests.find { r -> r.requestCode == requestCode }
+        if (task != null) {
+          task.future.set(when (resultCode) {
+            Activity.RESULT_OK -> APKInstallerStatus.Succeeded
+            Activity.RESULT_CANCELED -> APKInstallerStatus.Cancelled
+            else -> APKInstallerStatus.Failed(resultCode)
+          })
+          this.installRequests.remove(task)
+        }
+      }
+    }
+    
+    if (this.uninstallRequestRange.contains(requestCode)) {
+      return synchronized(this.uninstallRequestCodesLock) {
+        val task =
+          this.uninstallRequests.find { r -> r.requestCode == requestCode }
+        if (task != null) {
+          task.future.set(when (resultCode) {
+            Activity.RESULT_OK -> APKInstallerStatus.Succeeded
+            Activity.RESULT_CANCELED -> APKInstallerStatus.Cancelled
+            else -> APKInstallerStatus.Failed(resultCode)
+          })
+          this.uninstallRequests.remove(task)
+        }
       }
     }
   }
@@ -57,13 +83,13 @@ class APKInstallerDevice private constructor(
   override fun reportAPKRemoved(packageName: String) {
     this.logger.debug("reportAPKRemoved: ${packageName}: received")
 
-    synchronized(this.requestCodesLock) {
-      val iter = this.requests.iterator()
+    synchronized(this.installRequestCodesLock) {
+      val iter = this.installRequests.iterator()
       while (iter.hasNext()) {
         val request = iter.next()
         if (request.packageName == packageName) {
           this.logger.debug("reportAPKRemoved: ${packageName}: finished task")
-          request.future.set(Cancelled)
+          request.future.set(APKInstallerStatus.Cancelled)
           iter.remove()
         }
       }
@@ -75,16 +101,16 @@ class APKInstallerDevice private constructor(
     packageVersionCode: Int) {
     this.logger.debug("reportAPKInstalled: ${packageName} ${packageVersionCode}: received")
 
-    synchronized(this.requestCodesLock) {
-      val task = this.findTaskLocked(packageName, packageVersionCode)
+    synchronized(this.installRequestCodesLock) {
+      val task = this.findInstallTaskLocked(packageName, packageVersionCode)
       if (task == null) {
         this.logger.error("reportAPKInstalled: ${packageName} ${packageVersionCode}: no such task!")
         return
       }
 
       this.logger.debug("reportAPKInstalled: ${packageName} ${packageVersionCode}: finished task")
-      task.future.set(Succeeded)
-      this.requests.remove(task)
+      task.future.set(APKInstallerStatus.Succeeded)
+      this.installRequests.remove(task)
     }
   }
 
@@ -97,26 +123,34 @@ class APKInstallerDevice private constructor(
     fun create(installedItems: InstalledApplicationsType): APKInstallerType =
       APKInstallerDevice(installedItems)
   }
-
-  private val logger = LoggerFactory.getLogger(APKInstallerDevice::class.java)
-  private val requestCodesLock = Object()
-  private val requests = mutableListOf<InstallTask>()
-
+  
+  private val installRequestCodesLock = Object()
+  private val installRequests = mutableListOf<InstallTask>()
+  private val uninstallRequestCodesLock = Object()
+  private val uninstallRequests = mutableListOf<UninstallTask>()
+  
   inner class InstallTask(
     override val packageName: String,
     override val packageVersionCode: Int,
     override val file: File,
-    override val future: SettableFuture<Status>,
+    override val future: SettableFuture<APKInstallerStatus>,
     val requestCode: Int
   ) : APKInstallTaskType
 
-  private fun withFreshRequestCode(receiver: (Int) -> InstallTask): InstallTask {
-    for (i in 0..10_000) {
-      val value = Random.nextInt(1, 65535)
-      synchronized(this.requestCodesLock) {
-        if (this.requests.find { r -> r.requestCode == value } == null) {
+  inner class UninstallTask(
+    override val packageName: String,
+    override val future: SettableFuture<APKInstallerStatus>,
+    val requestCode: Int
+  ) : APKUninstallTaskType
+
+  private fun withFreshInstallRequestCode(receiver: (Int) -> InstallTask): InstallTask {
+    for (i in 0..1000) {
+      val value =
+        Random.nextInt(this.installRequestRange.first, this.installRequestRange.last)
+      synchronized(this.installRequestCodesLock) {
+        if (this.installRequests.find { r -> r.requestCode == value } == null) {
           val task = receiver.invoke(value)
-          this.requests.add(task)
+          this.installRequests.add(task)
           return task
         }
       }
@@ -125,6 +159,22 @@ class APKInstallerDevice private constructor(
     throw IllegalStateException("Could not generate a fresh request code ID")
   }
 
+  private fun withFreshUninstallRequestCode(receiver: (Int) -> UninstallTask): UninstallTask {
+    for (i in 0..1000) {
+      val value =
+        Random.nextInt(this.uninstallRequestRange.first, this.uninstallRequestRange.last)
+      synchronized(this.uninstallRequestCodesLock) {
+        if (this.uninstallRequests.find { r -> r.requestCode == value } == null) {
+          val task = receiver.invoke(value)
+          this.uninstallRequests.add(task)
+          return task
+        }
+      }
+    }
+
+    throw IllegalStateException("Could not generate a fresh request code ID")
+  }
+  
   override fun createInstallTask(
     activity: Any,
     packageName: String,
@@ -153,18 +203,18 @@ class APKInstallerDevice private constructor(
     this.logger.debug("resolved content URI: {}", targetFile)
 
     val future =
-      SettableFuture.create<Status>()
+      SettableFuture.create<APKInstallerStatus>()
 
     val installTask =
-      synchronized(this.requestCodesLock) {
-        val existingTask = this.findTaskLocked(packageName, packageVersionCode)
+      synchronized(this.installRequestCodesLock) {
+        val existingTask = this.findInstallTaskLocked(packageName, packageVersionCode)
         if (existingTask != null) {
           this.logger.debug("reusing existing task for package ${packageName} ${packageVersionCode}")
           return existingTask
         }
 
         this.logger.debug("registering task for package ${packageName} ${packageVersionCode}")
-        this.withFreshRequestCode { code ->
+        this.withFreshInstallRequestCode { code ->
           this.InstallTask(packageName, packageVersionCode, file, future, code)
         }
       }
@@ -179,9 +229,56 @@ class APKInstallerDevice private constructor(
     return installTask
   }
 
-  private fun findTaskLocked(packageName: String, packageVersionCode: Int): InstallTask? {
-    return this.requests.find { t ->
+  override fun createUninstallTask(
+    activity: Any,
+    packageName: String
+  ): APKUninstallTaskType {
+
+    if (!(activity is Activity)) {
+      throw IllegalArgumentException(
+        "Activity ${activity} must be a subtype of ${Activity::class.java}")
+    }
+
+    val future =
+      SettableFuture.create<APKInstallerStatus>()
+
+    val uninstallTask =
+      synchronized(this.uninstallRequestCodesLock) {
+        val existingTask = this.findUninstallTaskLocked(packageName)
+        if (existingTask != null) {
+          this.logger.debug("reusing existing task for package ${packageName}")
+          return existingTask
+        }
+
+        this.logger.debug("registering task for package ${packageName}")
+        this.withFreshUninstallRequestCode { code ->
+          this.UninstallTask(packageName, future, code)
+        }
+      }
+
+    this.logger.debug("starting uninstaller for ${packageName}")
+    val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE)
+    intent.setData(Uri.parse("package:${packageName}"));
+    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+    activity.startActivityForResult(intent, uninstallTask.requestCode)
+    return uninstallTask
+  }
+
+
+  private fun findInstallTaskLocked(
+    packageName: String,
+    packageVersionCode: Int
+  ): InstallTask? {
+    return this.installRequests.find { t ->
       t.packageName == packageName && t.packageVersionCode == packageVersionCode
+    }
+  }
+
+  private fun findUninstallTaskLocked(
+    packageName: String
+  ): UninstallTask? {
+    return this.uninstallRequests.find { t ->
+      t.packageName == packageName
     }
   }
 }

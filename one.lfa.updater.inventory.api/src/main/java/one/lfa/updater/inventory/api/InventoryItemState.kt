@@ -27,23 +27,44 @@ sealed class InventoryItemState {
   ) : InventoryItemState()
 
   /**
-   * Installation failed for the given item.
+   * An operation (such as installation, or uninstallation) failed for the given item.
    */
 
-  data class InstallFailed(
+  data class Failed(
     override val inventoryItem: InventoryRepositoryItemType,
-    val result: InventoryItemInstallResult
+    val result: InventoryItemResult
   ) : InventoryItemState()
 
   /**
-   * The item is currently installing.
+   * An operation is in progress for the item.
    */
 
-  data class Installing(
-    override val inventoryItem: InventoryRepositoryItemType,
-    val major: InventoryProgressValue?,
-    val minor: InventoryProgressValue,
-    val status: String
-  ) : InventoryItemState()
+  sealed class Operating : InventoryItemState() {
 
+    abstract val major: InventoryProgressValue?
+    abstract val minor: InventoryProgressValue
+    abstract val status: String
+
+    /**
+     * The item is currently installing.
+     */
+
+    data class Installing(
+      override val inventoryItem: InventoryRepositoryItemType,
+      override val major: InventoryProgressValue?,
+      override val minor: InventoryProgressValue,
+      override val status: String
+    ) : Operating()
+
+    /**
+     * The item is currently uninstalling.
+     */
+
+    data class Uninstalling(
+      override val inventoryItem: InventoryRepositoryItemType,
+      override val major: InventoryProgressValue?,
+      override val minor: InventoryProgressValue,
+      override val status: String
+    ) : Operating()
+  }
 }

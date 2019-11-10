@@ -25,7 +25,7 @@ import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.Inv
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.RepositoryChanged
 import one.lfa.updater.inventory.api.InventoryFailureReport
-import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import one.lfa.updater.inventory.api.InventoryRepositoryState
 import one.lfa.updater.inventory.api.InventoryRepositoryType
@@ -160,7 +160,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun showRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryItemType,
-    result: InventoryItemInstallResult
+    result: InventoryItemResult
   ) {
     this.router.pushController(
       RouterTransaction.with(InventoryFailureViewController(
@@ -171,7 +171,7 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   private fun bundleRepositoryPackageFailure(
     repositoryPackage: InventoryRepositoryItemType,
-    result: InventoryItemInstallResult): InventoryFailureReport {
+    result: InventoryItemResult): InventoryFailureReport {
 
     val resources = this.applicationContext!!.resources
     val attributes = TreeMap<String, String>()

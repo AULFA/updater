@@ -1,5 +1,6 @@
 package one.lfa.updater.inventory.vanilla
 
+import one.lfa.updater.inventory.vanilla.InventoryOPDSRemovalOperation.*
 import one.lfa.updater.opds.api.OPDSManifest
 import java.io.File
 import java.net.URI
@@ -36,9 +37,9 @@ object InventoryOPDSPlanning {
     operations.add(InventoryOPDSOperation.CreateDirectory(imageDirectory))
 
     val existingFiles = mutableSetOf<File>()
-    existingFiles.addAll(listDirectory(booksDirectory))
-    existingFiles.addAll(listDirectory(feedsDirectory))
-    existingFiles.addAll(listDirectory(imageDirectory))
+    existingFiles.addAll(this.listDirectory(booksDirectory))
+    existingFiles.addAll(this.listDirectory(feedsDirectory))
+    existingFiles.addAll(this.listDirectory(imageDirectory))
 
     val baseURI = this.determineBaseURI(
       opdsManifest = manifest,
@@ -66,6 +67,40 @@ object InventoryOPDSPlanning {
 
     operations.add(InventoryOPDSOperation.SerializeManifest(manifest))
     return operations.toList()
+  }
+
+  /**
+   * Determine the list of operations required to download an OPDS catalog described by
+   * the given manifest.
+   */
+
+  fun planDeletion(
+    catalogDirectory: File
+  ): List<InventoryOPDSRemovalOperation> {
+
+    val operations =
+      mutableListOf<InventoryOPDSRemovalOperation>()
+
+    this.walk(operations, catalogDirectory)
+    return operations.toList()
+  }
+
+  private fun walk(
+    operations: MutableList<InventoryOPDSRemovalOperation>,
+    directory: File
+  ) {
+    val all =
+      this.listDirectory(directory)
+    val directories =
+      all.filter { file -> file.isDirectory }
+    val others =
+      all.filter { file -> !file.isDirectory }
+
+    others.forEach { file -> operations.add(DeleteLocalFile(file)) }
+    for (subDirectory in directories) {
+      this.walk(operations, subDirectory)
+    }
+    operations.add(DeleteLocalDirectory(directory))
   }
 
   private fun listDirectory(directory: File): List<File> {

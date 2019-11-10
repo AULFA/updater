@@ -13,7 +13,9 @@ interface InventoryRepositoryItemType {
 
   val item: RepositoryItem
 
-  fun install(activity: Any): ListenableFuture<InventoryItemInstallResult>
+  fun install(activity: Any): ListenableFuture<InventoryItemResult>
+
+  fun uninstall(activity: Any): ListenableFuture<InventoryItemResult>
 
   fun cancel()
 }

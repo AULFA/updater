@@ -1,5 +1,6 @@
 package one.lfa.updater.opds.database.vanilla
 
+import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import one.lfa.updater.opds.api.OPDSManifest
@@ -108,6 +109,7 @@ class OPDSDatabase private constructor(
       if (entry != null) {
         entry.deleted = true
         entry.manifestFile.delete()
+        this.entries.remove(id)
         true
       } else {
         false
@@ -181,6 +183,10 @@ class OPDSDatabase private constructor(
     override var manifest: OPDSManifest = manifestInitial
 
     override fun update(newManifest: OPDSManifest) {
+      Preconditions.checkArgument(
+        !this.deleted,
+        "Database entry must not have been deleted")
+
       if (this.manifest.id == newManifest.id) {
         synchronized(this.database.entriesLock) {
           this.database.serializeManifest(

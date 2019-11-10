@@ -8,8 +8,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryItemState
 import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
@@ -18,8 +19,8 @@ import one.lfa.updater.repository.api.RepositoryItem
 class InventoryListAdapter(
   private val context: Activity,
   private val packages: List<InventoryRepositoryItemType>,
-  private val onShowFailureDetails: (InventoryRepositoryItemType, InventoryItemInstallResult) -> Unit)
-  : RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
+  private val onShowFailureDetails: (InventoryRepositoryItemType, InventoryItemResult) -> Unit
+) : RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -32,7 +33,7 @@ class InventoryListAdapter(
       parent = item,
       installFailed = item.findViewById(R.id.installFailed),
       installed = item.findViewById(R.id.installed),
-      installing = item.findViewById(R.id.installing),
+      operating = item.findViewById(R.id.installing),
       notInstalled = item.findViewById(R.id.notInstalled))
   }
 
@@ -41,8 +42,10 @@ class InventoryListAdapter(
       view.findViewById<TextView>(R.id.installedPackageName)
     val packageAvailable =
       view.findViewById<TextView>(R.id.installedPackageAvailable)
-    val packageButton =
+    val packageButtonUpdate =
       view.findViewById<Button>(R.id.installedPackageButtonUpdate)
+    val packageButtonUninstall =
+      view.findViewById<Button>(R.id.installedPackageButtonRemove)
     val packageIcon =
       view.findViewById<ImageView>(R.id.installedPackageIcon)
     val packageInstalled =
@@ -60,17 +63,17 @@ class InventoryListAdapter(
       view.findViewById<ImageView>(R.id.notInstalledPackageIcon)
   }
 
-  class ViewHolderInstalling(val view: View) {
-    val packageButton =
-      view.findViewById<Button>(R.id.installingPackageButton)
+  class ViewHolderOperating(val view: View) {
+    val buttonCancel =
+      view.findViewById<Button>(R.id.operatingButtonCancel)
     val packageName =
-      view.findViewById<TextView>(R.id.installingPackageName)
+      view.findViewById<TextView>(R.id.operatingPackageName)
     val progressBarMajor =
-      view.findViewById<ProgressBar>(R.id.installingProgressMajor)
+      view.findViewById<ProgressBar>(R.id.operatingProgressMajor)
     val progressBarMinor =
-      view.findViewById<ProgressBar>(R.id.installingProgressMinor)
+      view.findViewById<ProgressBar>(R.id.operatingProgressMinor)
     val progressState =
-      view.findViewById<TextView>(R.id.installingProgressState)
+      view.findViewById<TextView>(R.id.operatingProgressStatus)
   }
 
   class ViewHolderInstallFailed(val view: View) {
@@ -94,13 +97,16 @@ class InventoryListAdapter(
     }
   }
 
-  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+  override fun onBindViewHolder(
+    holder: ViewHolder,
+    position: Int
+  ) {
     val repositoryPackage = this.packages[position]
-    when (val state = repositoryPackage.state) {
+    return when (val state = repositoryPackage.state) {
       is InventoryItemState.NotInstalled -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
-        setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
+        setVisibility(holder.viewHolderOperating.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.VISIBLE)
 
         holder.viewHolderNotInstalled.packageName.text = repositoryPackage.item.name
@@ -123,7 +129,7 @@ class InventoryListAdapter(
       is InventoryItemState.Installed -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.VISIBLE)
-        setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
+        setVisibility(holder.viewHolderOperating.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
         holder.viewHolderInstalled.packageName.text = repositoryPackage.item.name
@@ -140,61 +146,74 @@ class InventoryListAdapter(
             state.installedVersionCode)
 
         if (repositoryPackage.isUpdateAvailable) {
-          setVisibility(holder.viewHolderInstalled.packageButton, View.VISIBLE)
-          holder.viewHolderInstalled.packageButton.isEnabled = true
-          holder.viewHolderInstalled.packageButton.setOnClickListener {
-            holder.viewHolderInstalled.packageButton.isEnabled = false
+          setVisibility(holder.viewHolderInstalled.packageButtonUpdate, View.VISIBLE)
+          holder.viewHolderInstalled.packageButtonUpdate.isEnabled = true
+          holder.viewHolderInstalled.packageButtonUpdate.setOnClickListener {
+            holder.viewHolderInstalled.packageButtonUpdate.isEnabled = false
             repositoryPackage.install(this.context)
           }
         } else {
-          setVisibility(holder.viewHolderInstalled.packageButton, View.INVISIBLE)
+          setVisibility(holder.viewHolderInstalled.packageButtonUpdate, View.INVISIBLE)
+        }
+
+        holder.viewHolderInstalled.packageButtonUninstall.isEnabled = true
+        holder.viewHolderInstalled.packageButtonUninstall.setOnClickListener {
+          holder.viewHolderInstalled.packageButtonUninstall.isEnabled = false
+          this.onWantConfirmUninstall(
+            onConfirm = {
+              repositoryPackage.uninstall(this.context)
+            },
+            onDismiss = {
+              holder.viewHolderInstalled.packageButtonUninstall.isEnabled = true
+            }
+          )
         }
 
         holder.viewHolderInstalled.packageIcon.setImageResource(
           iconFor(repositoryPackage.state.inventoryItem))
       }
 
-      is InventoryItemState.Installing -> {
+      is InventoryItemState.Operating -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.INVISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
-        setVisibility(holder.viewHolderInstalling.view, View.VISIBLE)
+        setVisibility(holder.viewHolderOperating.view, View.VISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
-        holder.viewHolderInstalling.packageButton.isEnabled = true
-        holder.viewHolderInstalling.packageButton.setOnClickListener {
-          holder.viewHolderInstalling.packageButton.isEnabled = false
+        holder.viewHolderOperating.buttonCancel.isEnabled = true
+        holder.viewHolderOperating.buttonCancel.setOnClickListener {
+          holder.viewHolderOperating.buttonCancel.isEnabled = false
           repositoryPackage.cancel()
         }
 
-        holder.viewHolderInstalling.progressState.text = state.status
-        holder.viewHolderInstalling.packageName.text = repositoryPackage.item.name
+        holder.viewHolderOperating.progressState.text = state.status
+        holder.viewHolderOperating.packageName.text = repositoryPackage.item.name
 
         when (val majorState = state.major) {
           null,
           is InventoryProgressValue.InventoryProgressValueIndefinite -> {
-            holder.viewHolderInstalling.progressBarMajor.isIndeterminate = true
+            holder.viewHolderOperating.progressBarMajor.isIndeterminate = true
           }
           is InventoryProgressValue.InventoryProgressValueDefinite -> {
-            holder.viewHolderInstalling.progressBarMajor.isIndeterminate = false
-            holder.viewHolderInstalling.progressBarMajor.progress = majorState.percent.toInt()
+            holder.viewHolderOperating.progressBarMajor.isIndeterminate = false
+            holder.viewHolderOperating.progressBarMajor.progress = majorState.percent.toInt()
           }
         }
 
         when (val minorState = state.minor) {
           is InventoryProgressValue.InventoryProgressValueIndefinite -> {
-            holder.viewHolderInstalling.progressBarMinor.isIndeterminate = true
+            holder.viewHolderOperating.progressBarMinor.isIndeterminate = true
           }
           is InventoryProgressValue.InventoryProgressValueDefinite -> {
-            holder.viewHolderInstalling.progressBarMinor.isIndeterminate = false
-            holder.viewHolderInstalling.progressBarMinor.progress = minorState.percent.toInt()
+            holder.viewHolderOperating.progressBarMinor.isIndeterminate = false
+            holder.viewHolderOperating.progressBarMinor.progress = minorState.percent.toInt()
           }
         }
       }
 
-      is InventoryItemState.InstallFailed -> {
+      is InventoryItemState.Failed -> {
         setVisibility(holder.viewHolderInstallFailed.view, View.VISIBLE)
         setVisibility(holder.viewHolderInstalled.view, View.INVISIBLE)
-        setVisibility(holder.viewHolderInstalling.view, View.INVISIBLE)
+        setVisibility(holder.viewHolderOperating.view, View.INVISIBLE)
         setVisibility(holder.viewHolderNotInstalled.view, View.INVISIBLE)
 
         holder.viewHolderInstallFailed.packageName.text = repositoryPackage.item.name
@@ -214,6 +233,22 @@ class InventoryListAdapter(
     }
   }
 
+  private fun onWantConfirmUninstall(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit)
+  {
+    AlertDialog.Builder(this.context)
+      .setTitle(R.string.uninstallConfirmTitle)
+      .setMessage(R.string.uninstallConfirm)
+      .setPositiveButton(R.string.package_uninstall) { _, _ ->
+        onConfirm.invoke()
+      }
+      .setOnDismissListener {
+        onDismiss.invoke()
+      }
+      .show()
+  }
+
   private fun iconFor(inventoryItem: InventoryRepositoryItemType): Int {
     return when (inventoryItem.item) {
       is RepositoryItem.RepositoryAndroidPackage -> R.drawable.apk
@@ -225,15 +260,15 @@ class InventoryListAdapter(
     parent: View,
     installFailed: View,
     installed: View,
-    installing: View,
+    operating: View,
     notInstalled: View) : RecyclerView.ViewHolder(parent) {
 
     val viewHolderInstallFailed =
       ViewHolderInstallFailed(installFailed)
     val viewHolderInstalled =
       ViewHolderInstalled(installed)
-    val viewHolderInstalling =
-      ViewHolderInstalling(installing)
+    val viewHolderOperating =
+      ViewHolderOperating(operating)
     val viewHolderNotInstalled =
       ViewHolderNotInstalled(notInstalled)
   }

@@ -13,6 +13,7 @@
     <item name="colorPrimaryDark">@color/mainColorDark</item>
     <item name="colorAccent">@color/mainColorLight</item>
     <item name="android:buttonStyle">@style/LauncherButton</item>
+    <item name="alertDialogTheme">@style/LauncherAppCompatAlertDialogStyle</item>
   </style>
 
   <style name="LauncherButton" parent="@android:style/Widget.Button">
@@ -27,6 +28,12 @@
     <item name="android:textColor">@drawable/button_text</item>
     <item name="android:textSize">12sp</item>
     <item name="android:textStyle">bold</item>
+  </style>
+
+  <style name="LauncherAppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <item name="colorAccent">@color/mainColorLight</item>
+    <item name="android:textColorPrimary">@color/mainColorLight</item>
+    <item name="android:background">#ffffff</item>
   </style>
 
 </resources>

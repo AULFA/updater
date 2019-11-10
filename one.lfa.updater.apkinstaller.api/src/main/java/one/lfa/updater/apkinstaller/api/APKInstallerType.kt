@@ -20,6 +20,15 @@ interface APKInstallerType {
   ): APKInstallTaskType
 
   /**
+   * Create an uninstallation task for the given package name.
+   */
+
+  fun createUninstallTask(
+    activity: Any,
+    packageName: String
+  ): APKUninstallTaskType
+
+  /**
    * Tell the installer that an APK was removed.
    */
 

@@ -10,9 +10,34 @@ import java.net.URI
 import java.util.UUID
 
 class InventoryStringResources : InventoryStringResourcesType, OPDSDatabaseStringsType {
+  override val uninstallAPKSucceeded: String
+    get() = "uninstallAPKSucceeded"
+  override val uninstallAPKCancelled: String
+    get() = "uninstallAPKCancelled"
+  override val uninstallAPKStarted: String
+    get() = "uninstallAPKStarted"
+
+  override fun uninstallAPKFailedWithCode(errorCode: Int): String {
+    return "uninstallAPKFailedWithCode $errorCode"
+  }
+
+  override val opdsDatabaseEntryMissing: String
+    get() = "opdsDatabaseEntryMissing"
+  override val opdsCatalogDeletingDatabaseEntry: String
+    get() = "opdsCatalogDeletingDatabaseEntry"
+  override val opdsCatalogDeleting: String
+    get() = "opdsCatalogDeleting"
+
+  override fun opdsCatalogDeletingFile(index: Int, size: Int): String {
+    return "opdsCatalogDeletingFile $index $size"
+  }
+
+  override fun opdsCatalogDeletingFileFailed(index: Int, size: Int, localFile: File): String {
+    return "opdsCatalogDeletingFileFailed $index $size $localFile"
+  }
 
   override fun opdsDatabaseErrorIdMismatch(expected: UUID, received: UUID): String {
-    return "opdsDatabaseErrorIdMismatch ${expected} ${received}"
+    return "opdsDatabaseErrorIdMismatch $expected $received"
   }
 
   override fun downloadingVerifyingProgress(majorProgress: InventoryProgressValue?, minorProgress: InventoryProgressValue): String {

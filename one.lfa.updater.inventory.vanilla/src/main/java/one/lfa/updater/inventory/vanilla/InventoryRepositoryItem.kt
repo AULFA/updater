@@ -12,11 +12,11 @@ import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
 import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
-import one.lfa.updater.inventory.api.InventoryItemInstallResult
+import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryItemState
-import one.lfa.updater.inventory.api.InventoryItemState.InstallFailed
+import one.lfa.updater.inventory.api.InventoryItemState.Failed
 import one.lfa.updater.inventory.api.InventoryItemState.Installed
-import one.lfa.updater.inventory.api.InventoryItemState.Installing
+import one.lfa.updater.inventory.api.InventoryItemState.Operating
 import one.lfa.updater.inventory.api.InventoryItemState.NotInstalled
 import one.lfa.updater.inventory.api.InventoryProgress
 import one.lfa.updater.inventory.api.InventoryProgressValue
@@ -25,7 +25,9 @@ import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKUninstall
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSDelete
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetch
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
 import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent
@@ -78,7 +80,7 @@ internal class InventoryRepositoryItem(
     }
 
   @Volatile
-  private var installing: ListenableFuture<InventoryItemInstallResult>? = null
+  private var installing: ListenableFuture<InventoryItemResult>? = null
 
   private val isInstalled: Boolean
     get() = this.installedApplications.isInstalled(this.id)
@@ -100,27 +102,40 @@ internal class InventoryRepositoryItem(
     val stateCurrent = this.stateActual
     return when (event) {
       is OPDSDatabaseEntryEvent.DatabaseEntryUpdated -> {
-        if (stateCurrent is NotInstalled) {
-          val entry = this.opdsDatabase.open(event.id)
-          if (entry != null) {
-            this.logger.debug("OPDS package {} became installed", this.item.id)
-            this.stateActual = Installed(
-              inventoryItem = this,
-              installedVersionCode = entry.versionCode,
-              installedVersionName = entry.versionName)
-          } else {
+        when (stateCurrent) {
+          is NotInstalled,
+          is Operating.Installing -> {
+            val entry = this.opdsDatabase.open(event.id)
+            if (entry != null) {
+              this.logger.debug("OPDS package {} became installed", this.item.id)
+              this.stateActual = Installed(
+                inventoryItem = this,
+                installedVersionCode = entry.versionCode,
+                installedVersionName = entry.versionName)
+            } else {
+
+            }
+          }
+          is Installed,
+          is Failed,
+          is Operating.Uninstalling -> {
 
           }
-        } else {
-
         }
       }
-      is OPDSDatabaseEntryEvent.DatabaseEntryDeleted -> {
-        if (stateCurrent is Installed) {
-          this.logger.debug("OPDS package {} became uninstalled", this.item.id)
-          this.stateActual = NotInstalled(this)
-        } else {
 
+      is OPDSDatabaseEntryEvent.DatabaseEntryDeleted -> {
+        when (stateCurrent) {
+          is Installed,
+          is Operating.Uninstalling -> {
+            this.logger.debug("OPDS package {} became uninstalled", this.item.id)
+            this.stateActual = NotInstalled(this)
+          }
+          is NotInstalled ,
+          is Failed ,
+          is Operating.Installing -> {
+
+          }
         }
       }
     }
@@ -177,16 +192,16 @@ internal class InventoryRepositoryItem(
   private val name: String
     get() = this.item.name
 
-  override fun install(activity: Any): ListenableFuture<InventoryItemInstallResult> {
+  override fun install(activity: Any): ListenableFuture<InventoryItemResult> {
     this.logger.debug("[${this.id}]: install")
 
     return synchronized(this.stateLock) {
       when (this.stateActual) {
         is NotInstalled,
         is Installed,
-        is InstallFailed -> {
+        is Failed -> {
           this.stateActual =
-            Installing(
+            Operating.Installing(
               inventoryItem = this,
               major = null,
               minor = InventoryProgressValue.InventoryProgressValueIndefinite(0L, 0L),
@@ -194,8 +209,8 @@ internal class InventoryRepositoryItem(
           this.runInstall(activity)
         }
 
-        is Installing -> {
-          Futures.immediateFuture(InventoryItemInstallResult(
+        is Operating.Installing -> {
+          Futures.immediateFuture(InventoryItemResult(
             repositoryId = this.repositoryId,
             itemVersionCode = this.versionCode,
             itemVersionName = this.versionName,
@@ -204,6 +219,9 @@ internal class InventoryRepositoryItem(
             steps = listOf(InventoryTaskStep(
               description = this.stringResources.installStarted,
               resolution = this.stringResources.installAlreadyInstalling))))
+        }
+        is Operating.Uninstalling -> {
+          TODO()
         }
       }
     }
@@ -217,14 +235,15 @@ internal class InventoryRepositoryItem(
       when (val state = this.stateActual) {
         is NotInstalled -> true
         is Installed -> state.installedVersionCode < this.item.versionCode
-        is InstallFailed -> true
-        is Installing -> false
+        is Failed -> true
+        is Operating.Installing -> false
+        is Operating.Uninstalling -> false
       }
     }
   }
 
-  private fun runInstall(activity: Any): ListenableFuture<InventoryItemInstallResult> {
-    val settableFuture = SettableFuture.create<InventoryItemInstallResult>()
+  private fun runInstall(activity: Any): ListenableFuture<InventoryItemResult> {
+    val settableFuture = SettableFuture.create<InventoryItemResult>()
     this.installing = settableFuture
 
     this.executor.execute {
@@ -240,8 +259,8 @@ internal class InventoryRepositoryItem(
 
   private fun runInstallActual(
     activity: Any,
-    future: SettableFuture<InventoryItemInstallResult>
-  ): InventoryItemInstallResult {
+    future: SettableFuture<InventoryItemResult>
+  ): InventoryItemResult {
 
     val executionContext = object : InventoryTaskExecutionType {
       override val services: ServiceDirectoryType
@@ -261,7 +280,7 @@ internal class InventoryRepositoryItem(
       }
 
     val installResult =
-      InventoryItemInstallResult(
+      InventoryItemResult(
         this.repositoryId,
         this.id,
         this.versionCode,
@@ -271,7 +290,7 @@ internal class InventoryRepositoryItem(
 
     return when (result) {
       is InventoryTaskResult.InventoryTaskFailed -> {
-        this.stateActual = InstallFailed(this, installResult)
+        this.stateActual = Failed(this, installResult)
         installResult
       }
       is InventoryTaskResult.InventoryTaskSucceeded,
@@ -289,7 +308,7 @@ internal class InventoryRepositoryItem(
 
   private fun runInstallActualOPDS(
     executionContext: InventoryTaskExecutionType,
-    future: SettableFuture<InventoryItemInstallResult>
+    future: SettableFuture<InventoryItemResult>
   ): InventoryTaskResult<Unit> {
     this.logger.debug("runInstallActualOPDS: {}", this.sourceURI)
 
@@ -304,7 +323,7 @@ internal class InventoryRepositoryItem(
   private fun runInstallActualAPK(
     activity: Any,
     executionContext: InventoryTaskExecutionType,
-    future: SettableFuture<InventoryItemInstallResult>
+    future: SettableFuture<InventoryItemResult>
   ): InventoryTaskResult<Unit> {
     this.logger.debug("runInstallActualAPK: {}", this.sourceURI)
 
@@ -333,9 +352,107 @@ internal class InventoryRepositoryItem(
     }
   }
 
+  override fun uninstall(activity: Any): ListenableFuture<InventoryItemResult> {
+    val settableFuture = SettableFuture.create<InventoryItemResult>()
+    this.installing = settableFuture
+
+    this.executor.execute {
+      this.runUninstallActual(activity, settableFuture)
+    }
+
+    return settableFuture
+  }
+
+  private fun runUninstallActual(
+    activity: Any,
+    future: SettableFuture<InventoryItemResult>
+  ): InventoryItemResult {
+    val executionContext = object : InventoryTaskExecutionType {
+      override val services: ServiceDirectoryType
+        get() = this@InventoryRepositoryItem.services
+      override val isCancelRequested: Boolean
+        get() = future.isCancelled
+      override val onProgress: (InventoryProgress) -> Unit
+        get() = this@InventoryRepositoryItem::onUninstallProgress
+    }
+
+    val result =
+      when (this.item) {
+        is RepositoryItem.RepositoryAndroidPackage ->
+          this.runUninstallActualAPK(activity, executionContext, future)
+        is RepositoryItem.RepositoryOPDSPackage ->
+          this.runUninstallActualOPDS(executionContext, future)
+      }
+
+    val installResult =
+      InventoryItemResult(
+        this.repositoryId,
+        this.id,
+        this.versionCode,
+        this.versionName,
+        this.item.source,
+        result.steps)
+
+    return when (result) {
+      is InventoryTaskResult.InventoryTaskFailed -> {
+        this.stateActual = Failed(this, installResult)
+        installResult
+      }
+      is InventoryTaskResult.InventoryTaskSucceeded,
+      is InventoryTaskResult.InventoryTaskCancelled -> {
+        this.stateActual =
+          if (this.isInstalled) {
+            Installed(this, this.versionCode, this.versionName)
+          } else {
+            NotInstalled(this)
+          }
+        installResult
+      }
+    }
+  }
+
+  private fun runUninstallActualOPDS(
+    executionContext: InventoryTaskExecutionType,
+    future: SettableFuture<InventoryItemResult>
+  ): InventoryTaskResult<Unit> {
+    this.logger.debug("runUninstallActualOPDS: {}", this.sourceURI)
+
+    return try {
+      InventoryTaskOPDSDelete.create(UUID.fromString(this.id))
+        .map { Unit }
+        .evaluate(executionContext)
+    } catch (e: Exception) {
+      future.setException(e)
+      val step = InventoryTaskStep(
+        description = this.stringResources.opdsCatalogDeleting,
+        resolution = e.localizedMessage,
+        exception = e,
+        failed = true)
+      InventoryTaskResult.failed(step)
+    }
+  }
+
+  private fun runUninstallActualAPK(
+    activity: Any,
+    executionContext: InventoryTaskExecutionType,
+    future: SettableFuture<InventoryItemResult>
+  ): InventoryTaskResult<Unit> {
+    return InventoryTaskAPKUninstall.create(activity, this.item.id)
+      .evaluate(executionContext)
+  }
+
   private fun onInstallProgress(progress: InventoryProgress) {
     this.stateActual =
-      Installing(
+      Operating.Installing(
+        inventoryItem = this,
+        major = progress.major,
+        minor = progress.minor,
+        status = progress.status)
+  }
+
+  private fun onUninstallProgress(progress: InventoryProgress) {
+    this.stateActual =
+      Operating.Uninstalling(
         inventoryItem = this,
         major = progress.major,
         minor = progress.minor,
