@@ -1,6 +1,5 @@
 package one.lfa.updater.inventory.vanilla
 
-import one.lfa.updater.services.api.ServiceDirectoryType
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -8,7 +7,7 @@ import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import one.lfa.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledApplicationsType
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameInvisible
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemBecameVisible
@@ -30,7 +29,12 @@ import one.lfa.updater.inventory.vanilla.tasks.InventoryTask
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskRepositoryAdd
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryDeleted
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryUpdated
+import one.lfa.updater.opds.database.api.OPDSDatabaseType
 import one.lfa.updater.repository.api.Repository
+import one.lfa.updater.services.api.ServiceDirectoryType
 import org.joda.time.LocalDateTime
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -43,29 +47,50 @@ class InventoryRepository internal constructor(
   private val eventSubject: PublishSubject<InventoryEvent>
 ) : InventoryRepositoryType {
 
-  private val logger = LoggerFactory.getLogger(InventoryRepository::class.java)
+  private val logger =
+    LoggerFactory.getLogger(InventoryRepository::class.java)
+  private val installedApplications =
+    this.services.requireService(InstalledApplicationsType::class.java)
+  private val opdsDatabase =
+    this.services.requireService(OPDSDatabaseType::class.java)
 
-  private val installedPackages =
-    this.services.requireService(InstalledItemsType::class.java)
+  private val repositorySubscription: Disposable
+  private val opdsSubscription: Disposable
 
-  private val subscription: Disposable
   private val stateLock = Object()
   private var stateActual: InventoryRepositoryState =
     RepositoryIdle(this.databaseEntry.repository.id)
+
   private val packagesActual =
-    mutableMapOf<String, InventoryRepositoryItemType>()
+    mutableMapOf<String, InventoryRepositoryItem>()
 
   init {
     this.logger.debug("create: {}", this.databaseEntry.repository.id)
 
-    this.subscription =
+    this.repositorySubscription =
       this.databaseEntry.database.events.subscribe { event ->
         if (event.repositoryID == this.databaseEntry.repository.id) {
           this.onRepositoryDatabaseEvent(event)
         }
       }
 
+    this.opdsSubscription = this.opdsDatabase.events.subscribe(this::onOPDSDatabaseEvent)
     this.updateFrom(this.databaseEntry.repository)
+  }
+
+  private fun onOPDSDatabaseEvent(event: OPDSDatabaseEvent) {
+    return when (event) {
+      is DatabaseEntryUpdated -> {
+        this.logger.debug("OPDS database entry updated: {}", event.id)
+        this.updateFrom(this.databaseEntry.repository)
+        Unit
+      }
+      is DatabaseEntryDeleted -> {
+        this.logger.debug("OPDS database entry deleted: {}", event.id)
+        this.updateFrom(this.databaseEntry.repository)
+        Unit
+      }
+    }
   }
 
   private fun onRepositoryDatabaseEvent(event: InventoryRepositoryDatabaseEvent) {
@@ -102,11 +127,42 @@ class InventoryRepository internal constructor(
     return this
   }
 
+  private fun findInstalledVersionOf(id: String): NamedVersion? {
+
+    /*
+     * Check the set of installed applications to see if there's a package with a matching ID.
+     */
+
+    val installed = this.installedApplications.items()
+    val installedApp = installed[id]
+    if (installedApp != null) {
+      return NamedVersion(installedApp.versionName, installedApp.versionCode)
+    }
+
+    /*
+     * Check the OPDS database to see if there's a matching installed catalog.
+     */
+
+    val uuid = try {
+      UUID.fromString(id)
+    } catch (e: IllegalArgumentException) {
+      null
+    }
+
+    if (uuid != null) {
+      val opdsEntry = this.opdsDatabase.open(uuid)
+      if (opdsEntry != null) {
+        return NamedVersion(opdsEntry.versionName, opdsEntry.versionCode)
+      }
+    }
+
+    return null
+  }
+
   private fun mergeRepository(
-    viewCurrent: MutableMap<String, InventoryRepositoryItemType>,
+    viewCurrent: MutableMap<String, InventoryRepositoryItem>,
     repository: Repository): List<InventoryEvent> {
 
-    val installed = this.installedPackages.items()
     val events = mutableListOf<InventoryEvent>()
 
     /*
@@ -115,11 +171,8 @@ class InventoryRepository internal constructor(
 
     for (repositoryPackage in repository.itemsNewest.values) {
       if (!viewCurrent.containsKey(repositoryPackage.id)) {
-        val installedPackage = installed[repositoryPackage.id]
         val installedVersion =
-          installedPackage?.let { pack ->
-            NamedVersion(pack.versionName, pack.versionCode)
-          }
+          this.findInstalledVersionOf(repositoryPackage.id)
 
         val newPackage =
           InventoryRepositoryItem(
@@ -161,11 +214,8 @@ class InventoryRepository internal constructor(
       val existing = viewCurrent[repositoryPackage.id]
       if (existing != null) {
         if (repositoryPackage.versionCode > existing.item.versionCode) {
-          val installedPackage = installed[repositoryPackage.id]
           val installedVersion =
-            installedPackage?.let { pack ->
-              NamedVersion(pack.versionName, pack.versionCode)
-            }
+            this.findInstalledVersionOf(repositoryPackage.id)
 
           val newPackage =
             InventoryRepositoryItem(
@@ -213,7 +263,7 @@ class InventoryRepository internal constructor(
     get() = this.databaseEntry.repository.self
 
   override fun update(): ListenableFuture<Unit> {
-    synchronized(this.stateLock) {
+    this.eventSubject.onNext(synchronized(this.stateLock) {
       when (this.stateActual) {
         is RepositoryUpdating -> {
           this.logger.debug("updating already")
@@ -222,10 +272,10 @@ class InventoryRepository internal constructor(
         is RepositoryUpdateFailed,
         is RepositoryIdle -> {
           this.stateActual = RepositoryUpdating(this.id)
-          this.eventSubject.onNext(RepositoryChanged(this.id))
+          RepositoryChanged(this.id)
         }
       }
-    }
+    })
 
     val future = SettableFuture.create<Unit>()
 
@@ -247,19 +297,21 @@ class InventoryRepository internal constructor(
           this.logger.debug("update succeeded")
           synchronized(this.stateLock) {
             this.stateActual = RepositoryIdle(this.id)
-            this.eventSubject.onNext(RepositoryChanged(this.id))
           }
+          this.eventSubject.onNext(RepositoryChanged(this.id))
         }
         is InventoryTaskResult.InventoryTaskCancelled -> {
           this.logger.debug("update cancelled")
           synchronized(this.stateLock) {
             this.stateActual = RepositoryIdle(this.id)
-            this.eventSubject.onNext(RepositoryChanged(this.id))
           }
+          this.eventSubject.onNext(RepositoryChanged(this.id))
         }
         is InventoryTaskResult.InventoryTaskFailed -> {
           this.logger.debug("update failed")
-          this.stateActual = RepositoryUpdateFailed(this.id, result.steps)
+          synchronized(this.stateLock) {
+            this.stateActual = RepositoryUpdateFailed(this.id, result.steps)
+          }
           this.eventSubject.onNext(RepositoryChanged(this.id))
         }
       }
@@ -277,6 +329,18 @@ class InventoryRepository internal constructor(
       uri = this.databaseEntry.repository.self,
       requiredUUID = this.id
     )
+  }
+
+  internal fun dispose() {
+    this.logger.debug("[{}]: disposing", this.id)
+    this.opdsSubscription.dispose()
+    this.repositorySubscription.dispose()
+
+    synchronized(this.stateLock) {
+      this.packagesActual.values.forEach {
+        item -> item.dispose()
+      }
+    }
   }
 
   override val state: InventoryRepositoryState

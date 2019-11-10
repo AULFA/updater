@@ -1,14 +1,13 @@
 package one.lfa.updater.inventory.vanilla
 
-import one.lfa.updater.services.api.ServiceDirectoryType
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged
-import one.lfa.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledApplicationEvent.InstalledApplicationsChanged
+import one.lfa.updater.installed.api.InstalledApplicationsType
 import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryEvent.InventoryRepositoryEvent.InventoryRepositoryItemEvent.ItemChanged
@@ -24,14 +23,15 @@ import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
-import one.lfa.updater.inventory.vanilla.tasks.InventoryTask
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstall
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskAPKFetchInstallRequest
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSFetch
-import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskOPDSManifestFetch
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent
+import one.lfa.updater.opds.database.api.OPDSDatabaseType
 import one.lfa.updater.repository.api.RepositoryItem
+import one.lfa.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -50,12 +50,16 @@ internal class InventoryRepositoryItem(
 
   private val stringResources =
     this.services.requireService(InventoryStringResourcesType::class.java)
-  private val installedPackages =
-    this.services.requireService(InstalledItemsType::class.java)
+  private val installedApplications =
+    this.services.requireService(InstalledApplicationsType::class.java)
+  private val opdsDatabase =
+    this.services.requireService(OPDSDatabaseType::class.java)
   private val apkDirectory =
     this.services.requireService(InventoryHashIndexedDirectoryType::class.java)
 
+  private val opdsSubscription: Disposable
   private val installedSubscription: Disposable
+
   private val stateLock = Object()
   private var stateActual: InventoryItemState =
     if (initiallyInstalledVersion != null) {
@@ -77,44 +81,80 @@ internal class InventoryRepositoryItem(
   private var installing: ListenableFuture<InventoryItemInstallResult>? = null
 
   private val isInstalled: Boolean
-    get() = this.installedPackages.items().containsKey(this.id)
+    get() = this.installedApplications.isInstalled(this.id)
+      || this.opdsDatabase.isInstalled(this.id)
 
   init {
     this.installedSubscription =
-      this.installedPackages.events.ofType(InstalledItemsChanged::class.java)
-        .filter { event -> event.installedItem.id == this.item.id }
+      this.installedApplications.events.ofType(InstalledApplicationsChanged::class.java)
+        .filter { event -> event.installedApplication.id == this.item.id }
         .subscribe(this::onInstalledPackageEvent)
+
+    this.opdsSubscription =
+      this.opdsDatabase.events.ofType(OPDSDatabaseEntryEvent::class.java)
+        .filter { event -> event.id.toString() == this.item.id }
+        .subscribe(this::onOPDSDatabaseEvent)
   }
 
-  private fun onInstalledPackageEvent(event: InstalledItemsChanged) {
+  private fun onOPDSDatabaseEvent(event: OPDSDatabaseEntryEvent) {
     val stateCurrent = this.stateActual
     return when (event) {
-      is InstalledItemsChanged.InstalledItemAdded -> {
+      is OPDSDatabaseEntryEvent.DatabaseEntryUpdated -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.item.id)
-          this.stateActual = Installed(
-            inventoryItem = this,
-            installedVersionCode = event.installedItem.versionCode,
-            installedVersionName = event.installedItem.versionName)
+          val entry = this.opdsDatabase.open(event.id)
+          if (entry != null) {
+            this.logger.debug("OPDS package {} became installed", this.item.id)
+            this.stateActual = Installed(
+              inventoryItem = this,
+              installedVersionCode = entry.versionCode,
+              installedVersionName = entry.versionName)
+          } else {
+
+          }
         } else {
 
         }
       }
-      is InstalledItemsChanged.InstalledItemRemoved -> {
+      is OPDSDatabaseEntryEvent.DatabaseEntryDeleted -> {
         if (stateCurrent is Installed) {
-          this.logger.debug("package {} became uninstalled", this.item.id)
+          this.logger.debug("OPDS package {} became uninstalled", this.item.id)
           this.stateActual = NotInstalled(this)
         } else {
 
         }
       }
-      is InstalledItemsChanged.InstalledItemUpdated -> {
+    }
+  }
+
+  private fun onInstalledPackageEvent(event: InstalledApplicationsChanged) {
+    val stateCurrent = this.stateActual
+    return when (event) {
+      is InstalledApplicationsChanged.InstalledApplicationAdded -> {
         if (stateCurrent is NotInstalled) {
-          this.logger.debug("package {} became installed", this.item.id)
+          this.logger.debug("application package {} became installed", this.item.id)
           this.stateActual = Installed(
             inventoryItem = this,
-            installedVersionCode = event.installedItem.versionCode,
-            installedVersionName = event.installedItem.versionName)
+            installedVersionCode = event.installedApplication.versionCode,
+            installedVersionName = event.installedApplication.versionName)
+        } else {
+
+        }
+      }
+      is InstalledApplicationsChanged.InstalledApplicationRemoved -> {
+        if (stateCurrent is Installed) {
+          this.logger.debug("application package {} became uninstalled", this.item.id)
+          this.stateActual = NotInstalled(this)
+        } else {
+
+        }
+      }
+      is InstalledApplicationsChanged.InstalledApplicationUpdated -> {
+        if (stateCurrent is NotInstalled) {
+          this.logger.debug("application package {} became installed", this.item.id)
+          this.stateActual = Installed(
+            inventoryItem = this,
+            installedVersionCode = event.installedApplication.versionCode,
+            installedVersionName = event.installedApplication.versionName)
         } else {
 
         }
@@ -305,4 +345,9 @@ internal class InventoryRepositoryItem(
   override val state: InventoryItemState
     get() = synchronized(this.stateLock) { this.stateActual }
 
+  internal fun dispose() {
+    this.logger.debug("[{}]: dispose", this.id)
+    this.installedSubscription.dispose()
+    this.opdsSubscription.dispose()
+  }
 }

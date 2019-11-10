@@ -1,5 +1,6 @@
 package one.lfa.updater.opds.api
 
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import java.net.URI
 import java.util.UUID
@@ -31,7 +32,7 @@ data class OPDSManifest(
    * The time that the manifest was generated.
    */
 
-  val updated: LocalDateTime,
+  val updated: DateTime,
 
   /**
    * The file that represents the search index for the feed, if one was provided.

@@ -24,6 +24,20 @@ interface OPDSDatabaseEntryType {
     get() = this.manifest.id
 
   /**
+   * The "name" of the version
+   */
+
+  val versionName: String
+    get() = this.manifest.updated.toString()
+
+  /**
+   * The "code" of the version, for ordering versions
+   */
+
+  val versionCode: Long
+    get() = this.manifest.updated.millis / 1000L
+
+  /**
    * The directory containing catalog files.
    */
 

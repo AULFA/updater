@@ -14,8 +14,8 @@ import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.apkinstaller.device.APKInstallerDevice
 import one.lfa.updater.credentials.api.BundledCredentials
 import one.lfa.updater.credentials.api.Credential
-import one.lfa.updater.installed.api.InstalledItemsType
-import one.lfa.updater.installed.vanilla.InstalledItems
+import one.lfa.updater.installed.api.InstalledApplicationsType
+import one.lfa.updater.installed.vanilla.InstalledApplications
 import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryClock
 import one.lfa.updater.inventory.api.InventoryClockType
@@ -168,9 +168,9 @@ object MainServices {
           service = this.createCatalogDirectory(context)
         )
 
-        val installedItems = InstalledItems.create(context)
+        val installedItems = InstalledApplications.create(context)
         directory.register(
-          serviceClass = InstalledItemsType::class.java,
+          serviceClass = InstalledApplicationsType::class.java,
           service = installedItems
         )
         directory.register(

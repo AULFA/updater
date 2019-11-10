@@ -3,6 +3,7 @@ package au.org.libraryforall.updater.tests
 import one.lfa.updater.opds.api.OPDSFile
 import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.opds.database.api.OPDSDatabaseEvent
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryUpdated
 import one.lfa.updater.opds.database.api.OPDSDatabaseException
 import one.lfa.updater.opds.database.api.OPDSDatabaseStringsType
 import one.lfa.updater.opds.database.api.OPDSDatabaseType
@@ -11,7 +12,7 @@ import one.lfa.updater.opds.xml.api.OPDSXMLParsers
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializers
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -94,11 +95,11 @@ abstract class OPDSDatabaseContract {
 
     this.run {
       val event = this.events.removeAt(0)
-      Assert.assertEquals(OPDSDatabaseEvent.DatabaseEntryUpdated(manifest.id), event)
+      Assert.assertEquals(DatabaseEntryUpdated(manifest.id), event)
     }
     this.run {
       val event = this.events.removeAt(0)
-      Assert.assertEquals(OPDSDatabaseEvent.DatabaseEntryUpdated(manifest.id), event)
+      Assert.assertEquals(DatabaseEntryUpdated(manifest.id), event)
     }
 
     Assert.assertTrue(this.events.isEmpty())
@@ -230,7 +231,7 @@ abstract class OPDSDatabaseContract {
     return OPDSManifest(
       baseURI = null,
       rootFile = URI.create("x.txt"),
-      updated = LocalDateTime.now(),
+      updated = DateTime.now(),
       searchIndex = null,
       id = UUID.randomUUID(),
       files = listOf(

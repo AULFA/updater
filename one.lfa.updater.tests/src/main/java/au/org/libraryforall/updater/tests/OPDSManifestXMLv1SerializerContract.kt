@@ -5,6 +5,7 @@ import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.opds.xml.api.OPDSXMLParserProviderType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
 import one.lfa.updater.xml.spi.ParseError
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Before
@@ -42,7 +43,7 @@ abstract class OPDSManifestXMLv1SerializerContract {
     return OPDSManifest(
       baseURI = URI.create("base"),
       rootFile = URI.create("x.txt"),
-      updated = LocalDateTime.now(),
+      updated = DateTime.now(),
       searchIndex = URI.create("x.txt"),
       id = UUID.randomUUID(),
       files = listOf(

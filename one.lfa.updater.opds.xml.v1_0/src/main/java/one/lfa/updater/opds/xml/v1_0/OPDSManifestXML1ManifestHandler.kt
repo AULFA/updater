@@ -4,6 +4,7 @@ import one.lfa.updater.opds.api.OPDSFile
 import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
 import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.xml.sax.Attributes
@@ -20,7 +21,7 @@ class OPDSManifestXML1ManifestHandler(
   private lateinit var id: UUID
   private lateinit var items: MutableList<OPDSFile>
   private lateinit var rootFile: URI
-  private lateinit var updated: LocalDateTime
+  private lateinit var updated: DateTime
   private var baseURI: URI? = null
   private var searchIndex: URI? = null
 
@@ -58,7 +59,7 @@ class OPDSManifestXML1ManifestHandler(
 
     try {
       this.id = UUID.fromString(attributes.getValue("id"))
-      this.updated = formatter.parseLocalDateTime(attributes.getValue("updated"))
+      this.updated = formatter.parseDateTime(attributes.getValue("updated"))
 
       val baseOpt = attributes.getValue("base")
       if (baseOpt != null) {

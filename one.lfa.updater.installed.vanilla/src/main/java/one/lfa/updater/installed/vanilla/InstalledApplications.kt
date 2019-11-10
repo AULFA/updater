@@ -1,12 +1,12 @@
 package one.lfa.updater.installed.vanilla
 
 import android.content.Context
-import one.lfa.updater.installed.api.InstalledItem
-import one.lfa.updater.installed.api.InstalledItemEvent
-import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemAdded
-import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemRemoved
-import one.lfa.updater.installed.api.InstalledItemEvent.InstalledItemsChanged.InstalledItemUpdated
-import one.lfa.updater.installed.api.InstalledItemsType
+import one.lfa.updater.installed.api.InstalledApplication
+import one.lfa.updater.installed.api.InstalledApplicationEvent
+import one.lfa.updater.installed.api.InstalledApplicationEvent.InstalledApplicationsChanged.InstalledApplicationAdded
+import one.lfa.updater.installed.api.InstalledApplicationEvent.InstalledApplicationsChanged.InstalledApplicationRemoved
+import one.lfa.updater.installed.api.InstalledApplicationEvent.InstalledApplicationsChanged.InstalledApplicationUpdated
+import one.lfa.updater.installed.api.InstalledApplicationsType
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -17,20 +17,20 @@ import android.content.Intent
 import android.content.pm.ResolveInfo
 
 /**
- * The default implementation of the [InstalledItemsType] interface.
+ * The default implementation of the [InstalledApplicationsType] interface.
  */
 
-class InstalledItems private constructor(
+class InstalledApplications private constructor(
   private val context: Context
-) : InstalledItemsType {
+) : InstalledApplicationsType {
 
-  private val logger = LoggerFactory.getLogger(InstalledItems::class.java)
+  private val logger = LoggerFactory.getLogger(InstalledApplications::class.java)
 
   private val executor =
     MoreExecutors.listeningDecorator(
       Executors.newFixedThreadPool(1) { runnable ->
         val th = Thread(runnable)
-        th.name = "one.lfa.updater.installed.vanilla.InstalledItems.poll[${th.id}]"
+        th.name = "one.lfa.updater.installed.vanilla.InstalledApplications.poll[${th.id}]"
         android.os.Process.setThreadPriority(19)
         th
       })
@@ -41,13 +41,13 @@ class InstalledItems private constructor(
   }
 
   companion object {
-    fun create(context: Context): InstalledItemsType =
-      InstalledItems(context)
+    fun create(context: Context): InstalledApplicationsType =
+      InstalledApplications(context)
   }
 
-  private val eventSubject: PublishSubject<InstalledItemEvent> = PublishSubject.create()
+  private val eventSubject: PublishSubject<InstalledApplicationEvent> = PublishSubject.create()
 
-  override fun items(): Map<String, InstalledItem> {
+  override fun items(): Map<String, InstalledApplication> {
     val intent = Intent(Intent.ACTION_MAIN, null)
     intent.addCategory(Intent.CATEGORY_LAUNCHER)
     return this.context.packageManager.queryIntentActivities(intent, 0)
@@ -62,7 +62,7 @@ class InstalledItems private constructor(
         this.items()
       } catch (e: Exception) {
         this.logger.error("polling task initial: ", e)
-        mapOf<String, InstalledItem>()
+        mapOf<String, InstalledApplication>()
       }
 
     while (true) {
@@ -87,17 +87,17 @@ class InstalledItems private constructor(
 
         this.logger.trace("{} items added", added.size)
         for (p in added) {
-          this.eventSubject.onNext(InstalledItemAdded(p.value))
+          this.eventSubject.onNext(InstalledApplicationAdded(p.value))
         }
 
         this.logger.trace("{} items removed", removed.size)
         for (p in removed) {
-          this.eventSubject.onNext(InstalledItemRemoved(p.value))
+          this.eventSubject.onNext(InstalledApplicationRemoved(p.value))
         }
 
         this.logger.trace("{} items updated", updated.size)
         for (p in updated) {
-          this.eventSubject.onNext(InstalledItemUpdated(p.value))
+          this.eventSubject.onNext(InstalledApplicationUpdated(p.value))
         }
 
         installedThen = installedNow
@@ -113,12 +113,12 @@ class InstalledItems private constructor(
     }
   }
 
-  private fun packageInfoToPackage(info: ResolveInfo): InstalledItem? {
+  private fun packageInfoToPackage(info: ResolveInfo): InstalledApplication? {
     return try {
       val packageInfo =
         this.context.packageManager.getPackageInfo(info.activityInfo.packageName, 0)
 
-      InstalledItem(
+      InstalledApplication(
         id = packageInfo.packageName,
         versionName = packageInfo.versionName ?: packageInfo.versionCode.toString(),
         versionCode = packageInfo.versionCode.toLong(),
@@ -130,7 +130,7 @@ class InstalledItems private constructor(
     }
   }
 
-  override val events: Observable<InstalledItemEvent>
+  override val events: Observable<InstalledApplicationEvent>
     get() = this.eventSubject
 
 }

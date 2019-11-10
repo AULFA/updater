@@ -9,11 +9,31 @@ import java.util.UUID
 sealed class OPDSDatabaseEvent {
 
   /**
-   * A database entry was updated.
+   * Events related to database entries.
    */
 
-  data class DatabaseEntryUpdated(
-    val id: UUID
-  ): OPDSDatabaseEvent()
+  sealed class OPDSDatabaseEntryEvent : OPDSDatabaseEvent() {
 
+    /**
+     * The ID of the entry
+     */
+
+    abstract val id: UUID
+
+    /**
+     * A database entry was created or updated.
+     */
+
+    data class DatabaseEntryUpdated(
+      override val id: UUID
+    ): OPDSDatabaseEntryEvent()
+
+    /**
+     * A database entry was deleted.
+     */
+
+    class DatabaseEntryDeleted(
+      override val id: UUID
+    ) : OPDSDatabaseEntryEvent()
+  }
 }

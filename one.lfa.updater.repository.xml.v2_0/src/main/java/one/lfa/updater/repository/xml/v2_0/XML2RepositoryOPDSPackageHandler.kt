@@ -4,6 +4,7 @@ import one.lfa.updater.repository.api.Hash
 import one.lfa.updater.repository.api.RepositoryItem
 import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
 import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.xml.sax.Attributes
 import org.xml.sax.SAXParseException
@@ -55,7 +56,7 @@ class XML2RepositoryOPDSPackageHandler(
       this.versionCode =
         attributes.getValue("versionCode").toLong()
       this.versionName =
-        attributes.getValue("versionName")
+        DateTime.parse(attributes.getValue("versionName")).toString()
       this.name =
         attributes.getValue("name")
       this.sha256 =

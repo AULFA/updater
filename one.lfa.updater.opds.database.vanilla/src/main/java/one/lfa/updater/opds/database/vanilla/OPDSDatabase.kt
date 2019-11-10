@@ -5,6 +5,8 @@ import io.reactivex.subjects.PublishSubject
 import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.opds.database.api.OPDSDatabaseEntryType
 import one.lfa.updater.opds.database.api.OPDSDatabaseEvent
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryDeleted
+import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryUpdated
 import one.lfa.updater.opds.database.api.OPDSDatabaseException
 import one.lfa.updater.opds.database.api.OPDSDatabaseIdException
 import one.lfa.updater.opds.database.api.OPDSDatabaseStringsType
@@ -100,6 +102,23 @@ class OPDSDatabase private constructor(
     return entry
   }
 
+  override fun delete(id: UUID) {
+    val deleted = synchronized(this.entriesLock) {
+      val entry = this.entries[id]
+      if (entry != null) {
+        entry.deleted = true
+        entry.manifestFile.delete()
+        true
+      } else {
+        false
+      }
+    }
+
+    if (deleted) {
+      this.eventSubject.onNext(DatabaseEntryDeleted(id))
+    }
+  }
+
   private fun createEntry(manifest: OPDSManifest): OPDSDatabaseEntryType {
     val catalogDirectory =
       File(this.directory, manifest.id.toString())
@@ -122,7 +141,7 @@ class OPDSDatabase private constructor(
       entry
     }
 
-    this.eventSubject.onNext(OPDSDatabaseEvent.DatabaseEntryUpdated(manifest.id))
+    this.eventSubject.onNext(DatabaseEntryUpdated(manifest.id))
     return entry
   }
 
@@ -150,10 +169,13 @@ class OPDSDatabase private constructor(
   private class DatabaseEntry(
     private val database: OPDSDatabase,
     override val directory: File,
-    private val manifestFile: File,
-    private val manifestFileTmp: File,
+    internal val manifestFile: File,
+    internal val manifestFileTmp: File,
     manifestInitial: OPDSManifest
   ) : OPDSDatabaseEntryType {
+
+    @Volatile
+    internal var deleted: Boolean = false
 
     @Volatile
     override var manifest: OPDSManifest = manifestInitial
@@ -168,7 +190,7 @@ class OPDSDatabase private constructor(
           )
           this.manifest = newManifest
         }
-        this.database.eventSubject.onNext(OPDSDatabaseEvent.DatabaseEntryUpdated(newManifest.id))
+        this.database.eventSubject.onNext(DatabaseEntryUpdated(newManifest.id))
       } else {
         throw OPDSDatabaseIdException(
           strings = this.database.strings,

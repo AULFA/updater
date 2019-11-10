@@ -3,6 +3,7 @@ package au.org.libraryforall.updater.tests
 import one.lfa.updater.inventory.vanilla.InventoryOPDSPlanning
 import one.lfa.updater.opds.api.OPDSFile
 import one.lfa.updater.opds.api.OPDSManifest
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
@@ -22,7 +23,7 @@ abstract class InventoryOPDSPlanningContract  {
       OPDSManifest(
       baseURI = null,
       rootFile = URI.create("file/x"),
-      updated = LocalDateTime.now(),
+      updated = DateTime.now(),
       searchIndex = null,
       id = UUID.randomUUID(),
       files = listOf<OPDSFile>(

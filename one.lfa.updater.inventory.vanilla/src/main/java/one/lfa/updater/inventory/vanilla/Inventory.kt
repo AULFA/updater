@@ -150,7 +150,9 @@ class Inventory private constructor(
     return this.executor.submit(Callable {
       try {
         this.inventoryDatabase.delete(id)
-        synchronized(this.repositoryLock) { this.repositories.remove(id) }
+        synchronized(this.repositoryLock) {
+          this.repositories.remove(id)?.dispose()
+        }
         this.eventSubject.onNext(InventoryStateChanged)
         InventoryRepositoryRemoveResult(
           id, listOf(InventoryTaskStep(
