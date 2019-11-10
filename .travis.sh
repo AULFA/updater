@@ -28,8 +28,8 @@ EOF
 #------------------------------------------------------------------------
 # Configure Nexus and keystore
 
-scp -P 1022 travis-ci@builds.lfa.one:updater-credentials.xml one.lfa.updater.app/src/main/assets/
-scp -P 1022 travis-ci@builds.lfa.one:lfa-keystore.jks .
+scp -P 1022 travis-ci@builds.lfa.one:updater-credentials.xml one.lfa.updater.app/src/main/assets/ || exit 1
+scp -P 1022 travis-ci@builds.lfa.one:lfa-keystore.jks . || exit 1
 
 (cat <<EOF
 
