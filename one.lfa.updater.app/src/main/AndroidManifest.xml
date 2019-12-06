@@ -9,18 +9,25 @@
   <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
   <application
-    android:icon="@drawable/lfa_updater"
+    android:icon="@mipmap/ic_launcher"
     android:label="@string/main_title"
     android:name="au.org.libraryforall.updater.app.MainApplication">
+
     <provider
       android:name="androidx.core.content.FileProvider"
-      android:authorities="au.org.libraryforall.updater.app.provider"
+      android:authorities="au.org.libraryforall.updater.app"
       android:exported="false"
       android:grantUriPermissions="true">
       <meta-data
         android:name="android.support.FILE_PROVIDER_PATHS"
         android:resource="@xml/provider_paths" />
     </provider>
+
+    <provider
+      android:name="au.org.libraryforall.updater.app.UnrestrictedProvider"
+      android:authorities="au.org.libraryforall"
+      android:exported="true"
+      android:grantUriPermissions="true" />
 
     <activity
       android:name="au.org.libraryforall.updater.app.MainActivity"

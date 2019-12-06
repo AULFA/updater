@@ -60,7 +60,7 @@ class NotificationWorker(
     val channelId = MainServices.notificationChannel().channelId
     val notification =
       NotificationCompat.Builder(this.applicationContext, channelId)
-        .setSmallIcon(R.drawable.lfa_updater)
+        .setSmallIcon(R.mipmap.ic_launcher)
         .setContentTitle(resources.getString(R.string.notificationUpdatesTitle))
         .setContentText(resources.getString(R.string.notificationUpdatesText))
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
