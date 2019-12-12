@@ -196,7 +196,7 @@ class APKInstallerDevice private constructor(
         this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI")
         FileProvider.getUriForFile(
           activity,
-          activity.applicationContext.packageName + ".provider",
+          "au.org.libraryforall.updater.app",
           file)
       }
 

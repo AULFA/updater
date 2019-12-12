@@ -9,13 +9,13 @@ import org.xml.sax.ext.Locator2
 import java.io.OutputStream
 import java.net.URI
 
-class OPDSManifestXML1Format : SPIFormatVersionedHandlerProviderType<OPDSManifest> {
+class OPDSManifestXML11Format : SPIFormatVersionedHandlerProviderType<OPDSManifest> {
 
   override val contentClass: Class<OPDSManifest>
     get() = OPDSManifest::class.java
 
   companion object {
-    val NAMESPACE = URI.create("urn:one.lfa.opdsget.manifest.xml:1:0")
+    val NAMESPACE = URI.create("urn:one.lfa.opdsget.manifest.xml:1:1")
   }
 
   override fun createSerializer(outputStream: OutputStream): SPIFormatXMLSerializerType<OPDSManifest> {
@@ -33,6 +33,6 @@ class OPDSManifestXML1Format : SPIFormatVersionedHandlerProviderType<OPDSManifes
       versionMajor = 1,
       versionMinor = 0,
       uri = NAMESPACE,
-      fileIdentifier = "schema-1.0.xsd",
-      location = OPDSManifestXML1Format::class.java.getResource("/one/lfa/updater/opds/xml/v1_0/schema-1.0.xsd"))
+      fileIdentifier = "schema-1.1.xsd",
+      location = OPDSManifestXML11Format::class.java.getResource("/one/lfa/updater/opds/xml/v1_0/schema-1.1.xsd"))
 }

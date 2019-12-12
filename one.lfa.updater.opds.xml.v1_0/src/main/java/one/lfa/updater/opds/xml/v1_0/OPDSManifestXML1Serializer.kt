@@ -64,7 +64,7 @@ class OPDSManifestXML1Serializer(
     manifest: OPDSManifest
   ): Element {
     val root =
-      document.createElementNS(OPDSManifestXML1Format.NAMESPACE.toString(), "om:Manifest")
+      document.createElementNS(OPDSManifestXML10Format.NAMESPACE.toString(), "om:Manifest")
 
     root.setAttribute("id", manifest.id.toString())
     root.setAttribute("rootFile", manifest.rootFile.toString())
@@ -88,7 +88,7 @@ class OPDSManifestXML1Serializer(
     file: OPDSFile
   ): Element {
     val root =
-      document.createElementNS(OPDSManifestXML1Format.NAMESPACE.toString(), "om:File")
+      document.createElementNS(OPDSManifestXML10Format.NAMESPACE.toString(), "om:File")
     root.setAttribute("name", file.file.toString())
     root.setAttribute("hashAlgorithm", file.hashAlgorithm)
     root.setAttribute("hash", file.hash.toUpperCase(Locale.ROOT))

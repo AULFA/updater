@@ -21,6 +21,7 @@ class OPDSManifestXML1ManifestHandler(
   private lateinit var id: UUID
   private lateinit var items: MutableList<OPDSFile>
   private lateinit var rootFile: URI
+  private lateinit var title: String
   private lateinit var updated: DateTime
   private var baseURI: URI? = null
   private var searchIndex: URI? = null
@@ -38,14 +39,16 @@ class OPDSManifestXML1ManifestHandler(
   override fun onElementFinishDirectly(
     namespace: String,
     name: String,
-    qname: String): OPDSManifest? {
+    qname: String
+  ): OPDSManifest? {
     return OPDSManifest(
       baseURI = this.baseURI,
       rootFile = this.rootFile,
       updated = this.updated,
       searchIndex = this.searchIndex,
       id = this.id,
-      files = this.items.toList()
+      files = this.items.toList(),
+      title = this.title
     )
   }
 
@@ -53,13 +56,21 @@ class OPDSManifestXML1ManifestHandler(
     namespace: String,
     name: String,
     qname: String,
-    attributes: Attributes) {
+    attributes: Attributes
+  ) {
 
     val formatter = ISODateTimeFormat.dateTimeParser()
 
     try {
       this.id = UUID.fromString(attributes.getValue("id"))
       this.updated = formatter.parseDateTime(attributes.getValue("updated"))
+
+      val titleOpt = attributes.getValue("title")
+      if (titleOpt != null) {
+        this.title = titleOpt
+      } else {
+        this.title = ""
+      }
 
       val baseOpt = attributes.getValue("base")
       if (baseOpt != null) {

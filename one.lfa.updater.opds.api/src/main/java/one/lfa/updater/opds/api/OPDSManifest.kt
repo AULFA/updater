@@ -51,5 +51,11 @@ data class OPDSManifest(
    * The list of files that must be downloaded.
    */
 
-  val files: List<OPDSFile>
+  val files: List<OPDSFile>,
+
+  /**
+   * The title of the OPDS feed
+   */
+
+  val title: String
 )
