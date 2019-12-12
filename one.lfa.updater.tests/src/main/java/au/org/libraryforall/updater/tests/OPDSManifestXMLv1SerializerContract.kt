@@ -2,23 +2,15 @@ package au.org.libraryforall.updater.tests
 
 import one.lfa.updater.opds.api.OPDSFile
 import one.lfa.updater.opds.api.OPDSManifest
-import one.lfa.updater.opds.xml.api.OPDSXMLParserProviderType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
-import one.lfa.updater.xml.spi.ParseError
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.slf4j.Logger
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.net.URI
 import java.util.UUID
 
@@ -46,6 +38,7 @@ abstract class OPDSManifestXMLv1SerializerContract {
       updated = DateTime.now(),
       searchIndex = URI.create("x.txt"),
       id = UUID.randomUUID(),
+      title = "",
       files = listOf(
         OPDSFile(
           file = URI.create("x.txt"),

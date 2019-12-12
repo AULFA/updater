@@ -115,7 +115,7 @@ abstract class OPDSDatabaseContract {
       OPDSXMLParsers.createFromServiceLoader()
 
     val serializers =
-      object: OPDSXMLSerializerProviderType {
+      object : OPDSXMLSerializerProviderType {
         override fun createSerializer(outputStream: OutputStream): OPDSXMLSerializerType {
           throw IOException()
         }
@@ -147,7 +147,7 @@ abstract class OPDSDatabaseContract {
       OPDSXMLParsers.createFromServiceLoader()
 
     val serializer =
-      object: OPDSXMLSerializerType {
+      object : OPDSXMLSerializerType {
         override fun serialize(manifest: OPDSManifest) {
           throw IOException()
         }
@@ -158,7 +158,7 @@ abstract class OPDSDatabaseContract {
       }
 
     val serializers =
-      object: OPDSXMLSerializerProviderType {
+      object : OPDSXMLSerializerProviderType {
         override fun createSerializer(outputStream: OutputStream): OPDSXMLSerializerType {
           return serializer
         }
@@ -234,6 +234,7 @@ abstract class OPDSDatabaseContract {
       updated = DateTime.now(),
       searchIndex = null,
       id = UUID.randomUUID(),
+      title = "",
       files = listOf(
         OPDSFile(
           file = URI.create("x.txt"),
