@@ -3,7 +3,6 @@ package au.org.libraryforall.updater.tests.tasks
 import one.lfa.updater.services.api.ServiceDirectoryType
 import au.org.libraryforall.updater.tests.InventoryStringResources
 import au.org.libraryforall.updater.tests.MockClock
-import au.org.libraryforall.updater.tests.MutableServiceDirectory
 import au.org.libraryforall.updater.tests.TestDirectories
 import one.lfa.updater.inventory.api.InventoryClockType
 import one.lfa.updater.inventory.api.InventoryProgress
@@ -15,6 +14,7 @@ import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verificat
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.FileHashMatched
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
 import one.lfa.updater.repository.api.Hash
+import one.lfa.updater.services.api.ServiceDirectory
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -28,7 +28,7 @@ class InventoryTaskFileVerifyTest {
   private lateinit var executionContext: InventoryTaskExecutionType
   private lateinit var cancelled: AtomicBoolean
   private lateinit var progress: MutableList<InventoryProgress>
-  private lateinit var serviceDirectory: MutableServiceDirectory
+  private lateinit var serviceDirectory: ServiceDirectoryType
   private lateinit var tempDir: File
 
   @Before
@@ -37,13 +37,14 @@ class InventoryTaskFileVerifyTest {
     this.progress = mutableListOf()
     this.clock = MockClock()
 
-    this.serviceDirectory = MutableServiceDirectory()
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryStringResourcesType::class.java,
+    val services = ServiceDirectory.builder()
+    services.addService(
+      interfaceType = InventoryStringResourcesType::class.java,
       service = InventoryStringResources())
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryClockType::class.java,
+    services.addService(
+      interfaceType = InventoryClockType::class.java,
       service = this.clock)
+    this.serviceDirectory = services.build()
 
     this.cancelled = AtomicBoolean(false)
 

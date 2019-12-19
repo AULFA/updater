@@ -9,10 +9,13 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import au.org.libraryforall.updater.app.boot.BootViewController
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
+import one.lfa.updater.apkinstaller.api.APKInstallerType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -21,9 +24,6 @@ class MainActivity : AppCompatActivity() {
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
   private lateinit var router: Router
-
-  private val inventory = MainServices.inventory()
-  private val apkInstaller = MainServices.apkInstaller()
 
   override fun onActivityResult(
     requestCode: Int,
@@ -35,13 +35,14 @@ class MainActivity : AppCompatActivity() {
     this.logger.debug("MainActivity: resultCode:  {}", resultCode)
     this.logger.debug("MainActivity: data:        {}", data)
 
-    this.apkInstaller.reportStatus(requestCode, resultCode)
+    Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      .requireService(APKInstallerType::class.java)
+      .reportStatus(requestCode, resultCode)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    this.logger.debug("inventory: {}", this.inventory)
     this.setContentView(R.layout.main_activity)
 
     val container =
@@ -49,62 +50,8 @@ class MainActivity : AppCompatActivity() {
 
     this.router = Conductor.attachRouter(this, container, savedInstanceState)
     if (!this.router.hasRootController()) {
-      MainServices.backgroundExecutor().execute {
-        BundledRepositoriesTask(this, this.inventory).execute()
-      }
-
-      this.router.setRoot(RouterTransaction.with(RepositoriesViewController()))
+      this.router.setRoot(RouterTransaction.with(BootViewController()))
     }
-
-    /*
-     * If parameters were passed to the activity, act on them!
-     */
-
-    val extras = intent.extras
-    if (extras != null) {
-      when (val target = extras.getString(TARGET_PARAMETER_ID)) {
-        "overview" -> {
-          this.logger.debug("opening overview")
-          UIThread.executeLater(
-            runnable = {
-              this.router.pushController(
-                RouterTransaction.with(OverviewViewController())
-                  .pushChangeHandler(HorizontalChangeHandler(500L))
-                  .popChangeHandler(HorizontalChangeHandler(500L)))
-            },
-            milliseconds = 500L)
-        }
-
-        else -> {
-          this.logger.debug("unrecognized target: {}", target)
-        }
-      }
-    }
-
-    this.enqueueUpdateTask()
-  }
-
-  private fun enqueueUpdateTask() {
-
-    /*
-     * Start a task to handle updates.
-     */
-
-    val workRequestContraints =
-      Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED)
-        .setRequiresStorageNotLow(true)
-        .build()
-
-    val workRequest =
-      PeriodicWorkRequestBuilder<NotificationWorker>(1, TimeUnit.HOURS)
-        .setConstraints(workRequestContraints)
-        .setInitialDelay(1L, TimeUnit.MINUTES)
-        .addTag("au.org.libraryforall.updater.app.Updates")
-        .build()
-
-    WorkManager.getInstance(this)
-      .enqueue(workRequest)
   }
 
   override fun onBackPressed() {

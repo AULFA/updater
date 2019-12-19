@@ -16,12 +16,15 @@ import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryFailureReport
 import one.lfa.updater.inventory.api.InventoryState
 import one.lfa.updater.inventory.api.InventoryTaskStep
+import one.lfa.updater.inventory.api.InventoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.TreeMap
 
 class RepositoryAddViewController : Controller() {
 
+  private lateinit var inventory: InventoryType
   private lateinit var errorDetails: Button
   private lateinit var errorConfirm: Button
   private lateinit var groupError: ViewGroup
@@ -33,8 +36,6 @@ class RepositoryAddViewController : Controller() {
 
   private var eventSubscription: Disposable? = null
   private val logger = LoggerFactory.getLogger(RepositoryAddViewController::class.java)
-
-  private val inventory = MainServices.inventory()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
     val layout =
@@ -65,6 +66,11 @@ class RepositoryAddViewController : Controller() {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    val serviceDirectory =
+      Services.serviceDirectory()
+    this.inventory =
+      serviceDirectory.requireService(InventoryType::class.java)
 
     this.setOptionsMenuHidden(true)
 

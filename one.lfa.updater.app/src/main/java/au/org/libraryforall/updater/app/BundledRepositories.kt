@@ -2,6 +2,7 @@ package au.org.libraryforall.updater.app
 
 import android.content.Context
 import android.content.res.XmlResourceParser
+import org.joda.time.LocalDateTime
 import org.xmlpull.v1.XmlPullParser
 import java.net.URI
 import java.util.UUID
@@ -29,17 +30,20 @@ object BundledRepositories {
 
         XmlPullParser.START_TAG ->
           when (parser.name) {
-            "bundled-repositories" -> Unit
-            "bundled-repository" -> {
+            "BundledRepositories" -> Unit
+            "BundledRepository" -> {
               val source =
                 parser.getAttributeValue(null, "source")
               val uuid =
                 parser.getAttributeValue(null, "uuid")
               val title =
                 parser.getAttributeValue(null, "title")
+              val updated =
+                LocalDateTime.parse(parser.getAttributeValue(null, "updated"))
               repositories.add(BundledRepository(
                 uri = URI(source),
                 requiredUUID = UUID.fromString(uuid),
+                updated = updated,
                 title = title
               ))
             }

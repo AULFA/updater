@@ -19,6 +19,8 @@ import io.reactivex.disposables.Disposable
 import one.lfa.updater.inventory.api.InventoryEvent
 import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
 import one.lfa.updater.inventory.api.InventoryRepositoryType
+import one.lfa.updater.inventory.api.InventoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 
 class RepositoriesViewController : Controller() {
@@ -27,8 +29,9 @@ class RepositoriesViewController : Controller() {
     this.setHasOptionsMenu(true)
   }
 
+  private lateinit var backgroundExecutor: BackgroundExecutor
+  private lateinit var inventory: InventoryType
   private val logger = LoggerFactory.getLogger(RepositoriesViewController::class.java)
-  private val inventory = MainServices.inventory()
   private val listRepositories: MutableList<InventoryRepositoryType> = mutableListOf()
 
   private var repositoryEventSubscription: Disposable? = null
@@ -105,12 +108,12 @@ class RepositoriesViewController : Controller() {
     AlertDialog.Builder(this.activity!!)
       .setTitle(R.string.delete_cached_confirm_title)
       .setMessage(R.string.delete_cached_confirm)
-      .setPositiveButton(R.string.delete_cached, { dialog, which ->
+      .setPositiveButton(R.string.delete_cached) { dialog, which ->
         val future = this.inventory.inventoryDeleteCachedData()
         future.addListener(Runnable {
           this.onDeletedCachedData(future.get())
-        }, MainServices.backgroundExecutor())
-      })
+        }, this.backgroundExecutor.executor)
+      }
       .show()
   }
 
@@ -135,6 +138,13 @@ class RepositoriesViewController : Controller() {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    val serviceDirectory =
+      Services.serviceDirectory()
+    this.inventory =
+      serviceDirectory.requireService(InventoryType::class.java)
+    this.backgroundExecutor =
+      serviceDirectory.requireService(BackgroundExecutor::class.java)
 
     this.setOptionsMenuHidden(false)
     (this.activity as AppCompatActivity).supportActionBar?.title =

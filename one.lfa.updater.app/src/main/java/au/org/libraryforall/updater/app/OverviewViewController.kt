@@ -17,6 +17,8 @@ import one.lfa.updater.inventory.api.InventoryFailureReport
 import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryItemState
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
+import one.lfa.updater.inventory.api.InventoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.util.TreeMap
 
@@ -31,9 +33,9 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     }
   }
 
+  private lateinit var inventory: InventoryType
   private val logger = LoggerFactory.getLogger(OverviewViewController::class.java)
   private var repositoryEventSubscription: Disposable? = null
-  private val inventory = MainServices.inventory()
 
   init {
     this.setHasOptionsMenu(true)
@@ -55,6 +57,10 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    this.inventory =
+      Services.serviceDirectory()
+        .requireService(InventoryType::class.java)
 
     (this.activity as AppCompatActivity).supportActionBar?.title =
       view.context.resources.getString(R.string.overview)

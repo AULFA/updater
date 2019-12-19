@@ -8,6 +8,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import one.lfa.updater.inventory.api.InventoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -24,7 +26,11 @@ class NotificationWorker(
   private val logger = LoggerFactory.getLogger(NotificationWorker::class.java)
 
   override fun doWork(): Result {
-    val inventory = MainServices.inventory()
+    val services =
+      Services.serviceDirectoryWaiting(1L, TimeUnit.MINUTES)
+    val inventory =
+      services.requireService(InventoryType::class.java)
+
     for (repository in inventory.inventoryRepositories()) {
       try {
         repository.update().get(1L, TimeUnit.MINUTES)
@@ -56,8 +62,14 @@ class NotificationWorker(
     val pendingIntent: PendingIntent =
       PendingIntent.getActivity(this.applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-    val resources = this.applicationContext.resources
-    val channelId = MainServices.notificationChannel().channelId
+    val resources =
+      this.applicationContext.resources
+
+    val channelId =
+      Services.serviceDirectory()
+        .requireService(InventoryNotificationChannelReferenceType::class.java)
+        .channelId
+
     val notification =
       NotificationCompat.Builder(this.applicationContext, channelId)
         .setSmallIcon(R.mipmap.ic_launcher)

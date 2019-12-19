@@ -4,7 +4,6 @@ import one.lfa.updater.services.api.ServiceDirectoryType
 import au.org.libraryforall.updater.tests.InventoryStringResources
 import au.org.libraryforall.updater.tests.MockClock
 import au.org.libraryforall.updater.tests.MockHTTP
-import au.org.libraryforall.updater.tests.MutableServiceDirectory
 import au.org.libraryforall.updater.tests.TestDirectories
 import one.irradia.http.api.HTTPAuthentication
 import one.irradia.http.api.HTTPClientType
@@ -19,6 +18,7 @@ import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileDownload
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileDownloadRequest
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
+import one.lfa.updater.services.api.ServiceDirectory
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +38,7 @@ class InventoryTaskFileDownloadTest {
   private lateinit var executionContext: InventoryTaskExecutionType
   private lateinit var cancelled: AtomicBoolean
   private lateinit var progress: MutableList<InventoryProgress>
-  private lateinit var serviceDirectory: MutableServiceDirectory
+  private lateinit var serviceDirectory: ServiceDirectoryType
   private lateinit var tempDir: File
 
   @Before
@@ -59,22 +59,23 @@ class InventoryTaskFileDownloadTest {
         get() = 1L
     }
 
-    this.serviceDirectory = MutableServiceDirectory()
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryStringResourcesType::class.java,
+    val services = ServiceDirectory.builder()
+    services.addService(
+      interfaceType = InventoryStringResourcesType::class.java,
       service = InventoryStringResources())
-    this.serviceDirectory.registerService(
-      serviceClass = HTTPClientType::class.java,
+    services.addService(
+      interfaceType = HTTPClientType::class.java,
       service = this.mockHttp)
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryHTTPAuthenticationType::class.java,
+    services.addService(
+      interfaceType = InventoryHTTPAuthenticationType::class.java,
       service = this.httpAuth)
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryClockType::class.java,
+    services.addService(
+      interfaceType = InventoryClockType::class.java,
       service = this.clock)
-    this.serviceDirectory.registerService(
-      serviceClass = InventoryHTTPConfigurationType::class.java,
+    services.addService(
+      interfaceType = InventoryHTTPConfigurationType::class.java,
       service = this.httpConfiguration)
+    this.serviceDirectory = services.build()
 
     this.cancelled = AtomicBoolean(false)
 

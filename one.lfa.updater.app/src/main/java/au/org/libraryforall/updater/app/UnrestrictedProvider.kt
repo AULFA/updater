@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import one.lfa.updater.contenturis.OPDSContentURIs
 import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -28,8 +29,10 @@ class UnrestrictedProvider : ContentProvider() {
     val contentURI =
       OPDSContentURIs.parseContentURI(path) ?: return null
 
+    val serviceDirectory =
+      Services.serviceDirectory()
     val catalogDirectory =
-      MainServices.services.requireService(InventoryCatalogDirectoryType::class.java)
+      serviceDirectory.requireService(InventoryCatalogDirectoryType::class.java)
     val resolved =
       File(catalogDirectory.directory.absoluteFile, "${contentURI.catalogId}/${contentURI.path}")
 

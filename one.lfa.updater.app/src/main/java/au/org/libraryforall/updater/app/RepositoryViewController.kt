@@ -30,6 +30,8 @@ import one.lfa.updater.inventory.api.InventoryRepositoryItemType
 import one.lfa.updater.inventory.api.InventoryRepositoryState
 import one.lfa.updater.inventory.api.InventoryRepositoryType
 import one.lfa.updater.inventory.api.InventoryTaskStep
+import one.lfa.updater.inventory.api.InventoryType
+import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.util.TreeMap
 import java.util.UUID
@@ -48,20 +50,20 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   private val logger = LoggerFactory.getLogger(RepositoryViewController::class.java)
   private var repositoryEventSubscription: Disposable? = null
-  private val inventory = MainServices.inventory()
   private val repositoryUUID: UUID = arguments.getSerializable("repositoryUUID") as UUID
 
   init {
     this.setHasOptionsMenu(true)
   }
 
-  private lateinit var listPackages: MutableList<InventoryRepositoryItemType>
-  private lateinit var title: TextView
-  private lateinit var recyclerView: RecyclerView
+  private lateinit var inventory: InventoryType
   private lateinit var listAdapter: InventoryListAdapter
-  private lateinit var progressError: ImageView
+  private lateinit var listPackages: MutableList<InventoryRepositoryItemType>
   private lateinit var progess: ProgressBar
+  private lateinit var progressError: ImageView
+  private lateinit var recyclerView: RecyclerView
   private lateinit var repository: InventoryRepositoryType
+  private lateinit var title: TextView
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
     val layout =
@@ -104,10 +106,10 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
     AlertDialog.Builder(this.activity!!)
       .setTitle(R.string.repository_delete_confirm_title)
       .setMessage(R.string.repository_delete_confirm)
-      .setPositiveButton(R.string.repository_delete, { dialog, which ->
+      .setPositiveButton(R.string.repository_delete) { dialog, which ->
         this.inventory.inventoryRepositoryRemove(this.repositoryUUID)
         this.router.popCurrentController()
-      })
+      }
       .show()
   }
 
@@ -125,6 +127,11 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
 
   override fun onAttach(view: View) {
     super.onAttach(view)
+
+    val serviceDirectory =
+      Services.serviceDirectory()
+    this.inventory =
+      serviceDirectory.requireService(InventoryType::class.java)
 
     (this.activity as AppCompatActivity).supportActionBar?.title =
       view.context.resources.getString(R.string.repository)
