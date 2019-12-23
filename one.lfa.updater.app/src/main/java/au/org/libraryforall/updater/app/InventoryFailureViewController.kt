@@ -95,11 +95,32 @@ class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) 
 
     this.saveReport.setOnClickListener {
       try {
-        val file = InventoryFailureReports.writeToStorage(view.context, Instant.now(), this.failure)
-        AlertDialog.Builder(this.activity!!)
-          .setTitle(R.string.failure_wrote_ok_title)
-          .setMessage(view.context.getString(R.string.failure_wrote_ok, file.toString()))
-          .show()
+        val file =
+          InventoryFailureReports.writeToStorage(
+            context = view.context,
+            time = Instant.now(),
+            report = this.failure
+          )
+
+        val result =
+          ErrorReports.sendReportsDefault(
+            context = view.context,
+            address = "",
+            subject = "[LFA Updater] error report",
+            body = ""
+          )
+
+        when (result) {
+          ErrorReports.Result.NoFiles,
+          ErrorReports.Result.Sent -> {
+            AlertDialog.Builder(this.activity!!)
+              .setTitle(R.string.failure_wrote_ok_title)
+              .setMessage(view.context.getString(R.string.failure_wrote_ok, file.toString()))
+              .show()
+          }
+          is ErrorReports.Result.RaisedException ->
+            throw result.exception
+        }
       } catch (e: Exception) {
         AlertDialog.Builder(this.activity!!)
           .setTitle(R.string.failure_wrote_failed_title)

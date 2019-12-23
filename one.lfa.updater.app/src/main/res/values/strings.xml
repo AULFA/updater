@@ -25,7 +25,7 @@
   <string name="install_failure_title">Install Failed</string>
   <string name="install_failure_repository">Repository</string>
   <string name="install_failure_package">Package</string>
-  <string name="install_failure_save_report">Save Report</string>
+  <string name="install_failure_send_report">Send Report</string>
   <string name="install_failure_package_version">Package Version</string>
   <string name="install_failure_package_uri">Package URI</string>
   <string name="install_opening_connection_to">Attempted connection to %1$s</string>
@@ -114,11 +114,11 @@ Repository: %1$s
   <string name="repositories_empty">No repositories available.\n
 \n
 Add repositories using the action bar menu!</string>
-  <string name="failure_wrote_ok">Wrote report to file: %1$s</string>
+  <string name="failure_wrote_ok">Sent error report. Report saved to: %1$s</string>
   <string name="failure_wrote_ok_title">Success</string>
   <string name="ok">OK</string>
   <string name="failure_wrote_failed_title">Failed</string>
-  <string name="failure_wrote_failed">Failed to save report: %1$s (%2$s)</string>
+  <string name="failure_wrote_failed">Failed to save or send report: %1$s (%2$s)</string>
   <string name="install_downloading">Downloading (%1$.2fM / %2$.2fM:  %3$.2fM/s)</string>
   <string name="install_downloading_indefinite">Downloading (%1$.2fM: %3.2fM/s)</string>
   <string name="install_apk_cancelled">APK installation was cancelled</string>
