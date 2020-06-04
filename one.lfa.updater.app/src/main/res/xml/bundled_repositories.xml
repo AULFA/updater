@@ -2,13 +2,13 @@
 
 <BundledRepositories>
   <BundledRepository
+    source="http://router.asus.com:8080/apk/releases.xml"
+    updated="2020-01-30T09:44:27"
+    title="LFA Hotspot Mirror"
+    uuid="f2e20610-63c1-46ce-95aa-606a7c9e2391" />
+  <BundledRepository
     source="https://distribution.lfa.one/repository/testing/all/releases.xml"
     updated="2019-12-19T12:50:20"
     title="LFA Testing (All)"
     uuid="96ed018a-1531-4a97-bfdb-acccc54ff4f3" />
-  <BundledRepository
-    source="http://192.168.1.1:8080/apk/releases.xml"
-    updated="2020-01-30T09:44:27"
-    title="LFA Hotspot Mirror"
-    uuid="f2e20610-63c1-46ce-95aa-606a7c9e2391" />
 </BundledRepositories>
