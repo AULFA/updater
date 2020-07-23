@@ -17,7 +17,7 @@ info()
 #------------------------------------------------------------------------
 # Publish APKs
 
-scp -B -P 1022 -v -v ./one.lfa.updater.app/build/outputs/apk/release/*.apk travis-ci@builds.lfa.one:/repository/testing/all/ || exit 1
+scp -B -P 1022 -v ./one.lfa.updater.app/build/outputs/apk/release/*.apk travis-ci@builds.lfa.one:/repository/testing/all/ || exit 1
 
 #------------------------------------------------------------------------
 # Determine version and whether or not this is a snapshot.
