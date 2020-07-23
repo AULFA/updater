@@ -68,15 +68,15 @@ git clone \
 #------------------------------------------------------------------------
 # Configure SSH
 
-mkdir -p "${HOME}/.ssh" || exit 1
-echo "${LFA_BUILDS_SSH_KEY}" | base64 -d > "${HOME}/.ssh/id_ed25519" || exit 1
-chmod 700 "${HOME}/.ssh" || exit 1
-chmod 600 "${HOME}/.ssh/id_ed25519" || exit 1
+mkdir -p "${HOME}/.ssh" || fatal "could not create .ssh"
+echo "${LFA_BUILDS_SSH_KEY}" > "${HOME}/.ssh/id_ed25519" || fatal "could not write ssh key"
+chmod 700 "${HOME}/.ssh" || fatal "could not set ssh permissions"
+chmod 600 "${HOME}/.ssh/id_ed25519" || fatal "could not set ssh permissions"
 
 (cat <<EOF
 [builds.lfa.one]:1022 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH/vroEIxH46lW/xg+CmCDwO7FHN24oP+ad4T/OtB/D2
 EOF
-) >> "$HOME/.ssh/known_hosts" || exit 1
+) >> "$HOME/.ssh/known_hosts" || fatal "could not edit known hosts"
 
 #------------------------------------------------------------------------
 # Configure Nexus and keystore
