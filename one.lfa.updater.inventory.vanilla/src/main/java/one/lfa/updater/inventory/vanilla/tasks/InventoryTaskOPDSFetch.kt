@@ -147,19 +147,20 @@ object InventoryTaskOPDSFetch {
       val httpConfiguration =
         execution.services.requireService(InventoryHTTPConfigurationType::class.java)
 
+      val hash =
+              Hash(operation.hash)
+
       val request =
         InventoryTaskFileDownloadRequest(
           progressValueMajor,
           uri = operation.uri,
           retries = httpConfiguration.retryCount,
-          outputFile = operation.outputFile
+          outputFile = operation.outputFile,
+          expectedHash = hash
         )
 
       val taskDownload =
         InventoryTaskFileDownload.create(request)
-
-      val hash =
-        Hash(operation.hash)
 
       val taskVerifyFirst =
         InventoryTaskFileVerify.create(
@@ -169,24 +170,16 @@ object InventoryTaskOPDSFetch {
           deleteOnFailure = false
         )
 
-      val taskVerify =
-        InventoryTaskFileVerify.createFailing(
-          progressMajor = progressValueMajor,
-          file = operation.outputFile,
-          hash = hash,
-          deleteOnFailure = true
-        )
-
       taskVerifyFirst.flatMap { verification ->
-        downloadIfRequiredTask(verification, taskDownload, taskVerify)
+        downloadIfRequiredTask(verification, taskDownload)
+
       }.evaluate(execution)
     }
   }
 
   private fun downloadIfRequiredTask(
     verification: InventoryTaskFileVerify.Verification,
-    taskDownload: InventoryTask<File>,
-    taskVerify: InventoryTask<InventoryTaskFileVerify.Verification>
+    taskDownload: InventoryTask<File>
   ): InventoryTask<Unit> {
     this.logger.debug("checking if download is required...")
     return when (verification) {
@@ -198,7 +191,7 @@ object InventoryTaskOPDSFetch {
       }
       is FileHashDidNotMatch -> {
         this.logger.debug("download is required")
-        taskDownload.flatMap { taskVerify }.map { }
+        taskDownload.map { }
       }
     }
   }
