@@ -19,7 +19,8 @@ object InventoryTaskAPKFetchInstall {
         InventoryTaskFileDownloadRequest(
           uri = request.downloadURI,
           retries = request.downloadRetries,
-          outputFile = request.apkFile))
+          outputFile = request.apkFile,
+          expectedHash = request.hash))
         .flatMap {
           InventoryTaskFileVerify.createFailing(
             file = request.apkFile,

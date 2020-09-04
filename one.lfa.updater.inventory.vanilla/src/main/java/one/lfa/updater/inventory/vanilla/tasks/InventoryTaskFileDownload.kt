@@ -11,13 +11,16 @@ import one.lfa.updater.inventory.api.InventoryProgressValue.InventoryProgressVal
 import one.lfa.updater.inventory.api.InventoryProgressValue.InventoryProgressValueIndefinite
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
+import one.lfa.updater.inventory.vanilla.Hex
 import one.lfa.updater.inventory.vanilla.UnitsPerSecond
+import one.lfa.updater.repository.api.Hash
 import org.joda.time.Duration
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
+import java.security.MessageDigest
 
 /**
  * A task that downloads a file over HTTP, retrying on failure.
@@ -314,7 +317,8 @@ object InventoryTaskFileDownload {
             expectedSize = expectedSize,
             outputFile = request.outputFile,
             inputStream = httpInputStream,
-            outputStream = outputStream
+            outputStream = outputStream,
+            expectedHash = request.expectedHash
           )
         }
       }
@@ -335,7 +339,8 @@ object InventoryTaskFileDownload {
     expectedSize: Long?,
     outputFile: File,
     inputStream: HTTPInputStream,
-    outputStream: FileOutputStream
+    outputStream: FileOutputStream,
+    expectedHash: Hash
   ): InventoryTask<File> =
     InventoryTask { execution ->
       this.transfer(
@@ -345,7 +350,8 @@ object InventoryTaskFileDownload {
         expectedSize = expectedSize,
         outputFile = outputFile,
         inputStream = inputStream,
-        outputStream = outputStream
+        outputStream = outputStream,
+        expectedHash = expectedHash
       )
     }
 
@@ -356,7 +362,8 @@ object InventoryTaskFileDownload {
     expectedSize: Long?,
     outputFile: File,
     inputStream: HTTPInputStream,
-    outputStream: FileOutputStream
+    outputStream: FileOutputStream,
+    expectedHash: Hash
   ): InventoryTaskResult<File> {
 
     this.logger.debug(
@@ -389,6 +396,7 @@ object InventoryTaskFileDownload {
       val counter = UnitsPerSecond(clock)
       var current = currentlyHave
 
+      val digest = MessageDigest.getInstance("SHA-256")
       val buffer = ByteArray(4096)
       while (true) {
         if (execution.isCancelRequested) {
@@ -400,6 +408,7 @@ object InventoryTaskFileDownload {
           break
         }
 
+        digest.update(buffer, 0, r)
         outputStream.write(buffer, 0, r)
         current += r
 
@@ -423,8 +432,16 @@ object InventoryTaskFileDownload {
         }
       }
 
-      step.resolution = strings.downloadingHTTPSucceeded
-      InventoryTaskResult.succeeded(outputFile, step)
+      val result = digest.digest()
+      val resultText = Hex.bytesToHex(result).toLowerCase()
+      this.logger.debug("verification: expected {} received {}", expectedHash.text, resultText)
+
+      if (expectedHash.text == resultText) {
+        step.resolution = strings.downloadingHTTPSucceeded
+        InventoryTaskResult.succeeded(outputFile, step)
+      } else {
+        throw java.lang.Exception("Hash doesn't match, download failed.");
+      }
     } catch (e: java.lang.Exception) {
       this.logger.error("transfer error: ", e)
       step.resolution = strings.downloadingHTTPConnectionFailed(e)
