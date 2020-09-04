@@ -18,6 +18,7 @@ import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskExecutionType
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileDownload
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileDownloadRequest
 import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskResult
+import one.lfa.updater.repository.api.Hash
 import one.lfa.updater.services.api.ServiceDirectory
 import org.junit.Assert
 import org.junit.Before
@@ -40,6 +41,7 @@ class InventoryTaskFileDownloadTest {
   private lateinit var progress: MutableList<InventoryProgress>
   private lateinit var serviceDirectory: ServiceDirectoryType
   private lateinit var tempDir: File
+  private lateinit var fileHash: Hash
 
   @Before
   fun testSetup() {
@@ -88,6 +90,8 @@ class InventoryTaskFileDownloadTest {
         override val onProgress: (InventoryProgress) -> Unit
           get() = { progress -> this@InventoryTaskFileDownloadTest.progress.add(progress) }
       }
+
+    this.fileHash = Hash("2d8bd7d9bb5f85ba643f0110d50cb506a1fe439e769a22503193ea6046bb87f7")
   }
 
   /**
@@ -125,7 +129,8 @@ class InventoryTaskFileDownloadTest {
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
         retries = 1,
-        outputFile = outputFile)
+        outputFile = outputFile,
+        expectedHash = fileHash)
 
     val result =
       InventoryTaskFileDownload.create(request)
@@ -230,7 +235,8 @@ class InventoryTaskFileDownloadTest {
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
         retries = 3,
-        outputFile = outputFile)
+        outputFile = outputFile,
+        expectedHash = fileHash)
 
     val result =
       InventoryTaskFileDownload.create(request)
@@ -353,7 +359,8 @@ class InventoryTaskFileDownloadTest {
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
         retries = 3,
-        outputFile = outputFile)
+        outputFile = outputFile,
+        expectedHash = fileHash)
 
     val result =
       InventoryTaskFileDownload.create(request)
@@ -450,7 +457,8 @@ class InventoryTaskFileDownloadTest {
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
         retries = 3,
-        outputFile = outputFile)
+        outputFile = outputFile,
+        expectedHash = fileHash)
 
     val result =
       InventoryTaskFileDownload.create(request)
@@ -526,7 +534,8 @@ class InventoryTaskFileDownloadTest {
         progressMajor = null,
         uri = URI.create("http://www.example.com/0.apk"),
         retries = 1,
-        outputFile = outputFile)
+        outputFile = outputFile,
+        expectedHash = fileHash)
 
     this.cancelled.set(true)
 
