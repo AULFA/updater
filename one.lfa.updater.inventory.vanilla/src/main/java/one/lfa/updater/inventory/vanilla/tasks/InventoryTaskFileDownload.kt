@@ -16,6 +16,7 @@ import one.lfa.updater.inventory.vanilla.UnitsPerSecond
 import one.lfa.updater.repository.api.Hash
 import org.joda.time.Duration
 import org.slf4j.LoggerFactory
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -29,6 +30,9 @@ import java.security.MessageDigest
 object InventoryTaskFileDownload {
 
   private val logger = LoggerFactory.getLogger(InventoryTaskFileDownload.javaClass)
+
+  private const val readBufferSize = 65536
+  private const val writeBufferSize = 65536
 
   /**
    * Create a task that will, when evaluated, download a file over HTTP.
@@ -390,66 +394,67 @@ object InventoryTaskFileDownload {
         description = strings.downloadingHTTPWritingFile,
         resolution = "",
         exception = null,
-        failed = false)
+        failed = false
+      )
 
-    return try {
-      val counter = UnitsPerSecond(clock)
-      var current = currentlyHave
-
-      val digest = MessageDigest.getInstance("SHA-256")
-      val buffer = ByteArray(4096)
-      while (true) {
-        if (execution.isCancelRequested) {
-          return InventoryTaskResult.cancelled(step)
-        }
-
-        val r = inputStream.inputStream.read(buffer)
-        if (r == -1) {
-          break
-        }
-
-        digest.update(buffer, 0, r)
-        outputStream.write(buffer, 0, r)
-        current += r
-
-        if (counter.update(r.toLong())) {
-          val minorProgress = if (expectedSize != null) {
-            InventoryProgressValueDefinite(
-              current = current,
-              perSecond = counter.now,
-              maximum = expectedTotal)
-          } else {
-            InventoryProgressValueIndefinite(
-              current = current,
-              perSecond = counter.now)
+    return BufferedOutputStream(outputStream, writeBufferSize).use { output ->
+      try {
+        val counter = UnitsPerSecond(clock)
+        var current = currentlyHave
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(this.readBufferSize)
+        while (true) {
+          if (execution.isCancelRequested) {
+            return InventoryTaskResult.cancelled(step)
           }
 
-          execution.onProgress(
-            InventoryProgress(
-              major = progress,
-              minor = minorProgress,
-              status = strings.downloadingHTTPProgress(progress, minorProgress)))
+          val r = inputStream.inputStream.read(buffer)
+          if (r == -1) {
+            break
+          }
+
+          digest.update(buffer, 0, r)
+          output.write(buffer, 0, r)
+          current += r
+
+          if (counter.update(r.toLong())) {
+            val minorProgress = if (expectedSize != null) {
+              InventoryProgressValueDefinite(
+                current = current,
+                perSecond = counter.now,
+                maximum = expectedTotal)
+            } else {
+              InventoryProgressValueIndefinite(
+                current = current,
+                perSecond = counter.now)
+            }
+
+            execution.onProgress(
+              InventoryProgress(
+                major = progress,
+                minor = minorProgress,
+                status = strings.downloadingHTTPProgress(progress, minorProgress)))
+          }
         }
-      }
 
-      val result = digest.digest()
-      val resultText = Hex.bytesToHex(result).toLowerCase()
-      this.logger.debug("verification: expected {} received {}", expectedHash.text, resultText)
+        val result = digest.digest()
+        val resultText = Hex.bytesToHex(result).toLowerCase()
+        this.logger.debug("verification: expected {} received {}", expectedHash.text, resultText)
 
-      if (expectedHash.text == resultText) {
-        step.resolution = strings.downloadingHTTPSucceeded
-        InventoryTaskResult.succeeded(outputFile, step)
-      } else {
-        throw java.lang.Exception("Hash doesn't match, download failed.");
+        if (expectedHash.text == resultText) {
+          step.resolution = strings.downloadingHTTPSucceeded
+          InventoryTaskResult.succeeded(outputFile, step)
+        } else {
+          throw java.lang.Exception("Hash doesn't match, download failed.");
+        }
+      } catch (e: java.lang.Exception) {
+        this.logger.error("transfer error: ", e)
+        step.resolution = strings.downloadingHTTPConnectionFailed(e)
+        step.exception = e
+        InventoryTaskResult.failed(step)
+      } finally {
+        output.flush()
       }
-    } catch (e: java.lang.Exception) {
-      this.logger.error("transfer error: ", e)
-      step.resolution = strings.downloadingHTTPConnectionFailed(e)
-      step.exception = e
-      InventoryTaskResult.failed(step)
-    } finally {
-      outputStream.flush()
-      outputStream.close()
     }
   }
 }

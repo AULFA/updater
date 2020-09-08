@@ -7,7 +7,6 @@ import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**

@@ -10,14 +10,13 @@ import one.lfa.updater.inventory.vanilla.InventoryOPDSOperation.DeleteLocalFile
 import one.lfa.updater.inventory.vanilla.InventoryOPDSOperation.DownloadFile
 import one.lfa.updater.inventory.vanilla.InventoryOPDSOperation.SerializeManifest
 import one.lfa.updater.inventory.vanilla.InventoryOPDSPlanning
-import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.*
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.FileHashDidNotMatch
+import one.lfa.updater.inventory.vanilla.tasks.InventoryTaskFileVerify.Verification.FileHashMatched
 import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.opds.database.api.OPDSDatabaseType
-import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
 import one.lfa.updater.repository.api.Hash
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URI
 
 /**
@@ -56,7 +55,7 @@ object InventoryTaskOPDSFetch {
       )
 
     val operationTasks = mutableListOf<InventoryTask<Unit>>()
-    for (index in 0 until(plan.size)) {
+    for (index in 0 until (plan.size)) {
       val operation = plan[index]
 
       val progressValueMajor =
@@ -148,7 +147,7 @@ object InventoryTaskOPDSFetch {
         execution.services.requireService(InventoryHTTPConfigurationType::class.java)
 
       val hash =
-              Hash(operation.hash)
+        Hash(operation.hash)
 
       val request =
         InventoryTaskFileDownloadRequest(
@@ -172,7 +171,6 @@ object InventoryTaskOPDSFetch {
 
       taskVerifyFirst.flatMap { verification ->
         downloadIfRequiredTask(verification, taskDownload)
-
       }.evaluate(execution)
     }
   }

@@ -20,13 +20,9 @@ object InventoryTaskAPKFetchInstall {
           uri = request.downloadURI,
           retries = request.downloadRetries,
           outputFile = request.apkFile,
-          expectedHash = request.hash))
-        .flatMap {
-          InventoryTaskFileVerify.createFailing(
-            file = request.apkFile,
-            hash = request.hash,
-            deleteOnFailure = true)
-        }
+          expectedHash = request.hash
+        )
+      )
 
     val downloadTaskRetrying =
       InventoryTaskRetry.retrying(

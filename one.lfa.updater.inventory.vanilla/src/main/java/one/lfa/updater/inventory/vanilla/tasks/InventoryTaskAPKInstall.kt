@@ -1,6 +1,5 @@
 package one.lfa.updater.inventory.vanilla.tasks
 
-import one.lfa.updater.apkinstaller.api.APKInstallTaskType
 import one.lfa.updater.apkinstaller.api.APKInstallerStatus
 import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.inventory.api.InventoryProgress
