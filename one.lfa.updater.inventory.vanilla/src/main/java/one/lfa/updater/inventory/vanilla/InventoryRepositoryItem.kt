@@ -37,6 +37,7 @@ import one.lfa.updater.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
+import javax.naming.OperationNotSupportedException
 
 internal class InventoryRepositoryItem(
   private val services: ServiceDirectoryType,
@@ -221,7 +222,7 @@ internal class InventoryRepositoryItem(
               resolution = this.stringResources.installAlreadyInstalling))))
         }
         is Operating.Uninstalling -> {
-          TODO()
+          throw OperationNotSupportedException("Unimplemented code!")
         }
       }
     }

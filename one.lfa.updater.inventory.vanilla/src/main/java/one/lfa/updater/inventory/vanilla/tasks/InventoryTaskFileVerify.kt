@@ -72,7 +72,7 @@ object InventoryTaskFileVerify {
     deleteOnFailure: Boolean = false
   ): InventoryTask<Verification> {
     return InventoryTask { execution ->
-      verify(execution, progressMajor, file, hash, deleteOnFailure)
+      this.verify(execution, progressMajor, file, hash, deleteOnFailure)
     }
   }
 
@@ -88,13 +88,13 @@ object InventoryTaskFileVerify {
     hash: Hash,
     deleteOnFailure: Boolean = false
   ): InventoryTask<Verification> {
-    return create(progressMajor, file, hash, deleteOnFailure)
+    return this.create(progressMajor, file, hash, deleteOnFailure)
       .flatMap(this::verifyFailTask)
   }
 
   private fun verifyFailTask(verification: Verification): InventoryTask<Verification> {
     return InventoryTask { execution ->
-      verifyFail(execution, verification)
+      this.verifyFail(execution, verification)
     }
   }
 
@@ -132,7 +132,7 @@ object InventoryTaskFileVerify {
     hash: Hash,
     deleteOnFailure: Boolean = false
   ): InventoryTaskResult<Verification> {
-    logger.debug("verify: {} {} (delete: {})", file, hash.text, deleteOnFailure)
+    this.logger.debug("verify: {} {} (delete: {})", file, hash.text, deleteOnFailure)
 
     val strings =
       execution.services.requireService(InventoryStringResourcesType::class.java)
@@ -153,7 +153,7 @@ object InventoryTaskFileVerify {
     return try {
       FileInputStream(file).use { stream ->
         val digest = MessageDigest.getInstance("SHA-256")
-        val buffer = ByteArray(4096)
+        val buffer = ByteArray(65536)
         while (true) {
           val r = stream.read(buffer)
           if (r == -1) {
@@ -180,7 +180,7 @@ object InventoryTaskFileVerify {
 
         val result = digest.digest()
         val resultText = Hex.bytesToHex(result).toLowerCase()
-        logger.debug("verification: expected {} received {}", hash.text, resultText)
+        this.logger.debug("verification: expected {} received {}", hash.text, resultText)
 
         if (resultText == hash.text) {
           step.resolution = strings.verificationSucceeded

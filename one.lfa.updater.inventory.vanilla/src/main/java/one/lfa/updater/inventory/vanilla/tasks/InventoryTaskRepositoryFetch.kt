@@ -1,8 +1,5 @@
 package one.lfa.updater.inventory.vanilla.tasks
 
-import one.irradia.http.api.HTTPClientType
-import one.irradia.http.api.HTTPResult
-import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
 import one.lfa.updater.repository.api.Repository
@@ -21,60 +18,15 @@ import java.util.UUID
 
 object InventoryTaskRepositoryFetch {
 
-  private val logger = LoggerFactory.getLogger(InventoryTaskRepositoryFetch.javaClass)
-
-  private fun fetchHTTPTask(uri: URI): InventoryTask<InputStream> {
-    return InventoryTask { execution ->
-      logger.debug("fetch: {}", uri)
-
-      val strings =
-        execution.services.requireService(InventoryStringResourcesType::class.java)
-      val httpClient =
-        execution.services.requireService(HTTPClientType::class.java)
-      val httpAuthentication =
-        execution.services.requireService(InventoryHTTPAuthenticationType::class.java)
-
-      val step = InventoryTaskStep(
-        description = strings.repositoryAddFetching(uri),
-        resolution = "",
-        exception = null,
-        failed = false)
-
-      val timeThen = Instant.now()
-      when (val result = httpClient.get(uri, httpAuthentication::authenticationFor, 0L)) {
-        is HTTPResult.HTTPOK -> {
-          val timeNow = Instant.now()
-          step.resolution = strings.repositoryAddFetched(Duration(timeThen, timeNow))
-          step.failed = false
-          InventoryTaskResult.succeeded(result.result, step)
-        }
-
-        is HTTPResult.HTTPFailed.HTTPError -> {
-          step.failed = true
-          step.resolution =
-            strings.repositoryAddServerError(
-              statusCode = result.statusCode,
-              message = result.message,
-              contentType = result.contentTypeOrDefault,
-              contentLength = result.contentLength)
-          InventoryTaskResult.failed<InputStream>(step)
-        }
-
-        is HTTPResult.HTTPFailed.HTTPFailure -> {
-          step.failed = true
-          step.resolution = strings.repositoryAddConnectionFailed(result.exception)
-          InventoryTaskResult.failed(step)
-        }
-      }
-    }
-  }
+  private val logger =
+    LoggerFactory.getLogger(InventoryTaskRepositoryFetch.javaClass)
 
   private fun parseTask(
     uri: URI,
     inputStream: InputStream
   ): InventoryTask<Repository> {
     return InventoryTask { execution ->
-      logger.debug("parsing repository {}", uri)
+      this.logger.debug("parsing repository {}", uri)
 
       val strings =
         execution.services.requireService(InventoryStringResourcesType::class.java)
@@ -100,7 +52,7 @@ object InventoryTaskRepositoryFetch {
           InventoryTaskResult.succeeded(repository, step)
         }
       } catch (e: Exception) {
-        logger.error("parse: {} failed: ", uri, e)
+        this.logger.error("parse: {} failed: ", uri, e)
         step.failed = true
         step.exception = e
         step.resolution = buildString {
@@ -134,7 +86,7 @@ object InventoryTaskRepositoryFetch {
     requiredUUID: UUID?
   ): InventoryTask<Repository> {
     return InventoryTask { execution ->
-      logger.debug("checking repository has required uuid: {}", requiredUUID)
+      this.logger.debug("checking repository has required uuid: {}", requiredUUID)
 
       val strings =
         execution.services.requireService(InventoryStringResourcesType::class.java)
@@ -178,9 +130,8 @@ object InventoryTaskRepositoryFetch {
     uri: URI,
     requiredUUID: UUID?
   ): InventoryTask<Repository> {
-    return fetchHTTPTask(uri)
-      .flatMap { stream -> parseTask(uri, stream) }
-      .flatMap { repository -> checkRequiredUUIDTask(repository, requiredUUID) }
+    return InventoryTaskFetchOne.fetch(uri)
+      .flatMap { stream -> this.parseTask(uri, stream.inputStream) }
+      .flatMap { repository -> this.checkRequiredUUIDTask(repository, requiredUUID) }
   }
-
 }

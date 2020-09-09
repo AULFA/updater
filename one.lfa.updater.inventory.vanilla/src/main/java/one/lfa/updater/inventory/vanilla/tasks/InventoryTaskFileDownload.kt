@@ -3,6 +3,7 @@ package one.lfa.updater.inventory.vanilla.tasks
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.api.HTTPResult
 import one.lfa.updater.inventory.api.InventoryClockType
+import one.lfa.updater.inventory.api.InventoryExternalStorageServiceType
 import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
 import one.lfa.updater.inventory.api.InventoryHTTPConfigurationType
 import one.lfa.updater.inventory.api.InventoryProgress
@@ -18,8 +19,9 @@ import org.joda.time.Duration
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.InputStream
+import java.io.OutputStream
 import java.net.URI
 import java.security.MessageDigest
 
@@ -67,15 +69,11 @@ object InventoryTaskFileDownload {
       })
   }
 
-  private data class HTTPInputStream(
-    val contentLength: Long?,
-    val inputStream: InputStream)
-
   private fun getTask(
     uri: URI,
     attempt: InventoryTaskRetryAttempt,
     offset: Long
-  ): InventoryTask<HTTPInputStream> {
+  ): InventoryTask<InventoryPossiblySizedInputStream> {
     return InventoryTask { execution -> this.get(uri, offset, attempt, execution) }
   }
 
@@ -167,7 +165,7 @@ object InventoryTaskFileDownload {
     offset: Long,
     attempt: InventoryTaskRetryAttempt,
     execution: InventoryTaskExecutionType
-  ): InventoryTaskResult<HTTPInputStream> {
+  ): InventoryTaskResult<InventoryPossiblySizedInputStream> {
     this.logger.debug(
       "performing GET request for {} offset {} (attempt {}/{})",
       uri,
@@ -213,7 +211,7 @@ object InventoryTaskFileDownload {
         val timeNow = clock.now()
         step.resolution = strings.downloadingHTTPOK(Duration(timeThen, timeNow))
         step.failed = false
-        InventoryTaskResult.succeeded(HTTPInputStream(
+        InventoryTaskResult.succeeded(InventoryPossiblySizedInputStream(
           contentLength = result.contentLength,
           inputStream = result.result
         ), step)
@@ -252,19 +250,58 @@ object InventoryTaskFileDownload {
         this.pauses(request.progressMajor, retry, execution)
       },
       one = { attempt ->
-        this.downloadOneAttemptTask(request, attempt)
+        this.fetchOneAttemptTask(request, attempt)
       })
   }
 
-  private fun openFileTask(
-    outputFile: File
-  ): InventoryTask<FileOutputStream> {
+  private fun openInputFileTask(
+    inputFile: File
+  ): InventoryTask<InventoryPossiblySizedInputStream> {
     return InventoryTask { execution ->
-      this.openFile(outputFile, execution)
+      this.openInputFile(inputFile, execution)
     }
   }
 
-  private fun openFile(
+  private fun openInputFile(
+    inputFile: File,
+    execution: InventoryTaskExecutionType
+  ): InventoryTaskResult<InventoryPossiblySizedInputStream> {
+    this.logger.debug("opening {}", inputFile)
+
+    val strings =
+      execution.services.requireService(InventoryStringResourcesType::class.java)
+
+    val step =
+      InventoryTaskStep(
+        description = strings.fileOpening,
+        resolution = "",
+        exception = null,
+        failed = false)
+
+    return try {
+      InventoryTaskResult.succeeded(
+        result = InventoryPossiblySizedInputStream(
+          contentLength = null,
+          inputStream = FileInputStream(inputFile)),
+        step = step
+      )
+    } catch (e: Exception) {
+      step.resolution = strings.fileOpeningFailed(e)
+      step.exception = e
+      step.failed = true
+      InventoryTaskResult.failed(step)
+    }
+  }
+
+  private fun openOutputFileTask(
+    outputFile: File
+  ): InventoryTask<FileOutputStream> {
+    return InventoryTask { execution ->
+      this.openOutputFile(outputFile, execution)
+    }
+  }
+
+  private fun openOutputFile(
     outputFile: File,
     execution: InventoryTaskExecutionType
   ): InventoryTaskResult<FileOutputStream> {
@@ -287,6 +324,64 @@ object InventoryTaskFileDownload {
       step.exception = e
       step.failed = true
       InventoryTaskResult.failed(step)
+    }
+  }
+
+  private fun fetchOneAttemptTask(
+    request: InventoryTaskFileDownloadRequest,
+    attempt: InventoryTaskRetryAttempt
+  ): InventoryTask<File> {
+    return when (request.uri.scheme) {
+      "file" ->
+        this.copyOneAttemptTask(request, attempt)
+      InventoryExternalStorageServiceType.uriScheme ->
+        this.externalCopyOneAttemptTask(request, attempt)
+      else ->
+        this.downloadOneAttemptTask(request, attempt)
+    }
+  }
+
+  private fun externalCopyOneAttemptTask(
+    request: InventoryTaskFileDownloadRequest,
+    attempt: InventoryTaskRetryAttempt
+  ): InventoryTask<File> {
+    return this.openOutputFileTask(request.outputFile).flatMap { outputStream ->
+      val currentSize = request.outputFile.length()
+      this.logger.debug("file:      {}", request.outputFile)
+      this.logger.debug("file size: {}", currentSize)
+      InventoryTaskExternalStorage.resolveExternalInputFileTask(request.uri).flatMap { inputStream ->
+        this.transferTask(
+          progress = request.progressMajor,
+          attempt = attempt,
+          expectedSize = null,
+          outputFile = request.outputFile,
+          inputStream = inputStream,
+          outputStream = outputStream,
+          expectedHash = request.expectedHash
+        )
+      }
+    }
+  }
+
+  private fun copyOneAttemptTask(
+    request: InventoryTaskFileDownloadRequest,
+    attempt: InventoryTaskRetryAttempt
+  ): InventoryTask<File> {
+    return this.openOutputFileTask(request.outputFile).flatMap { outputStream ->
+      val currentSize = request.outputFile.length()
+      this.logger.debug("file:      {}", request.outputFile)
+      this.logger.debug("file size: {}", currentSize)
+      this.openInputFileTask(File(request.uri)).flatMap { inputStream ->
+        this.transferTask(
+          progress = request.progressMajor,
+          attempt = attempt,
+          expectedSize = null,
+          outputFile = request.outputFile,
+          inputStream = inputStream,
+          outputStream = outputStream,
+          expectedHash = request.expectedHash
+        )
+      }
     }
   }
 
@@ -313,7 +408,7 @@ object InventoryTaskFileDownload {
       }
 
       currentSize = request.outputFile.length()
-      this.openFileTask(request.outputFile).flatMap { outputStream ->
+      this.openOutputFileTask(request.outputFile).flatMap { outputStream ->
         this.getTask(request.uri, attempt, currentSize).flatMap { httpInputStream ->
           this.transferTask(
             progress = request.progressMajor,
@@ -342,8 +437,8 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt,
     expectedSize: Long?,
     outputFile: File,
-    inputStream: HTTPInputStream,
-    outputStream: FileOutputStream,
+    inputStream: InventoryPossiblySizedInputStream,
+    outputStream: OutputStream,
     expectedHash: Hash
   ): InventoryTask<File> =
     InventoryTask { execution ->
@@ -365,8 +460,8 @@ object InventoryTaskFileDownload {
     attempt: InventoryTaskRetryAttempt,
     expectedSize: Long?,
     outputFile: File,
-    inputStream: HTTPInputStream,
-    outputStream: FileOutputStream,
+    inputStream: InventoryPossiblySizedInputStream,
+    outputStream: OutputStream,
     expectedHash: Hash
   ): InventoryTaskResult<File> {
 
@@ -397,7 +492,7 @@ object InventoryTaskFileDownload {
         failed = false
       )
 
-    return BufferedOutputStream(outputStream, writeBufferSize).use { output ->
+    return BufferedOutputStream(outputStream, this.writeBufferSize).use { output ->
       try {
         val counter = UnitsPerSecond(clock)
         var current = currentlyHave

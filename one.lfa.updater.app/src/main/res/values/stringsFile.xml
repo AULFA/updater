@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-
-  <string name="fileDeleting">Deleting the local file...</string>
+  <string name="fileDeleting">Deleting the local file…</string>
   <string name="fileDoesNotExist">The local file does not exist!</string>
   <string name="fileCouldNotDelete">Could not delete the local file.</string>
+  <string name="fileFinding">Finding a local file…</string>
+  <string name="fileOpening">Opening a local file…</string>
+  <string name="fileOpeningFailed">Opening a local file failed! ($1%s)</string>
 </resources>

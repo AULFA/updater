@@ -234,6 +234,13 @@ class InventoryStringResources : InventoryStringResourcesType, OPDSDatabaseStrin
 
   override val repositoryRemoving: String =
     "repositoryRemoving"
+  override val fileFinding: String
+    get() = "fileFinding"
+  override val fileOpening: String
+    get() = "fileOpening"
+  override fun fileOpeningFailed(e: Exception): String {
+    return "fileOpeningFailed"
+  }
 
   override val repositoryAddInProgress: String =
     "repositoryAddInProgress"

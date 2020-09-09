@@ -193,7 +193,7 @@ class APKInstallerDevice private constructor(
         // https://code.google.com/p/android/issues/detail?id=205827
         file.toUri()
       } else {
-        this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI")
+        this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI ({})", file)
         FileProvider.getUriForFile(
           activity,
           "au.org.libraryforall.updater.app",

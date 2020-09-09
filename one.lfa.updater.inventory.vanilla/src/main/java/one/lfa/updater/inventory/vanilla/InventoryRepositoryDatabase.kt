@@ -23,8 +23,8 @@ import java.util.UUID
 class InventoryRepositoryDatabase private constructor(
   private val parsers: RepositoryXMLParserProviderType,
   private val serializers: RepositoryXMLSerializerProviderType,
-  private val directory: File)
-  : InventoryRepositoryDatabaseType {
+  private val directory: File
+) : InventoryRepositoryDatabaseType {
 
   private val logger = LoggerFactory.getLogger(InventoryRepositoryDatabase::class.java)
 

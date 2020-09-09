@@ -4,15 +4,24 @@
 
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
   <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
   <application
     android:icon="@mipmap/ic_launcher"
     android:label="@string/main_title"
     android:networkSecurityConfig="@xml/net_security_policy"
     android:name="au.org.libraryforall.updater.app.MainApplication">
+
+    <receiver android:name="au.org.libraryforall.updater.app.MountedFilesystemReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_MOUNTED" />
+        <action android:name="android.intent.action.MEDIA_EJECT" />
+        <action android:name="android.intent.action.MEDIA_REMOVED" />
+        <data android:scheme="file"/>
+      </intent-filter>
+    </receiver>
 
     <provider
       android:name="androidx.core.content.FileProvider"

@@ -76,6 +76,32 @@ abstract class RepositoryXMLv2ParserContract {
   }
 
   @Test
+  fun testSDCard0() {
+    val parsers = this.repositoryXMLParsers()
+    val parser =
+      parsers.createParser(
+        uri = URI.create("urn:example"),
+        inputStream = this.stream("sdCard-0.xml"))
+
+    parser.errors.subscribe(loggingConsumer())
+    val repository = parser.parse()
+
+    Assert.assertEquals("f5ba3b0f-24cd-4a29-b47b-be51d4920801", repository.id.toString())
+    Assert.assertEquals("SD Example", repository.title)
+    Assert.assertEquals(URI.create("lfaUpdaterExternal:/releases.xml"), repository.self)
+    Assert.assertEquals("2020-09-08T13:37:02.608", repository.updated.toString())
+
+    Assert.assertEquals(1, repository.items.size)
+
+    val p0 = repository.items[0]
+    Assert.assertEquals("au.org.libraryforall.launcher.inclusiv", p0.id)
+    Assert.assertEquals(133, p0.versionCode)
+    Assert.assertEquals("0.0.3", p0.versionName)
+    Assert.assertEquals("df81b6ce4f595baa9deeaac4e003330aef98bfbab9c260a5156265b8f85119ab", p0.sha256.text)
+    Assert.assertEquals("lfaUpdaterExternal:/au.org.libraryforall.launcher.inclusiv-0.0.3-133-release.apk", p0.source.toASCIIString())
+  }
+
+  @Test
   fun testInvalidWrongNamespace() {
     val parsers = this.repositoryXMLParsers()
     val parser =
@@ -147,6 +173,19 @@ abstract class RepositoryXMLv2ParserContract {
       parsers.createParser(
         uri = URI.create("urn:example"),
         inputStream = this.stream("bad-repository-3.xml"))
+
+    parser.errors.subscribe(loggingConsumer())
+    this.expectedException.expect(RepositoryParserFailureException::class.java)
+    parser.parse()
+  }
+
+  @Test
+  fun testInvalidBadRepository4() {
+    val parsers = this.repositoryXMLParsers()
+    val parser =
+      parsers.createParser(
+        uri = URI.create("urn:example"),
+        inputStream = this.stream("bad-repository-4.xml"))
 
     parser.errors.subscribe(loggingConsumer())
     this.expectedException.expect(RepositoryParserFailureException::class.java)

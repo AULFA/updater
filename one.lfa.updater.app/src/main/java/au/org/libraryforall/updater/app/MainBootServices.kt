@@ -25,6 +25,7 @@ import one.lfa.updater.installed.vanilla.InstalledApplications
 import one.lfa.updater.inventory.api.InventoryCatalogDirectoryType
 import one.lfa.updater.inventory.api.InventoryClock
 import one.lfa.updater.inventory.api.InventoryClockType
+import one.lfa.updater.inventory.api.InventoryExternalStorageServiceType
 import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
 import one.lfa.updater.inventory.api.InventoryHTTPConfigurationType
 import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
@@ -103,6 +104,10 @@ object MainBootServices {
     directory.addService(
       interfaceType = InventoryHTTPConfigurationType::class.java,
       service = InventoryHTTPConfiguration
+    )
+    directory.addService(
+      interfaceType = InventoryExternalStorageServiceType::class.java,
+      service = InventoryExternalStorageService(context)
     )
 
     val clock = InventoryClock
@@ -249,12 +254,6 @@ object MainBootServices {
   }
 
   private fun apkDirectory(context: Context): File {
-    val dir0 = context.getExternalFilesDir("APKs")?.absoluteFile
-    if (dir0 != null) {
-      this.logger.debug("using external files dir: {}", dir0)
-      return dir0
-    }
-
     val dir1 = File(context.filesDir, "APKs").absoluteFile
     this.logger.debug("using internal files dir: {}", dir1)
     return dir1

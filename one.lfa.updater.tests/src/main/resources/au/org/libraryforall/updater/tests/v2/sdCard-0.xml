@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<r:Repository xmlns:r="urn:one.lfa.updater.repository.xml:2.0" id="f5ba3b0f-24cd-4a29-b47b-be51d4920801"
+  self="lfaUpdaterExternal:/releases.xml" title="SD Example"
+  updated="2020-09-08T13:37:02.608217">
+  <r:AndroidPackage name="LFA Launcher Inclusiv" id="au.org.libraryforall.launcher.inclusiv"
+    sha256="df81b6ce4f595baa9deeaac4e003330aef98bfbab9c260a5156265b8f85119ab"
+    source="au.org.libraryforall.launcher.inclusiv-0.0.3-133-release.apk" versionCode="133"
+    versionName="0.0.3" />
+</r:Repository>

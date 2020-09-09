@@ -58,5 +58,4 @@ object InventoryTaskRepositorySave {
       InventoryTaskResult.failed(step)
     }
   }
-
 }

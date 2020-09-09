@@ -6,4 +6,5 @@ import java.net.URI
 data class InventoryRepositoryAddResult(
   val uri: URI,
   val repository: InventoryRepositoryType?,
-  val steps: List<InventoryTaskStep>): Serializable
+  val steps: List<InventoryTaskStep>
+): Serializable

@@ -23,5 +23,4 @@ object InventoryTaskRepositoryAdd {
     return InventoryTaskRepositoryFetch.create(uri, requiredUUID)
       .flatMap(InventoryTaskRepositorySave::create)
   }
-
 }

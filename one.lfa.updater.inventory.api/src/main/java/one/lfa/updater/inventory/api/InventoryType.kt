@@ -4,6 +4,7 @@ import one.lfa.updater.repository.api.Repository
 import com.google.common.util.concurrent.ListenableFuture
 import io.reactivex.Observable
 import net.jcip.annotations.ThreadSafe
+import java.io.File
 import java.net.URI
 import java.util.UUID
 
@@ -43,8 +44,8 @@ interface InventoryType {
    */
 
   fun inventoryRepositoryPut(
-    repository: Repository)
-    : ListenableFuture<InventoryRepositoryAddResult>
+    repository: Repository
+  ): ListenableFuture<InventoryRepositoryAddResult>
 
   /**
    * Find the repository with the given UUID.

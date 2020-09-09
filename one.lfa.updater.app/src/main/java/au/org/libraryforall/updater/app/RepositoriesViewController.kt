@@ -17,11 +17,16 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import io.reactivex.disposables.Disposable
 import one.lfa.updater.inventory.api.InventoryEvent
+import one.lfa.updater.inventory.api.InventoryFailureReport
 import one.lfa.updater.inventory.api.InventoryHashIndexedDirectoryType
 import one.lfa.updater.inventory.api.InventoryRepositoryType
+import one.lfa.updater.inventory.api.InventoryState
+import one.lfa.updater.inventory.api.InventoryTaskStep
 import one.lfa.updater.inventory.api.InventoryType
 import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.util.TreeMap
 
 class RepositoriesViewController : Controller() {
 
@@ -29,6 +34,7 @@ class RepositoriesViewController : Controller() {
     this.setHasOptionsMenu(true)
   }
 
+  private var acceptedRepositoryError: Boolean = false
   private lateinit var backgroundExecutor: BackgroundExecutor
   private lateinit var inventory: InventoryType
   private val logger = LoggerFactory.getLogger(RepositoriesViewController::class.java)
@@ -118,7 +124,6 @@ class RepositoriesViewController : Controller() {
   }
 
   private fun onDeletedCachedData(deletedFiles: List<InventoryHashIndexedDirectoryType.Deleted>) {
-
     UIThread.execute {
       val deletedSize =
         deletedFiles.fold(0.0, { acc, deleted -> acc + deleted.size })
@@ -185,7 +190,46 @@ class RepositoriesViewController : Controller() {
         this.listRepositories.addAll(currentRepositories)
         this.listAdapter.notifyDataSetChanged()
       }
+
+      when (val state = this.inventory.state) {
+        InventoryState.InventoryIdle,
+        is InventoryState.InventoryAddingRepository -> {
+          this.acceptedRepositoryError = false
+        }
+        is InventoryState.InventoryAddingRepositoryFailed -> {
+          if (!this.acceptedRepositoryError) {
+            this.acceptedRepositoryError = true
+            AlertDialog.Builder(this.activity!!)
+              .setTitle(R.string.repository_add_failed)
+              .setMessage(R.string.repository_add_failed)
+              .setNeutralButton(R.string.package_details) { dialog, which ->
+                this.showErrorDetails(state.uri, state.steps)
+              }.show()
+          }
+        }
+      }
     }
+  }
+
+  private fun showErrorDetails(uri: URI, steps: List<InventoryTaskStep>) {
+    this.router.pushController(
+      RouterTransaction.with(InventoryFailureViewController(this.bundleErrorDetails(uri, steps)))
+        .pushChangeHandler(HorizontalChangeHandler())
+        .popChangeHandler(HorizontalChangeHandler()))
+  }
+
+  private fun bundleErrorDetails(
+    uri: URI,
+    steps: List<InventoryTaskStep>
+  ): InventoryFailureReport {
+
+    val resources = this.applicationContext!!.resources
+    val attributes = TreeMap<String, String>()
+    attributes[resources.getString(R.string.install_failure_repository)] = uri.toString()
+    return InventoryFailureReport(
+      title = resources.getString(R.string.repository_add_failed),
+      attributes = attributes.toSortedMap(),
+      taskSteps = steps)
   }
 
   private fun onSelectedRepository(repository: InventoryRepositoryType) {

@@ -1,8 +1,5 @@
 package one.lfa.updater.inventory.vanilla.tasks
 
-import one.irradia.http.api.HTTPClientType
-import one.irradia.http.api.HTTPResult
-import one.lfa.updater.inventory.api.InventoryHTTPAuthenticationType
 import one.lfa.updater.inventory.api.InventoryStringOPDSResourcesType
 import one.lfa.updater.inventory.api.InventoryStringResourcesType
 import one.lfa.updater.inventory.api.InventoryTaskStep
@@ -24,54 +21,8 @@ object InventoryTaskOPDSManifestFetch {
   private val logger = LoggerFactory.getLogger(InventoryTaskOPDSManifestFetch::class.java)
 
   fun create(uri: URI): InventoryTask<OPDSManifest> {
-    return fetchHTTPTask(uri)
-      .flatMap { stream -> parseTask(uri, stream) }
-  }
-
-  private fun fetchHTTPTask(uri: URI): InventoryTask<InputStream> {
-    return InventoryTask { execution ->
-      this.logger.debug("fetch: {}", uri)
-
-      val strings : InventoryStringOPDSResourcesType =
-        execution.services.requireService(InventoryStringResourcesType::class.java)
-      val httpClient =
-        execution.services.requireService(HTTPClientType::class.java)
-      val httpAuthentication =
-        execution.services.requireService(InventoryHTTPAuthenticationType::class.java)
-
-      val step = InventoryTaskStep(
-        description = strings.opdsManifestFetching(uri),
-        resolution = "",
-        exception = null,
-        failed = false)
-
-      val timeThen = Instant.now()
-      when (val result = httpClient.get(uri, httpAuthentication::authenticationFor, 0L)) {
-        is HTTPResult.HTTPOK -> {
-          val timeNow = Instant.now()
-          step.resolution = strings.opdsManifestFetched(Duration(timeThen, timeNow))
-          step.failed = false
-          InventoryTaskResult.succeeded(result.result, step)
-        }
-
-        is HTTPResult.HTTPFailed.HTTPError -> {
-          step.failed = true
-          step.resolution =
-            strings.opdsManifestFetchServerError(
-              statusCode = result.statusCode,
-              message = result.message,
-              contentType = result.contentTypeOrDefault,
-              contentLength = result.contentLength)
-          InventoryTaskResult.failed<InputStream>(step)
-        }
-
-        is HTTPResult.HTTPFailed.HTTPFailure -> {
-          step.failed = true
-          step.resolution = strings.opdsManifestConnectionFailed(result.exception)
-          InventoryTaskResult.failed(step)
-        }
-      }
-    }
+    return InventoryTaskFetchOne.fetch(uri)
+      .flatMap { stream -> parseTask(uri, stream.inputStream) }
   }
 
   private fun parseTask(
@@ -133,5 +84,4 @@ object InventoryTaskOPDSManifestFetch {
       }
     }
   }
-
 }

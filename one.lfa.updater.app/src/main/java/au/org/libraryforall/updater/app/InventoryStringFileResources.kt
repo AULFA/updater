@@ -7,6 +7,16 @@ class InventoryStringFileResources(
   val resources: Resources
 ) : InventoryStringFileResourcesType {
 
+  override val fileFinding: String
+    get() = this.resources.getString(R.string.fileFinding)
+
+  override val fileOpening: String
+    get() = this.resources.getString(R.string.fileOpening)
+
+  override fun fileOpeningFailed(e: Exception): String {
+    return this.resources.getString(R.string.fileOpeningFailed, e)
+  }
+
   override val fileDeleting: String
     get() = this.resources.getString(R.string.fileDeleting)
 
