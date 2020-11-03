@@ -11,4 +11,9 @@
     updated="2020-06-04T09:40:00"
     title="LFA Testing (All)"
     uuid="96ed018a-1531-4a97-bfdb-acccc54ff4f3" />
+  <BundledRepository
+      source="lfaUpdaterExternal:/releases.xml"
+      updated="2020-09-11T09:40:00"
+      title="LFA SD Card"
+      uuid="d2e20610-63c1-46ce-95aa-606a7c9e2391" />
 </BundledRepositories>
