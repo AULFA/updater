@@ -13,6 +13,7 @@ import one.lfa.updater.opds.xml.api.OPDSXMLSerializerProviderType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializerType
 import one.lfa.updater.opds.xml.api.OPDSXMLSerializers
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -231,7 +232,7 @@ abstract class OPDSDatabaseContract {
     return OPDSManifest(
       baseURI = null,
       rootFile = URI.create("x.txt"),
-      updated = DateTime.now(),
+      updated = DateTime.now(DateTimeZone.UTC),
       searchIndex = null,
       id = UUID.randomUUID(),
       title = "",
