@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import one.lfa.updater.opds.api.OPDSManifest
+import one.lfa.updater.opds.api.OPDSVersionCodes
 import one.lfa.updater.opds.database.api.OPDSDatabaseEntryType
 import one.lfa.updater.opds.database.api.OPDSDatabaseEvent
 import one.lfa.updater.opds.database.api.OPDSDatabaseEvent.OPDSDatabaseEntryEvent.DatabaseEntryDeleted
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.StringBuilder
 import java.util.UUID
 import javax.annotation.concurrent.GuardedBy
 
@@ -181,6 +183,9 @@ class OPDSDatabase private constructor(
 
     @Volatile
     override var manifest: OPDSManifest = manifestInitial
+
+    override val versionCode: Long
+      get() = OPDSVersionCodes.timeToVersion(this.manifest.updated)
 
     override fun update(newManifest: OPDSManifest) {
       Preconditions.checkArgument(

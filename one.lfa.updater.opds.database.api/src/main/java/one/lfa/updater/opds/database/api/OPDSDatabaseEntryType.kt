@@ -35,7 +35,6 @@ interface OPDSDatabaseEntryType {
    */
 
   val versionCode: Long
-    get() = this.manifest.updated.millis / 1000L
 
   /**
    * The directory containing catalog files.

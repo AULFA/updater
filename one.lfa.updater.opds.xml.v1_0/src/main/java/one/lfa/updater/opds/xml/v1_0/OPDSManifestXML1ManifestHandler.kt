@@ -5,6 +5,7 @@ import one.lfa.updater.opds.api.OPDSManifest
 import one.lfa.updater.xml.spi.SPIFormatXMLAbstractContentHandler
 import one.lfa.updater.xml.spi.SPIFormatXMLContentHandlerType
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.xml.sax.Attributes
@@ -44,7 +45,7 @@ class OPDSManifestXML1ManifestHandler(
     return OPDSManifest(
       baseURI = this.baseURI,
       rootFile = this.rootFile,
-      updated = this.updated,
+      updated = DateTime(this.updated, DateTimeZone.UTC),
       searchIndex = this.searchIndex,
       id = this.id,
       files = this.items.toList(),
