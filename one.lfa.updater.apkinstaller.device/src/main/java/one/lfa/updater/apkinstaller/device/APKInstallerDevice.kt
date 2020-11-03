@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.google.common.util.concurrent.MoreExecutors
 import one.lfa.updater.installed.api.InstalledApplicationEvent
 import one.lfa.updater.installed.api.InstalledApplicationsType
 import com.google.common.util.concurrent.SettableFuture
@@ -15,6 +16,7 @@ import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.apkinstaller.api.APKUninstallTaskType
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.UUID
 import kotlin.random.Random
 
 /**
@@ -187,11 +189,32 @@ class APKInstallerDevice private constructor(
         "Activity ${activity} must be a subtype of ${Activity::class.java}")
     }
 
+    val future =
+      SettableFuture.create<APKInstallerStatus>()
+
     val targetFile =
       if (Build.VERSION.SDK_INT < 24) {
         this.logger.debug("running on Android ${Build.VERSION.SDK_INT}: can only use file:// URIs")
         // https://code.google.com/p/android/issues/detail?id=205827
-        file.toUri()
+        val cacheDir = activity.externalCacheDir!!
+        val cacheAPKDir = File(cacheDir, "APKs")
+        cacheAPKDir.mkdirs()
+        val cacheAPKFile = File(cacheAPKDir, file.name)
+
+        /*
+         * The Android filesystem used on external devices is _broken_. It's safest to rename
+         * files before deleting them, because you will typically be unable to reuse the original
+         * name for the lifetime of the process after deletion.
+         */
+
+        val cacheAPKFileGone = File(cacheAPKDir, UUID.randomUUID().toString())
+        future.addListener(Runnable {
+          cacheAPKFile.renameTo(cacheAPKFileGone)
+          cacheAPKFileGone.delete()
+        }, MoreExecutors.directExecutor())
+
+        file.copyTo(cacheAPKFile, overwrite = true)
+        cacheAPKFile.toUri()
       } else {
         this.logger.debug("running on modern Android ${Build.VERSION.SDK_INT}: resolving content URI ({})", file)
         FileProvider.getUriForFile(
@@ -201,9 +224,6 @@ class APKInstallerDevice private constructor(
       }
 
     this.logger.debug("resolved content URI: {}", targetFile)
-
-    val future =
-      SettableFuture.create<APKInstallerStatus>()
 
     val installTask =
       synchronized(this.installRequestCodesLock) {
