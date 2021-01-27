@@ -28,6 +28,7 @@ copy()
 }
 
 copy .ci/credentials/lfa-keystore.jks lfa-keystore.jks
+copy .ci/credentials/updater-credentials.xml one.lfa.updater.app/src/main/assets/bundled_credentials.xml
 
 mkdir -p "$HOME/.gradle" ||
   fatal "could not create gradle configuration directory"
