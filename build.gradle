@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 buildscript {
   if ("$gradle.gradleVersion" != "6.7") {
     throw new GradleException("Gradle version 6.7 is required (received $gradle.gradleVersion)")
@@ -76,6 +78,45 @@ ext.libraries = [
 allprojects {
   group = project.ext["GROUP"]
   version = project.ext["VERSION_NAME"]
+}
+
+static def sha256Of(File file) {
+  MessageDigest digest = MessageDigest.getInstance("SHA-256")
+  digest.update(file.getBytes())
+  return digest.digest().encodeHex().toString()
+}
+
+task preFlightChecks {
+  logger.info("running pre-flight checks")
+
+  def keystoreHash = "20dfb53906594f4ae7a77df3d92f87f1c003c6a824b0b541c23c3185fd603da8"
+
+  def requiredFiles = [:]
+  requiredFiles["lfa-keystore.jks"] = keystoreHash
+  requiredFiles["one.lfa.updater.app/src/main/assets/bundled_credentials.xml"] = "3186190d091144e2c108a3d0675d5176b6396310f0abdc9071c1c283ed431893"
+
+  def missingFiles = []
+  for (entry in requiredFiles) {
+    logger.info("Checking ${entry.key} exists and has expected digest value")
+
+    try {
+      def received = sha256Of(file(entry.key))
+      def expected = entry.value
+      if (received != expected) {
+        logger.error("ERROR: File ${entry.key} has incorrect SHA-256 hash")
+        logger.error("  Expected: ${expected}")
+        logger.error("  Received: ${received}")
+        missingFiles.add(entry.key)
+      }
+    } catch (Exception e) {
+      logger.error("ERROR: Could not open required file ${entry.key}: ${e.getClass()}: ${e.getMessage()}")
+      missingFiles.add(entry.key)
+    }
+  }
+
+  if (!missingFiles.isEmpty()) {
+    throw new FileNotFoundException("One or more required files are missing or have incorrect contents.")
+  }
 }
 
 subprojects { project ->
