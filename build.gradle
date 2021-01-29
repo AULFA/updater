@@ -93,7 +93,7 @@ task preFlightChecks {
 
   def requiredFiles = [:]
   requiredFiles["lfa-keystore.jks"] = keystoreHash
-  requiredFiles["one.lfa.updater.app/src/main/assets/bundled_credentials.xml"] = "3186190d091144e2c108a3d0675d5176b6396310f0abdc9071c1c283ed431893"
+  requiredFiles["one.lfa.updater.app/src/main/assets/bundled_credentials.xml"] = "cc591725c2e397055cb218455219d6320c300eafac048241c165c51787c9b2f1"
 
   def missingFiles = []
   for (entry in requiredFiles) {
