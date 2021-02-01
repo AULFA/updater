@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import one.lfa.updater.inventory.api.InventoryItemState.Installed
 import one.lfa.updater.inventory.api.InventoryType
 import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
@@ -41,7 +42,7 @@ class NotificationWorker(
 
     for (repository in inventory.inventoryRepositories()) {
       for (repositoryPackage in repository.items) {
-        if (repositoryPackage.isUpdateAvailable) {
+        if (repositoryPackage.isUpdateAvailable && repositoryPackage.state is Installed) {
           this.logger.debug("update available for {}, showing notification", repositoryPackage.item.id)
           this.publishNotification()
           return Result.success()
