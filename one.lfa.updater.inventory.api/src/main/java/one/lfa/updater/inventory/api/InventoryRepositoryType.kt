@@ -63,4 +63,10 @@ interface InventoryRepositoryType {
    */
 
   fun update(): ListenableFuture<Unit>
+
+  /**
+   * `true` if this repository is a "testing" repository (not a production repository)
+   */
+
+  val isTesting: Boolean
 }

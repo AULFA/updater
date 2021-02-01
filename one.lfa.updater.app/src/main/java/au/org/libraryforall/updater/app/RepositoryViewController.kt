@@ -65,7 +65,11 @@ class RepositoryViewController(arguments: Bundle) : Controller(arguments) {
   private lateinit var repository: InventoryRepositoryType
   private lateinit var title: TextView
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    savedViewState: Bundle?
+  ): View {
     val layout =
       inflater.inflate(R.layout.inventory_repository, container, false)
 

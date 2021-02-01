@@ -1,10 +1,10 @@
 dependencies {
 
-  api libraries.irradiaHTTPAPI
-  api libraries.kotlinStdlib
+  api libraries.irradia_http_api
+  api libraries.kotlin_stdlib
   api libraries.slf4j
 
   compileOnly libraries.jcip
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

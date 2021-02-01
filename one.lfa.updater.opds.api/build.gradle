@@ -1,9 +1,9 @@
 dependencies {
-  api libraries.kotlinStdlib
-  api libraries.jodaTime
+  api libraries.kotlin_stdlib
+  api libraries.joda_time
   api libraries.rxjava
-  api libraries.googleGuava
+  api libraries.google_guava
 
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

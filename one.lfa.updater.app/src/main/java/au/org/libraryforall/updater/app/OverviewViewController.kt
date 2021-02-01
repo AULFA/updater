@@ -45,7 +45,11 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
   private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: InventoryListAdapter
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    savedViewState: Bundle?
+  ): View {
     val layout =
       inflater.inflate(R.layout.overview, container, false)
 

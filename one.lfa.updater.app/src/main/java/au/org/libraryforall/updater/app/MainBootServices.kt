@@ -10,10 +10,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import au.org.libraryforall.updater.app.boot.BootEvent
-import au.org.libraryforall.updater.app.boot.BootLoaderType
 import com.google.common.util.concurrent.MoreExecutors
-import io.reactivex.Observable
-import io.reactivex.subjects.ReplaySubject
 import one.irradia.http.api.HTTPClientType
 import one.irradia.http.vanilla.HTTPClientsOkHTTP
 import one.lfa.updater.apkinstaller.api.APKInstallerType

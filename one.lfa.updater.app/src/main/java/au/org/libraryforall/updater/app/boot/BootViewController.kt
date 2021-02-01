@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.app.boot
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +26,8 @@ class BootViewController : Controller() {
 
   override fun onCreateView(
     inflater: LayoutInflater,
-    container: ViewGroup
+    container: ViewGroup,
+    savedViewState: Bundle?
   ): View {
     val layout =
       inflater.inflate(R.layout.boot, container, false)

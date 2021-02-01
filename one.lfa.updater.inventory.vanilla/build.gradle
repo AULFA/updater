@@ -10,14 +10,14 @@ dependencies {
   api project(":one.lfa.updater.repository.xml.api")
   api project(":one.lfa.updater.services.api")
 
-  implementation libraries.googleGuava
-  implementation libraries.irradiaHTTPAPI
-  implementation libraries.jodaTime
-  implementation libraries.kotlinStdlib
+  implementation libraries.google_guava
+  implementation libraries.irradia_http_api
+  implementation libraries.joda_time
+  implementation libraries.kotlin_stdlib
   implementation libraries.rxjava
   implementation libraries.slf4j
 
   compileOnly libraries.jcip
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

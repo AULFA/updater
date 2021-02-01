@@ -40,7 +40,11 @@ class InventoryFailureViewController(arguments: Bundle) : Controller(arguments) 
   private val failure =
     arguments.getSerializable("failure") as InventoryFailureReport
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    savedViewState: Bundle?
+  ): View {
     val mainLayout =
       inflater.inflate(R.layout.failure, container, false)
 

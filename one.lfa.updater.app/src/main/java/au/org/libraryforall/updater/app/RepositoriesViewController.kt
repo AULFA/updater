@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.app
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -24,7 +25,6 @@ import one.lfa.updater.inventory.api.InventoryState
 import one.lfa.updater.inventory.api.InventoryTaskStep
 import one.lfa.updater.inventory.api.InventoryType
 import one.lfa.updater.services.api.Services
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.TreeMap
 
@@ -34,19 +34,20 @@ class RepositoriesViewController : Controller() {
     this.setHasOptionsMenu(true)
   }
 
-  private var acceptedRepositoryError: Boolean = false
   private lateinit var backgroundExecutor: BackgroundExecutor
   private lateinit var inventory: InventoryType
-  private val logger = LoggerFactory.getLogger(RepositoriesViewController::class.java)
-  private val listRepositories: MutableList<InventoryRepositoryType> = mutableListOf()
-
-  private var repositoryEventSubscription: Disposable? = null
-
   private lateinit var isEmpty: TextView
-  private lateinit var recyclerView: RecyclerView
   private lateinit var listAdapter: RepositoryListAdapter
+  private lateinit var recyclerView: RecyclerView
+  private var acceptedRepositoryError: Boolean = false
+  private var repositoryEventSubscription: Disposable? = null
+  private var showTestingRepositorySubscription: Disposable? = null
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    savedViewState: Bundle?
+  ): View {
     val layout =
       inflater.inflate(R.layout.repositories, container, false)
 
@@ -160,9 +161,9 @@ class RepositoriesViewController : Controller() {
 
     this.listAdapter =
       RepositoryListAdapter(
-        context = this.activity!!,
-        onItemClicked = { repository -> this.onSelectedRepository(repository) },
-        repositories = this.listRepositories)
+        onItemClicked = this::onSelectedRepository,
+        onItemFilter = this::onFilterRepository
+      )
 
     this.recyclerView.setHasFixedSize(true)
     this.recyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -173,22 +174,27 @@ class RepositoriesViewController : Controller() {
       this.inventory.events.ofType(InventoryEvent.InventoryStateChanged::class.java)
         .subscribe { this.onInventoryStateChanged() }
 
+    this.showTestingRepositorySubscription =
+      MainDeveloperSettings.showTestingRepositories.subscribe { showTestingRepositories ->
+        UIThread.execute {
+          this.onInventoryStateChanged()
+        }
+      }
+
     this.onInventoryStateChanged()
   }
 
   private fun onInventoryStateChanged() {
     UIThread.execute {
-      this.listRepositories.clear()
-
       val currentRepositories = this.inventory.inventoryRepositories()
-      if (currentRepositories.isEmpty()) {
-        this.recyclerView.visibility = View.INVISIBLE
-        this.isEmpty.visibility = View.VISIBLE
-      } else {
+      this.listAdapter.submitList(currentRepositories)
+
+      if (this.listAdapter.itemCount > 0) {
         this.recyclerView.visibility = View.VISIBLE
         this.isEmpty.visibility = View.INVISIBLE
-        this.listRepositories.addAll(currentRepositories)
-        this.listAdapter.notifyDataSetChanged()
+      } else {
+        this.recyclerView.visibility = View.INVISIBLE
+        this.isEmpty.visibility = View.VISIBLE
       }
 
       when (val state = this.inventory.state) {
@@ -232,6 +238,16 @@ class RepositoriesViewController : Controller() {
       taskSteps = steps)
   }
 
+  private fun onFilterRepository(
+    repository: InventoryRepositoryType
+  ): Boolean {
+    val showTesting = MainDeveloperSettings.areTestingRepositoriesShown()
+    if (showTesting) {
+      return true
+    }
+    return !repository.isTesting
+  }
+
   private fun onSelectedRepository(repository: InventoryRepositoryType) {
     this.setOptionsMenuHidden(true)
 
@@ -245,5 +261,6 @@ class RepositoriesViewController : Controller() {
     super.onDetach(view)
 
     this.repositoryEventSubscription?.dispose()
+    this.showTestingRepositorySubscription?.dispose()
   }
 }

@@ -16,14 +16,14 @@ buildscript {
   dependencies {
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath 'com.android.tools.build:gradle:4.1.1'
+    classpath 'com.android.tools.build:gradle:4.1.2'
   }
 }
 
 plugins {
-  id "com.github.ben-manes.versions" version "0.23.0"
-  id "digital.wup.android-maven-publish" version "3.6.2"
-  id "ru.vyarus.animalsniffer" version "1.5.0"
+  id "com.github.ben-manes.versions" version "0.36.0"
+  id "digital.wup.android-maven-publish" version "3.6.3"
+  id "ru.vyarus.animalsniffer" version "1.5.2"
 }
 
 ext {
@@ -43,34 +43,52 @@ ext {
   }
 }
 
+ext.versions = [
+  android_material              : '1.2.1',
+  androidx_activity             : '1.1.0',
+  androidx_appcompat            : '1.2.0',
+  androidx_constraintlayout     : '1.1.3',
+  androidx_core_ktx             : '1.3.2',
+  androidx_lifecycle            : '2.2.0',
+  androidx_lifecycle_viewmodel  : '2.2.0',
+  androidx_recyclerview         : '1.1.0',
+  androidx_work_manager         : '2.2.0',
+  conductor                     : '3.0.0',
+  google_guava                  : '27.1-android',
+  irradia_http                  : '0.0.3',
+  joda_time                     : '2.10.9',
+  junit                         : '4.13.1',
+  osgi_bundle_annotation        : '1.1.0',
+  osgi_bundle_version_annotation: '1.1.1',
+  rxjava2                       : '2.2.20',
+]
+
 ext.libraries = [
-  androidMaterial               : "com.google.android.material:material:1.0.0",
-  androidSupportTestRules       : "com.android.support.test:rules:1.0.2",
-  androidSupportTestRunner      : "com.android.support.test:runner:1.0.2",
-  androidTestOrchestrator       : "com.android.support.test:orchestrator:1.0.2",
-  androidXActivity              : "androidx.activity:activity-ktx:1.1.0-alpha02",
-  androidXAppCompat             : "androidx.appcompat:appcompat:1.1.0-rc01",
-  androidXConstraintLayout      : "androidx.constraintlayout:constraintlayout:1.1.3",
-  androidXCore                  : "androidx.core:core-ktx:1.2.0-alpha03",
-  androidXWorkManager           : "androidx.work:work-runtime-ktx:2.2.0",
-  conductor                     : "com.bluelinelabs:conductor:3.0.0-rc2",
-  googleGuava                   : "com.google.guava:guava:27.1-android",
-  irradiaHTTPAPI                : "one.irradia.http:one.irradia.http.api:0.0.3",
-  irradiaHTTPVanilla            : "one.irradia.http:one.irradia.http.vanilla:0.0.3",
+  android_material              : "com.google.android.material:material:${versions.android_material}",
+  androidx_activity             : "androidx.activity:activity-ktx:${versions.androidx_activity}",
+  androidx_appcompat            : "androidx.appcompat:appcompat:${versions.androidx_appcompat}",
+  androidx_constraintlayout     : "androidx.constraintlayout:constraintlayout:${versions.androidx_constraintlayout}",
+  androidx_core                 : "androidx.core:core-ktx:${versions.androidx_core_ktx}",
+  androidx_recyclerview         : "androidx.recyclerview:recyclerview:${versions.androidx_recyclerview}",
+  androidx_work_manager         : "androidx.work:work-runtime-ktx:${versions.androidx_work_manager}",
+  conductor                     : "com.bluelinelabs:conductor:${versions.conductor}",
+  google_guava                  : "com.google.guava:guava:${versions.google_guava}",
+  irradia_http_api              : "one.irradia.http:one.irradia.http.api:${versions.irradia_http}",
+  irradia_http_vanilla          : "one.irradia.http:one.irradia.http.vanilla:${versions.irradia_http}",
   jackson                       : "com.fasterxml.jackson.core:jackson-core:2.9.8",
   jcip                          : "com.io7m.jcip:jcip-annotations:1.0.2",
-  jodaTime                      : "joda-time:joda-time:2.10.3",
-  junit                         : "junit:junit:4.12",
-  kotlinReflect                 : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
-  kotlinStdlib                  : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
-  logbackAndroid                : "com.github.tony19:logback-android:2.0.0",
-  logbackClassic                : "ch.qos.logback:logback-classic:1.3.0-alpha4",
+  joda_time                     : "joda-time:joda-time:${versions.joda_time}",
+  junit                         : "junit:junit:${versions.junit}",
+  kotlin_reflect                : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
+  kotlin_stdlib                 : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
+  logback_android               : "com.github.tony19:logback-android:2.0.0",
+  logback_classic               : "ch.qos.logback:logback-classic:1.3.0-alpha4",
   mockito                       : "org.mockito:mockito-core:2.27.0",
   nanohttpd                     : 'org.nanohttpd:nanohttpd:2.3.1',
   okhttp                        : "com.squareup.okhttp3:okhttp:3.14.1",
-  OSGiBundleAnnotation          : "org.osgi:org.osgi.annotation.bundle:1.0.0",
-  OSGiBundleVersionAnnotation   : "org.osgi:org.osgi.annotation.versioning:1.1.0",
-  rxjava                        : "io.reactivex.rxjava2:rxjava:2.2.12",
+  osgi_bundle_annotation        : "org.osgi:org.osgi.annotation.bundle:${versions.osgi_bundle_annotation}",
+  osgi_bundle_version_annotation: "org.osgi:org.osgi.annotation.versioning:${versions.osgi_bundle_version_annotation}",
+  rxjava                        : "io.reactivex.rxjava2:rxjava:${versions.rxjava2}",
   slf4j                         : "org.slf4j:slf4j-api:1.7.25",
   xerces                        : "xerces:xercesImpl:2.12.0"
 ]

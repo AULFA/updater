@@ -1,8 +1,8 @@
 dependencies {
-  implementation libraries.googleGuava
-  implementation libraries.kotlinStdlib
+  implementation libraries.google_guava
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

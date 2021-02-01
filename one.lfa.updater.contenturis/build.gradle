@@ -1,8 +1,8 @@
 dependencies {
-  api libraries.kotlinStdlib
+  api libraries.kotlin_stdlib
   api libraries.slf4j
 
   compileOnly libraries.jcip
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

@@ -47,24 +47,24 @@
     android:id="@+id/version_developer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="16dp"
     android:orientation="vertical"
-    android:visibility="invisible">
+    android:visibility="visible">
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
       android:layout_marginBottom="16dp"
       android:text="@string/devSettingsTitle"
       android:textSize="18sp"
       android:textStyle="bold" />
 
-    <Button
-      android:id="@+id/openOverviewActivity"
-      android:layout_width="wrap_content"
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/showTestingRepositories"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:text="@string/devTargetOverview" />
+      android:text="Show testing repositories" />
+
   </LinearLayout>
 
 </LinearLayout>

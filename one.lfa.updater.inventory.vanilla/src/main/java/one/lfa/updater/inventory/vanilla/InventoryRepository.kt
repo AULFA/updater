@@ -320,6 +320,9 @@ class InventoryRepository internal constructor(
     return future
   }
 
+  override val isTesting: Boolean =
+    false
+
   private fun receiveProgressUpdate(progress: InventoryProgress) {
 
   }

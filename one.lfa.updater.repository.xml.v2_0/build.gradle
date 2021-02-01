@@ -4,11 +4,11 @@ dependencies {
 
   api libraries.xerces
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jodaTime
+  implementation libraries.kotlin_stdlib
+  implementation libraries.joda_time
   implementation libraries.rxjava
   implementation libraries.slf4j
 
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

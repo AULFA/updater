@@ -5,15 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import au.org.libraryforall.updater.app.boot.BootViewController
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import one.lfa.updater.apkinstaller.api.APKInstallerType
 import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory

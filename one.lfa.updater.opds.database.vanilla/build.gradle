@@ -3,10 +3,10 @@ dependencies {
   api project(":one.lfa.updater.opds.database.api")
   api project(":one.lfa.updater.opds.xml.api")
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
   implementation libraries.rxjava
   implementation libraries.slf4j
 
-  compileOnly libraries.OSGiBundleAnnotation
-  compileOnly libraries.OSGiBundleVersionAnnotation
+  compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_version_annotation
 }

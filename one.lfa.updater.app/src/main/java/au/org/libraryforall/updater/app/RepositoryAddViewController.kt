@@ -1,5 +1,6 @@
 package au.org.libraryforall.updater.app
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,11 @@ class RepositoryAddViewController : Controller() {
   private var eventSubscription: Disposable? = null
   private val logger = LoggerFactory.getLogger(RepositoryAddViewController::class.java)
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    savedViewState: Bundle?
+  ): View {
     val layout =
       inflater.inflate(R.layout.repository_add, container, false)
 

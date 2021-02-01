@@ -18,17 +18,18 @@ dependencies {
   implementation project(":one.lfa.updater.repository.xml.v2_0")
   implementation project(":one.lfa.updater.xml.spi")
 
-  implementation libraries.androidMaterial
-  implementation libraries.androidXActivity
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.androidXCore
-  implementation libraries.androidXWorkManager
+  implementation libraries.android_material
+  implementation libraries.androidx_recyclerview
+  implementation libraries.androidx_activity
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_core
+  implementation libraries.androidx_work_manager
   implementation libraries.conductor
-  implementation libraries.irradiaHTTPAPI
-  implementation libraries.irradiaHTTPVanilla
-  implementation libraries.kotlinStdlib
-  implementation libraries.logbackAndroid
+  implementation libraries.irradia_http_api
+  implementation libraries.irradia_http_vanilla
+  implementation libraries.kotlin_stdlib
+  implementation libraries.logback_android
   implementation libraries.rxjava
 
   implementation (libraries.slf4j) {

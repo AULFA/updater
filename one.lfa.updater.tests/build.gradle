@@ -13,12 +13,12 @@ dependencies {
   implementation project(":one.lfa.updater.repository.xml.v2_0")
   implementation project(":one.lfa.updater.xml.spi")
 
-  implementation libraries.irradiaHTTPAPI
-  implementation libraries.irradiaHTTPVanilla
+  implementation libraries.irradia_http_api
+  implementation libraries.irradia_http_vanilla
   implementation libraries.junit
   implementation libraries.mockito
   implementation libraries.nanohttpd
   implementation libraries.slf4j
 
-  testImplementation libraries.logbackClassic
+  testImplementation libraries.logback_classic
 }
