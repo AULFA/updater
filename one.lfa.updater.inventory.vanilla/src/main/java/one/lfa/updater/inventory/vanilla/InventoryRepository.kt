@@ -321,7 +321,7 @@ class InventoryRepository internal constructor(
   }
 
   override val isTesting: Boolean =
-    false
+    this.databaseEntry.repository.self.toString().contains("TESTING", ignoreCase = true)
 
   private fun receiveProgressUpdate(progress: InventoryProgress) {
 

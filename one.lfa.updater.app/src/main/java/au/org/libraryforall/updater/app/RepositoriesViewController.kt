@@ -162,7 +162,7 @@ class RepositoriesViewController : Controller() {
     this.listAdapter =
       RepositoryListAdapter(
         onItemClicked = this::onSelectedRepository,
-        onItemFilter = this::onFilterRepository
+        onItemFilter = MainDeveloperSettings::shouldShowRepository
       )
 
     this.recyclerView.setHasFixedSize(true)
@@ -236,16 +236,6 @@ class RepositoriesViewController : Controller() {
       title = resources.getString(R.string.repository_add_failed),
       attributes = attributes.toSortedMap(),
       taskSteps = steps)
-  }
-
-  private fun onFilterRepository(
-    repository: InventoryRepositoryType
-  ): Boolean {
-    val showTesting = MainDeveloperSettings.areTestingRepositoriesShown()
-    if (showTesting) {
-      return true
-    }
-    return !repository.isTesting
   }
 
   private fun onSelectedRepository(repository: InventoryRepositoryType) {

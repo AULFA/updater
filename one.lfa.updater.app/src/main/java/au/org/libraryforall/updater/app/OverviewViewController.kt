@@ -97,7 +97,11 @@ class OverviewViewController(arguments: Bundle) : Controller(arguments) {
     val updates =
       mutableMapOf<String, InventoryRepositoryItemType>()
 
-    for (repository in this.inventory.inventoryRepositories()) {
+    val filteredRepositories =
+      this.inventory.inventoryRepositories()
+        .filter(MainDeveloperSettings::shouldShowRepository)
+
+    for (repository in filteredRepositories) {
       for (packageCurrent in repository.items) {
         if (this.packageIsSuitableForOverview(packageCurrent)) {
           val existing = updates[packageCurrent.item.id]

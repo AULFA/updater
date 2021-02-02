@@ -32,7 +32,11 @@ class NotificationWorker(
     val inventory =
       services.requireService(InventoryType::class.java)
 
-    for (repository in inventory.inventoryRepositories()) {
+    val filteredRepositories =
+      inventory.inventoryRepositories()
+        .filter(MainDeveloperSettings::shouldShowRepository)
+
+    for (repository in filteredRepositories) {
       try {
         repository.update().get(1L, TimeUnit.MINUTES)
       } catch (e: Exception) {
@@ -40,7 +44,7 @@ class NotificationWorker(
       }
     }
 
-    for (repository in inventory.inventoryRepositories()) {
+    for (repository in filteredRepositories) {
       for (repositoryPackage in repository.items) {
         if (repositoryPackage.isUpdateAvailable && repositoryPackage.state is Installed) {
           this.logger.debug("update available for {}, showing notification", repositoryPackage.item.id)

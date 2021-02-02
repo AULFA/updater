@@ -2,6 +2,7 @@ package au.org.libraryforall.updater.app
 
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
+import one.lfa.updater.inventory.api.InventoryRepositoryType
 import org.slf4j.LoggerFactory
 
 object MainDeveloperSettings {
@@ -29,5 +30,15 @@ object MainDeveloperSettings {
     this.logger.debug("{} testing repositories", if (show) "enabled" else "disabled")
     this.showTestingRepositoriesField = show
     this.showTestingRepositoriesSubject.onNext(this.showTestingRepositoriesField)
+  }
+
+  fun shouldShowRepository(
+    repository: InventoryRepositoryType
+  ): Boolean {
+    val showTesting = areTestingRepositoriesShown()
+    if (showTesting) {
+      return true
+    }
+    return !repository.isTesting
   }
 }
