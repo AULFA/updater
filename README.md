@@ -6,12 +6,6 @@ updater
 The LFA Updater application downloads and installs updates to applications published in
 [repositories](#repositories).
 
-| JVM             | Platform | Status |
-|-----------------|----------|--------|
-| OpenJDK LTS     | Linux    | [![Build (OpenJDK LTS, Linux)](https://img.shields.io/github/workflow/status/AULFA/updater/main-openjdk_lts-linux)](https://github.com/AULFA/updater/actions?query=workflow%3Amain-openjdk_lts-linux) |
-| OpenJDK Current | Linux    | [![Build (OpenJDK Current, Linux)](https://img.shields.io/github/workflow/status/AULFA/updater/main-openjdk_current-linux)](https://github.com/AULFA/updater/actions?query=workflow%3Amain-openjdk_current-linux)
-| OpenJDK Current | Windows  | [![Build (OpenJDK Current, Windows)](https://img.shields.io/github/workflow/status/AULFA/updater/main-openjdk_current-windows)](https://github.com/AULFA/updater/actions?query=workflow%3Amain-openjdk_current-windows)
-
 ## Features
 
 * Install and update applications from self-hosted repositories
