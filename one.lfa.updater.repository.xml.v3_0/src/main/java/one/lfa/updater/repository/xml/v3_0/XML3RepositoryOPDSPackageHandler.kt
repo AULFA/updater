@@ -1,4 +1,4 @@
-package one.lfa.updater.repository.xml.v2_0
+package one.lfa.updater.repository.xml.v3_0
 
 import one.lfa.updater.repository.api.Hash
 import one.lfa.updater.repository.api.RepositoryItem
@@ -11,13 +11,13 @@ import org.xml.sax.SAXParseException
 import org.xml.sax.ext.Locator2
 import java.net.URI
 
-class XML2RepositoryOPDSPackageHandler(
+class XML3RepositoryOPDSPackageHandler(
   locator2: Locator2,
   private val baseURI: URI
 ): SPIFormatXMLAbstractContentHandler<Unit, RepositoryItem>(locator2, "OPDSPackage") {
 
   private val logger =
-    LoggerFactory.getLogger(XML2RepositoryOPDSPackageHandler::class.java)
+    LoggerFactory.getLogger(XML3RepositoryOPDSPackageHandler::class.java)
 
   private lateinit var source: URI
   private lateinit var sha256: Hash
@@ -25,9 +25,10 @@ class XML2RepositoryOPDSPackageHandler(
   private lateinit var versionName: String
   private lateinit var id: String
   private var versionCode: Long = 0L
+  private var installPasswordSha256: Hash? = null
 
   override fun onWantHandlerName(): String =
-    XML2RepositoryOPDSPackageHandler::class.java.simpleName
+    XML3RepositoryOPDSPackageHandler::class.java.simpleName
 
   override fun onWantChildHandlers(): Map<String, () -> SPIFormatXMLContentHandlerType<Unit>> =
     mapOf()
@@ -35,7 +36,8 @@ class XML2RepositoryOPDSPackageHandler(
   override fun onElementFinishDirectly(
     namespace: String,
     name: String,
-    qname: String): RepositoryItem? {
+    qname: String
+  ): RepositoryItem? {
     return RepositoryItem.RepositoryOPDSPackage(
       id = this.id,
       versionName = this.versionName,
@@ -43,7 +45,7 @@ class XML2RepositoryOPDSPackageHandler(
       name = this.name,
       sha256 = this.sha256,
       source = this.source,
-      installPasswordSha256 = null
+      installPasswordSha256 = this.installPasswordSha256
     )
   }
 
@@ -63,6 +65,13 @@ class XML2RepositoryOPDSPackageHandler(
         attributes.getValue("name")
       this.sha256 =
         Hash(attributes.getValue("sha256"))
+
+      this.installPasswordSha256 =
+        if (attributes.getValue("installPasswordSha256") != null) {
+          Hash(attributes.getValue("installPasswordSha256"))
+        } else {
+          null
+        }
 
       val relativeSource =
         URI.create(attributes.getValue("source"))

@@ -16,13 +16,16 @@ sealed class RepositoryItem {
 
   abstract val sha256: Hash
 
+  abstract val installPasswordSha256: Hash?
+
   data class RepositoryAndroidPackage(
     override val id: String,
     override val versionCode: Long,
     override val versionName: String,
     override val name: String,
     override val source: URI,
-    override val sha256: Hash)
+    override val sha256: Hash,
+    override val installPasswordSha256: Hash?)
     : RepositoryItem()
 
   data class RepositoryOPDSPackage(
@@ -31,6 +34,7 @@ sealed class RepositoryItem {
     override val versionName: String,
     override val name: String,
     override val source: URI,
-    override val sha256: Hash)
+    override val sha256: Hash,
+    override val installPasswordSha256: Hash?)
     : RepositoryItem()
 }

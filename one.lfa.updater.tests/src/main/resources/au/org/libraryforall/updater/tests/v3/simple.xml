@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<r:Repository xmlns:r="urn:one.lfa.updater.repository.xml:3.0"
+  id="79b82d4a-02d1-4dd4-81e3-37dc37b8a5d0" self="http://www.example.com/self"
+  title="Example Repository" updated="2019-01-01T00:00:00Z">
+
+  <r:AndroidPackage name="Package 0" id="com.example.p0"
+    sha256="87298cc2f31fba73181ea2a9e6ef10dce21ed95e98bdac9c4e1504ea16f486e4"
+    source="http://www.example.com/1" versionCode="23" versionName="1.0.0" />
+
+  <r:AndroidPackage name="Package 1" id="com.example.p1"
+    installPasswordSha256="1e142e6277b12b7e1110478a24caee8f006a9349e86970c890203d6266209463"
+    sha256="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+    source="http://www.example.com/2" versionCode="22" versionName="1.0.2" />
+
+  <r:AndroidPackage name="Package 2" id="com.example.p2"
+    sha256="47ea70cf08872bdb4afad3432b01d963ac7d165f6b575cd72ef47498f4459a90"
+    source="http://www.example.com/3" versionCode="24" versionName="1.0.4" />
+
+  <r:OPDSPackage name="OPDS 1" id="c11fb660-8fdd-4c95-99fb-f754653cea83"
+    installPasswordSha256="d0addeb753c36c0c4b0f180ca9361eb7cb18107b3ddda6aea12c0756f8f08d82"
+    sha256="1e142e6277b12b7e1110478a24caee8f006a9349e86970c890203d6266209463"
+    source="http://www.example.com/4" versionCode="1" versionName="1" />
+
+</r:Repository>

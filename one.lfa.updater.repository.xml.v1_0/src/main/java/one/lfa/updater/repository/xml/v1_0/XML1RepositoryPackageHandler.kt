@@ -41,7 +41,9 @@ class XML1RepositoryPackageHandler(
       versionCode = this.versionCode,
       name = this.name,
       sha256 = this.sha256,
-      source = this.source)
+      source = this.source,
+      installPasswordSha256 = null
+    )
   }
 
   override fun onElementStartDirectly(

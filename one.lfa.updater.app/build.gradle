@@ -16,6 +16,7 @@ dependencies {
   implementation project(":one.lfa.updater.repository.xml.api")
   implementation project(":one.lfa.updater.repository.xml.v1_0")
   implementation project(":one.lfa.updater.repository.xml.v2_0")
+  implementation project(":one.lfa.updater.repository.xml.v3_0")
   implementation project(":one.lfa.updater.xml.spi")
 
   implementation libraries.android_material
