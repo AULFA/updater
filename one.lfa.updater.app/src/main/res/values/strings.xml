@@ -5,6 +5,7 @@
   <string name="package_cancel">Cancel</string>
   <string name="package_details">Details</string>
   <string name="package_install">Install</string>
+  <string name="package_install_locked">Install &#x1f512;</string>
   <string name="package_retry">Retry</string>
   <string name="package_uninstall">Uninstall</string>
   <string name="package_update">Update</string>
@@ -20,6 +21,11 @@
 
   <string name="failure_steps_title">Task Steps</string>
 
+  <string name="install_password_title">Password?</string>
+  <string name="install_password_incorrect_title">Wrong!</string>
+  <string name="install_password_incorrect">"Incorrect password.</string>
+  <string name="install_password_enter">Enter</string>
+
   <string name="install_started">Install started</string>
   <string name="install_already_running">Already installing/updating</string>
   <string name="install_failure_title">Install Failed</string>
@@ -32,6 +38,8 @@
   <string name="install_connected_ok">Connected: %1$d %2$s, %3$d bytes of %4$s</string>
   <string name="install_connected_server_error">Server error: %1$d %2$s</string>
   <string name="install_connection_failed">Could not open a connection to the server: %1$s (%2$s)</string>
+
+  <string name="install_password_required">Password required.</string>
 
   <string name="install_downloading_to">Attempted download to temporary file.\n
 \n

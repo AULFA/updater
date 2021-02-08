@@ -10,11 +10,17 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputEditText
 import one.lfa.updater.inventory.api.InventoryItemResult
 import one.lfa.updater.inventory.api.InventoryItemState
 import one.lfa.updater.inventory.api.InventoryProgressValue
 import one.lfa.updater.inventory.api.InventoryRepositoryItemType
+import one.lfa.updater.inventory.vanilla.Hex
+import one.lfa.updater.repository.api.Hash
 import one.lfa.updater.repository.api.RepositoryItem
+import org.slf4j.LoggerFactory
+import java.nio.charset.StandardCharsets.UTF_8
+import java.security.MessageDigest
 
 class InventoryListAdapter(
   private val context: Activity,
@@ -22,8 +28,13 @@ class InventoryListAdapter(
   private val onShowFailureDetails: (InventoryRepositoryItemType, InventoryItemResult) -> Unit
 ) : RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+  private val logger =
+    LoggerFactory.getLogger(InventoryListAdapter::class.java)
 
+  override fun onCreateViewHolder(
+    parent: ViewGroup,
+    viewType: Int
+  ): ViewHolder {
     val inflater =
       LayoutInflater.from(parent.context)
     val item =
@@ -39,50 +50,50 @@ class InventoryListAdapter(
 
   class ViewHolderInstalled(val view: View) {
     val packageName =
-      view.findViewById<TextView>(R.id.installedPackageName)
+      this.view.findViewById<TextView>(R.id.installedPackageName)
     val packageAvailable =
-      view.findViewById<TextView>(R.id.installedPackageAvailable)
+      this.view.findViewById<TextView>(R.id.installedPackageAvailable)
     val packageButtonUpdate =
-      view.findViewById<Button>(R.id.installedPackageButtonUpdate)
+      this.view.findViewById<Button>(R.id.installedPackageButtonUpdate)
     val packageButtonUninstall =
-      view.findViewById<Button>(R.id.installedPackageButtonRemove)
+      this.view.findViewById<Button>(R.id.installedPackageButtonRemove)
     val packageIcon =
-      view.findViewById<ImageView>(R.id.installedPackageIcon)
+      this.view.findViewById<ImageView>(R.id.installedPackageIcon)
     val packageInstalled =
-      view.findViewById<TextView>(R.id.installedPackageInstalled)
+      this.view.findViewById<TextView>(R.id.installedPackageInstalled)
   }
 
   class ViewHolderNotInstalled(val view: View) {
     val packageName =
-      view.findViewById<TextView>(R.id.notInstalledPackageName)
+      this.view.findViewById<TextView>(R.id.notInstalledPackageName)
     val packageAvailable =
-      view.findViewById<TextView>(R.id.notInstalledPackageAvailable)
+      this.view.findViewById<TextView>(R.id.notInstalledPackageAvailable)
     val packageButton =
-      view.findViewById<Button>(R.id.notInstalledPackageButton)
+      this.view.findViewById<Button>(R.id.notInstalledPackageButton)
     val packageIcon =
-      view.findViewById<ImageView>(R.id.notInstalledPackageIcon)
+      this.view.findViewById<ImageView>(R.id.notInstalledPackageIcon)
   }
 
   class ViewHolderOperating(val view: View) {
     val buttonCancel =
-      view.findViewById<Button>(R.id.operatingButtonCancel)
+      this.view.findViewById<Button>(R.id.operatingButtonCancel)
     val packageName =
-      view.findViewById<TextView>(R.id.operatingPackageName)
+      this.view.findViewById<TextView>(R.id.operatingPackageName)
     val progressBarMajor =
-      view.findViewById<ProgressBar>(R.id.operatingProgressMajor)
+      this.view.findViewById<ProgressBar>(R.id.operatingProgressMajor)
     val progressBarMinor =
-      view.findViewById<ProgressBar>(R.id.operatingProgressMinor)
+      this.view.findViewById<ProgressBar>(R.id.operatingProgressMinor)
     val progressState =
-      view.findViewById<TextView>(R.id.operatingProgressStatus)
+      this.view.findViewById<TextView>(R.id.operatingProgressStatus)
   }
 
   class ViewHolderInstallFailed(val view: View) {
     val retry =
-      view.findViewById<Button>(R.id.installFailedPackageButton)
+      this.view.findViewById<Button>(R.id.installFailedPackageButton)
     val details =
-      view.findViewById<Button>(R.id.installFailedPackageDetailsButton)
+      this.view.findViewById<Button>(R.id.installFailedPackageDetailsButton)
     val packageName =
-      view.findViewById<TextView>(R.id.installFailedPackageName)
+      this.view.findViewById<TextView>(R.id.installFailedPackageName)
   }
 
   override fun getItemCount(): Int =
@@ -116,14 +127,23 @@ class InventoryListAdapter(
             repositoryPackage.item.versionName,
             repositoryPackage.item.versionCode)
 
+        holder.viewHolderNotInstalled.packageButton.setText(
+          if (repositoryPackage.item.installPasswordSha256 != null) {
+            R.string.package_install_locked
+          } else {
+            R.string.package_install
+          })
+
         holder.viewHolderNotInstalled.packageButton.isEnabled = true
         holder.viewHolderNotInstalled.packageButton.setOnClickListener {
           holder.viewHolderNotInstalled.packageButton.isEnabled = false
-          repositoryPackage.install(this.context)
+          this.doInstall(repositoryPackage, onCancel = {
+            holder.viewHolderNotInstalled.packageButton.isEnabled = true
+          })
         }
 
         holder.viewHolderNotInstalled.packageIcon.setImageResource(
-          iconFor(repositoryPackage.state.inventoryItem))
+          this.iconFor(repositoryPackage.state.inventoryItem))
       }
 
       is InventoryItemState.Installed -> {
@@ -147,10 +167,13 @@ class InventoryListAdapter(
 
         if (repositoryPackage.isUpdateAvailable) {
           setVisibility(holder.viewHolderInstalled.packageButtonUpdate, View.VISIBLE)
+
           holder.viewHolderInstalled.packageButtonUpdate.isEnabled = true
           holder.viewHolderInstalled.packageButtonUpdate.setOnClickListener {
             holder.viewHolderInstalled.packageButtonUpdate.isEnabled = false
-            repositoryPackage.install(this.context)
+            this.doInstall(repositoryPackage, onCancel = {
+              holder.viewHolderInstalled.packageButtonUpdate.isEnabled = true
+            })
           }
         } else {
           setVisibility(holder.viewHolderInstalled.packageButtonUpdate, View.INVISIBLE)
@@ -170,7 +193,7 @@ class InventoryListAdapter(
         }
 
         holder.viewHolderInstalled.packageIcon.setImageResource(
-          iconFor(repositoryPackage.state.inventoryItem))
+          this.iconFor(repositoryPackage.state.inventoryItem))
       }
 
       is InventoryItemState.Operating -> {
@@ -221,7 +244,9 @@ class InventoryListAdapter(
         holder.viewHolderInstallFailed.retry.isEnabled = true
         holder.viewHolderInstallFailed.retry.setOnClickListener {
           holder.viewHolderInstallFailed.retry.isEnabled = false
-          repositoryPackage.install(this.context)
+          this.doInstall(repositoryPackage, onCancel = {
+            holder.viewHolderInstallFailed.retry.isEnabled = true
+          })
         }
 
         holder.viewHolderInstallFailed.details.isEnabled = true
@@ -233,13 +258,81 @@ class InventoryListAdapter(
     }
   }
 
+  private fun doInstall(
+    repositoryPackage: InventoryRepositoryItemType,
+    onCancel: () -> Unit
+  ) {
+    val requiredPasswordHash = repositoryPackage.item.installPasswordSha256
+    if (requiredPasswordHash != null) {
+      this.doInstallPasswordGated(
+        repositoryPackage = repositoryPackage,
+        requiredPasswordHash = requiredPasswordHash,
+        onCancel = onCancel
+      )
+    } else {
+      repositoryPackage.install(this.context)
+    }
+  }
+
+  private fun doInstallPasswordGated(
+    repositoryPackage: InventoryRepositoryItemType,
+    requiredPasswordHash: Hash,
+    onCancel: () -> Unit
+  ) {
+    val layoutInflater =
+      this.context.layoutInflater
+    val view =
+      layoutInflater.inflate(R.layout.password, null)
+    val text =
+      view.findViewById<TextInputEditText>(R.id.updaterPasswordText)
+
+    AlertDialog.Builder(this.context)
+      .setView(view)
+      .setPositiveButton(R.string.install_password_enter) { _, _ ->
+        val providedText = text.text?.toString() ?: ""
+        if (this.checkPasswordHash(providedText, requiredPasswordHash)) {
+          repositoryPackage.install(this.context)
+        } else {
+          AlertDialog.Builder(this.context)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle(R.string.install_password_incorrect_title)
+            .setMessage(R.string.install_password_incorrect)
+            .create()
+            .show()
+          repositoryPackage.cancel()
+          onCancel.invoke()
+        }
+      }
+      .setOnDismissListener {
+        onCancel.invoke()
+      }
+      .create()
+      .show()
+  }
+
+  private fun checkPasswordHash(
+    providedText: String,
+    requiredPasswordHash: Hash
+  ): Boolean {
+    val digest =
+      MessageDigest.getInstance("SHA-256")
+    val providedBytes =
+      Hex.bytesToHex(digest.digest(providedText.trim().toByteArray(UTF_8)))
+    val matches =
+      requiredPasswordHash.text.equals(providedBytes, ignoreCase = true)
+
+    this.logger.debug("required hash: {}", requiredPasswordHash.text)
+    this.logger.debug("provided hash: {}", providedBytes)
+    this.logger.debug("matches:       {}", matches)
+    return matches
+  }
+
   private fun onWantConfirmUninstall(
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit)
-  {
+    onDismiss: () -> Unit) {
     AlertDialog.Builder(this.context)
-      .setTitle(R.string.uninstallConfirmTitle)
-      .setMessage(R.string.uninstallConfirm)
+      .setTitle(R.string.install_password_required)
+      .setMessage(R.string.install_password_required)
       .setPositiveButton(R.string.package_uninstall) { _, _ ->
         onConfirm.invoke()
       }

@@ -256,6 +256,7 @@ internal class InventoryRepositoryItem(
 
   override fun cancel() {
     this.installing?.cancel(true)
+    this.stateActual = this.stateActual
   }
 
   private fun runInstallActual(
