@@ -331,8 +331,8 @@ class InventoryListAdapter(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit) {
     AlertDialog.Builder(this.context)
-      .setTitle(R.string.install_password_required)
-      .setMessage(R.string.install_password_required)
+      .setTitle(R.string.uninstallConfirmTitle)
+      .setMessage(R.string.uninstallConfirm)
       .setPositiveButton(R.string.package_uninstall) { _, _ ->
         onConfirm.invoke()
       }
