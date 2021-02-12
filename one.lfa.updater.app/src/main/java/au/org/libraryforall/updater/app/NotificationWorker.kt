@@ -28,7 +28,7 @@ class NotificationWorker(
 
   override fun doWork(): Result {
     val services =
-      Services.serviceDirectoryWaiting(1L, TimeUnit.MINUTES)
+      Services.serviceDirectory()
     val inventory =
       services.requireService(InventoryType::class.java)
 

@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     this.logger.debug("MainActivity: resultCode:  {}", resultCode)
     this.logger.debug("MainActivity: data:        {}", data)
 
-    Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+    Services.serviceDirectory()
       .requireService(APKInstallerType::class.java)
       .reportStatus(requestCode, resultCode)
   }

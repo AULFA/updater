@@ -25,7 +25,7 @@ class MountedFilesystemReceiver : BroadcastReceiver() {
     intent: Intent
   ) {
     val services =
-      Services.serviceDirectoryWaiting(1L, TimeUnit.MINUTES)
+      Services.serviceDirectory()
     val inventory =
       services.requireService(InventoryType::class.java)
     val external =
