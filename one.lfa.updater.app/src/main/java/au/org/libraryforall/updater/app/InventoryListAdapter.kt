@@ -308,6 +308,8 @@ class InventoryListAdapter(
       }
       .create()
       .show()
+
+    text.requestFocus()
   }
 
   private fun checkPasswordHash(
