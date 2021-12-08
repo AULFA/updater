@@ -224,7 +224,7 @@ object MainBootServices {
   private fun createCatalogDirectory(context: Context): InventoryCatalogDirectoryType {
     return object : InventoryCatalogDirectoryType {
       override val directory: File
-        get() = File(context.filesDir, "OPDS")
+        get() = File(context.getExternalFilesDir(null) ?: context.filesDir, "OPDS")
     }
   }
 
@@ -251,7 +251,7 @@ object MainBootServices {
   }
 
   private fun apkDirectory(context: Context): File {
-    val dir1 = File(context.filesDir, "APKs").absoluteFile
+    val dir1 = File(context.getExternalFilesDir(null) ?: context.filesDir, "APKs").absoluteFile
     this.logger.debug("using internal files dir: {}", dir1)
     return dir1
   }
@@ -286,13 +286,13 @@ object MainBootServices {
   }
 
   private fun inventoryDatabaseDirectory(context: Context): File {
-    val dir = File(context.filesDir, "Repositories").absoluteFile
+    val dir = File(context.getExternalFilesDir(null) ?: context.filesDir, "Repositories").absoluteFile
     this.logger.debug("using inventory directory: {}", dir)
     return dir
   }
 
   private fun opdsDatabaseDirectory(context: Context): File {
-    val dir = File(context.filesDir, "OPDS").absoluteFile
+    val dir = File(context.getExternalFilesDir(null) ?: context.filesDir, "OPDS").absoluteFile
     this.logger.debug("using OPDS database directory: {}", dir)
     return dir
   }
