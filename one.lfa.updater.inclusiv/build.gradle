@@ -62,6 +62,6 @@ android {
     versionCode = version
     buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
     buildConfigField "int", "VERSION_CODE", "${versionCode}"
-    setProperty("archivesBaseName", "lfa-updater-${versionName}-${versionCode}")
+    setProperty("archivesBaseName", "lfa-updater-inclusiv-${versionName}-${versionCode}")
   }
 }
