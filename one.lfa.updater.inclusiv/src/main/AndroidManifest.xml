@@ -25,7 +25,7 @@
 
     <provider
       android:name="androidx.core.content.FileProvider"
-      android:authorities="au.org.libraryforall.updater.app"
+      android:authorities="au.org.libraryforall.updater.inclusiv"
       android:exported="false"
       android:grantUriPermissions="true">
       <meta-data

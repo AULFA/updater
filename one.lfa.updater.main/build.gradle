@@ -1,5 +1,41 @@
 dependencies {
-  api project(':one.lfa.updater.main')
+  implementation project(":one.lfa.updater.apkinstaller.api")
+  implementation project(":one.lfa.updater.apkinstaller.device")
+  implementation project(":one.lfa.updater.contenturis")
+  implementation project(":one.lfa.updater.credentials.api")
+  implementation project(":one.lfa.updater.installed.api")
+  implementation project(":one.lfa.updater.installed.vanilla")
+  implementation project(":one.lfa.updater.inventory.api")
+  implementation project(":one.lfa.updater.inventory.vanilla")
+  implementation project(":one.lfa.updater.opds.api")
+  implementation project(":one.lfa.updater.opds.database.api")
+  implementation project(":one.lfa.updater.opds.database.vanilla")
+  implementation project(":one.lfa.updater.opds.xml.api")
+  implementation project(":one.lfa.updater.opds.xml.v1_0")
+  implementation project(":one.lfa.updater.repository.api")
+  implementation project(":one.lfa.updater.repository.xml.api")
+  implementation project(":one.lfa.updater.repository.xml.v1_0")
+  implementation project(":one.lfa.updater.repository.xml.v2_0")
+  implementation project(":one.lfa.updater.repository.xml.v3_0")
+  implementation project(":one.lfa.updater.xml.spi")
+
+  implementation libraries.android_material
+  implementation libraries.androidx_recyclerview
+  implementation libraries.androidx_activity
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_core
+  implementation libraries.androidx_work_manager
+  implementation libraries.conductor
+  implementation libraries.irradia_http_api
+  implementation libraries.irradia_http_vanilla
+  implementation libraries.kotlin_stdlib
+  implementation libraries.logback_android
+  implementation libraries.rxjava
+
+  implementation (libraries.slf4j) {
+    force = true
+  }
 }
 
 def versionValues() {
