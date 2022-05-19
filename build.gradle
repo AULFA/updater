@@ -107,7 +107,7 @@ static def sha256Of(File file) {
 task preFlightChecks {
   logger.info("running pre-flight checks")
 
-  def keystoreHash = "20dfb53906594f4ae7a77df3d92f87f1c003c6a824b0b541c23c3185fd603da8"
+  def keystoreHash = "df23e1d756802f420a8add6d6104848a4ae110d5de946267cccb9ea8b2e892dd"
 
   def requiredFiles = [:]
   requiredFiles["lfa-keystore.jks"] = keystoreHash
