@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
+import android.os.Environment
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
@@ -51,6 +52,9 @@ import one.lfa.updater.services.api.ServiceDirectoryType
 import one.lfa.updater.services.api.Services
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.net.URI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -192,6 +196,8 @@ object MainBootServices {
       )
     )
 
+    this.loadExternalOPDSResources(context)
+
     val inventory =
       Inventory.open(directory.build(), inventoryExecutor)
 
@@ -218,6 +224,69 @@ object MainBootServices {
     } catch (e: Exception) {
       this.logger.error("could not load bundled credentials: ", e)
       listOf()
+    }
+  }
+
+  private fun loadExternalOPDSResources(context: Context) {
+    val lfaDirName = "LFA/au.org.libraryforall.updater.app/files/OPDS"
+    try {
+      val externalLFADir = File(Environment.getExternalStorageDirectory(), lfaDirName)
+      if (!externalLFADir.exists()) {
+        return
+      }
+
+      this.logger.debug("found external OPDS resources: {}", externalLFADir)
+
+      if (externalLFADir.canRead() && externalLFADir.canWrite()) {
+        this.copyDirectory(externalLFADir, this.opdsDatabaseDirectory(context))
+        this.removeDirectory(externalLFADir)
+      } else {
+        this.logger.error("cannot read or write external OPDS resources directory {}", externalLFADir)
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not load external OPDS bundles: ", e)
+    }
+  }
+
+  @Throws(IOException::class)
+  private fun copyDirectory(sourceLocation: File, targetLocation: File) {
+    if (sourceLocation.isDirectory) {
+      if (!targetLocation.exists() && !targetLocation.mkdirs()) {
+        throw IOException("Cannot create directory " + targetLocation.absolutePath)
+      }
+      val children = sourceLocation.list()
+      for (i in children.indices) {
+        copyDirectory(File(sourceLocation, children[i]), File(targetLocation, children[i]))
+      }
+    } else {
+
+      // make sure the directory we plan to store the recording in exists
+      val directory = targetLocation.parentFile
+      if (directory != null && !directory.exists() && !directory.mkdirs()) {
+        throw IOException("Cannot create directory " + directory.absolutePath)
+      }
+      val inputStream = FileInputStream(sourceLocation)
+      val outputStream = FileOutputStream(targetLocation)
+
+      // Copy the bits from instream to outstream
+      val buf = ByteArray(1024)
+      var len: Int
+      while (inputStream.read(buf).also { len = it } > 0) {
+        outputStream.write(buf, 0, len)
+      }
+      inputStream.close()
+      outputStream.close()
+    }
+  }
+
+  @Throws(Exception::class)
+  private fun removeDirectory(location: File) {
+    if (location.exists()) {
+      if (!location.deleteRecursively()) {
+        throw IOException("Cannot delete directory " + location.absolutePath)
+      }
+    } else {
+      throw IOException("Cannot delete directory as it doesn't exist " + location.absolutePath)
     }
   }
 
