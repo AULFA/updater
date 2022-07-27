@@ -1,0 +1,67 @@
+dependencies {
+  api project(':one.lfa.updater.main')
+}
+
+def versionValues() {
+  def propsFile = file('version.properties')
+  def Properties props = new Properties()
+  def code
+  if (propsFile.canRead()) {
+    props.load(new FileInputStream(propsFile))
+    code = props['versionCode'].toInteger()
+  } else {
+    throw new FileNotFoundException("Could not read version.properties!")
+  }
+
+  props['versionCode'] = (code + 1).toString()
+  props.store(new FileOutputStream(propsFile), "")
+
+  logger.info("incrementing build version ${code} -> ${code + 1}")
+  return code
+}
+
+def getGitHash = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'rev-parse', 'HEAD'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
+android {
+  def version = versionValues()
+
+  signingConfigs {
+    debug {
+      keyAlias findProperty("au.org.libraryforall.keyAlias")
+      keyPassword findProperty("au.org.libraryforall.keyPassword")
+      storeFile file("${project.rootDir}/lfa-keystore.jks")
+      storePassword findProperty("au.org.libraryforall.storePassword")
+    }
+    release {
+      keyAlias findProperty("au.org.libraryforall.keyAlias")
+      keyPassword findProperty("au.org.libraryforall.keyPassword")
+      storeFile file("${project.rootDir}/lfa-keystore.jks")
+      storePassword findProperty("au.org.libraryforall.storePassword")
+    }
+  }
+
+  buildTypes {
+    debug {
+      signingConfig signingConfigs.debug
+    }
+    release {
+      signingConfig signingConfigs.release
+    }
+  }
+
+  defaultConfig {
+    buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
+    versionName = VERSION_NAME
+    versionCode = version
+    buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
+    buildConfigField "int", "VERSION_CODE", "${versionCode}"
+    setProperty("archivesBaseName", "lfa-updater-inclusiv-${versionName}-${versionCode}")
+  }
+}
