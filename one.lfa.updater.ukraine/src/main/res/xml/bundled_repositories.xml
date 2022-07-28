@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BundledRepositories>
+  <BundledRepository
+    source="http://router.asus.com:8080/apk/releases.xml"
+    title="LFA Hotspot"
+    updated="2020-06-04T09:40:00"
+    uuid="f2e20610-63c1-46ce-95aa-606a7c9e2391" />
+  <BundledRepository
+    source="https://distribution.lfa.one/repository/testing/releases.xml"
+    title="LFA Testing"
+    updated="2020-06-04T09:40:00"
+    uuid="0e3ec0c6-65ba-477b-be11-8e59f99955bb" />
+  <BundledRepository
+    source="https://distribution.lfa.one/repository/ukraine/releases.xml"
+    title="LFA Ukraine"
+    updated="2022-07-27T11:42:05"
+    uuid="f8f82576-6da2-4373-bb16-77aa7fe222c7" />
+  <BundledRepository
+    source="lfaUpdaterExternal:/releases.xml"
+    title="LFA SD Card"
+    updated="2020-09-11T09:40:00"
+    uuid="d2e20610-63c1-46ce-95aa-606a7c9e2391" />
+</BundledRepositories>
