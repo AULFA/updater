@@ -35,3 +35,83 @@ An example repository file:
   <r:package id="au.org.libraryforall.updater.app" name="LFA Updater" sha256="b49d1e4d8c649dcbfd7793044434098d257caceb3316fd6ee555602c161ccd65" source="lfa-updater-0.0.3-516-release.apk" versionCode="516" versionName="0.0.3"/>
 </r:repository>
 ```
+
+Currently, the Updater app supports these methods to package, read and display repositories:
+- LFA SD Card: normally used to deliver content together with the Spark Kits sent on the field, or to provide our apps and collections to third-party devices.
+- LFA Hotspot: installed on GroundCloud hardware through USB sticks either on the field or while setting up kits to send to the field.
+- Testing online repository: used by us (the tech team) or under our supervision to test the latest versions of our apps and collections. This can only be viewed by activating the “testing repositories” from the app’s settings. It can be found at this URL: Index of /repository/testing/
+
+While every type of repository is displayed in the same way, they have different structures and delivery methods under the hood. You can find a tutorial on how to create an Updater repository here: [LFA Updater Repositories - A to Z](<https://stc365.sharepoint.com/:w:/r/sites/Spaces02/Site028/Site007/Documents/Documentation/A-Z Tech Guides/MS Word/LFA Updater Repositories - A to Z.docx?d=w6d894542043143278d5a17c67c48dc05&csf=1&web=1&e=5NYN5c>)
+
+## Setup
+1. Clone the repo:
+```bash
+git clone git@github.com:AULFA/updater.git
+```
+2. Get the submodules:
+```bash
+cd updater
+git submodule update --init
+```
+3. Clone the application-secrets directory into the `.ci` directory, naming it `credentials`:
+```bash
+cd .ci
+git clone git@github.com:AULFA/application-secrets.git credentials
+```
+4. Run the `credentials.sh` script to set up the required credential files for the app:
+```bash
+cd ..
+.ci-local/credentials.sh
+```
+
+Done! You should be able to build the project in any of the available variants now.
+
+## How-tos
+
+### Increment the version number
+The version of the Updater app is composed by two parts: version name and version code.
+
+#### Version code
+The version code of a specific variant of the app is provided by the `version.properties` file of the variant:
+```bash
+#
+#Thu May 19 19:52:30 AEST 2022
+versionCode=1487
+
+```
+This file is updated automatically every time you (or Android Studio) rebuild the app, so you shouldn't need to update it manually.
+If you need to change it, it's better if you rebuild the app and commit the new content of this file. You can change it manually too, just make sure that the new version code is higher than the previous one.
+
+#### Version name
+The version name of the app is defined under the `gradle.properties` file of the project:
+```bash
+VERSION_NAME=0.0.7-SNAPSHOT
+```
+You can update this by simply incrementing the version in this variable.
+
+### Create a new variant of the Updater
+You might need to create a new variant of the app to provide a different translation or list of repositories for a specific program. For example, the Ukraine program has a separate variant of the Updater with a different list of repositories.
+If you want to create a new variant of the Updater, you can follow these steps:
+1. Duplicate the whole `<project root>/one.lfa.updater.app` directory. Rename it to `one.lfa.updater.<name of the program>`.
+2. Update the `settings.gradle` file of the project to include the new package.
+3. Locate the `AndroidManifest.xml` file of your variant. Change the package name to be the same as the package directory name (`one.lfa.updater.<name of the program>`).
+4. To change the app title, create a `res/values/strings.xml` file for your variant. Set the item `<string name="main_title">YOUR APP TITLE HERE</string>` according to your needs.
+5. To change the list of repositories, create or modify the `res/xml/bundled_repositories.xml` file for your variant. The main version of the Updater comes with three predefined repositories (SD Card, GroundCloud, Testing online repository). If you want to add a new repository, bear in mind that its `uuid` value has to be unique.
+6. Update the `.ci-local/credentials.sh` file to copy the `bundled_credentials.xml` file to your build variant:
+```bash
+copy .ci/credentials/updater-credentials.xml one.lfa.updater.<your variant>/src/main/assets/bundled_credentials.xml
+```
+7. Re-run `.ci-local/credentials.sh`.
+8. Update the `.ci-local/deploy-ssh.conf` file of the project to include the new variant.
+
+You should now be able to run, test and release the new variant.
+
+## Release
+Once you're done with your changes, you may want to release a new version of the app. To do this, follow these steps:
+1. Commit your changes to a new branch and push them to the GitHub repository.
+2. Create a pull request detailing the changes you made (features, fixes, new versions...). The PR should point to the `develop` branch.
+3. Depending on the changes made and the availability of the rest of the team, ask for a code review.
+4. Once everything is ready, squash and merge the pull request.
+5. A GitHub Action will start. This will build all the app variants and, if successful, push the generated APK files automatically to the testing repository.
+6. You will find the latest version of each variant in the testing repository https://distribution.lfa.one/repository/testing/
+
