@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-  <string name="main_title">LFA Updater</string>
+  <string name="main_title">Updater</string>
 
   <string name="package_cancel">Cancel</string>
   <string name="package_details">Details</string>
